@@ -4,54 +4,49 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Stack, useRouter } from "expo-router";
+import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import * as SecureStore from "expo-secure-store";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
+import OnboardingScreen from "./onboarding";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
-  });
 
   // If the user is not onboarded, redirect them to the onboarding screen.
-  const router = useRouter();
+  const [isLoaded] = useFonts({
+    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+  });
   const [isOnboarded, setIsOnboarded] = useState(false);
 
   // Check for onboarding status in SecureStore.
   const checkForOnboarded = async () => {
     const result = await SecureStore.getItemAsync("isOnboarded");
     setIsOnboarded(JSON.parse(result || "false"));
-
-    if (!isOnboarded) {
-      router.navigate("/onboarding");
-    }
-    console.log;
   };
 
   useEffect(() => {
-    if (loaded) {
+    if (isLoaded) {
       SplashScreen.hideAsync();
     }
 
     checkForOnboarded();
-  }, [loaded]);
+  }, [isLoaded]);
 
-  if (!loaded) {
-    return null;
+  // Show the onboarding screen if user is not onboarded yet
+  if (!isOnboarded) {
+    return <OnboardingScreen />;
   }
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={DefaultTheme}>
       <Stack>
-        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>

@@ -3,6 +3,8 @@ import { TextInput, Image, TouchableOpacity, StyleSheet } from "react-native";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import DateRangePicker from "@/components/DateRangePicker";
+import { useDateRange } from "@marceloterreiro/flash-calendar";
 
 export default function OnboardingScreen() {
   const [step, setStep] = useState(1);
@@ -17,9 +19,20 @@ export default function OnboardingScreen() {
     }
   };
 
+  const {
+    calendarActiveDateRanges,
+    // Also available for your convenience:
+    onCalendarDayPress,
+    dateRange, // { startId?: string, endId?: string }
+    // isDateRangeValid, // boolean
+    // onClearDateRange, // () => void
+  } = useDateRange();
+
+
   const saveOnboardingData = () => {
-    console.log("Onboarding complete:", { avgPeriodLength, avgCycleLength });
+    console.log("Onboarding complete:", { avgPeriodLength, avgCycleLength, dateRange });
   };
+
 
   return (
     <ThemedView style={styles.container}>
@@ -31,13 +44,22 @@ export default function OnboardingScreen() {
             source={require("@/assets/images/undraw-womens-day.png")}
             style={{
               alignSelf: "center",
-              width: 200,
-              height: 200,
-              marginTop: "50%",
+              height: "40%",
+              resizeMode: "contain",
             }}
           />
           <ThemedText>Hustle Less, Flow More.</ThemedText>
-          <TouchableOpacity onPress={nextStep} style={styles.button}>
+
+          {/* @TODO Perhaps refactor this into a button component */}
+          <TouchableOpacity
+            onPress={nextStep}
+            style={{
+              ...styles.button,
+              position: "absolute",
+              bottom: 0,
+              width: "100%",
+            }}
+          >
             <ThemedText style={styles.buttonText}>Get Started</ThemedText>
           </TouchableOpacity>
         </ThemedView>
@@ -75,17 +97,15 @@ export default function OnboardingScreen() {
         </ThemedView>
       )}
 
-      {/* Screen 3: Start and end of last Period */}
+      {/* Screen 3a: Start and end of last Period */}
       {step === 3 && (
-        <ThemedView>
+        <ThemedView style={styles.container}>
           <ThemedText style={styles.header}>
             When was your last period? Select start and end dates.
           </ThemedText>
-          <TextInput
-            style={styles.input}
-            value={avgCycleLength}
-            onChangeText={setAvgCycleLength}
-            keyboardType="numeric"
+          <DateRangePicker
+            onCalendarDayPress={onCalendarDayPress}
+            calendarActiveDateRanges={calendarActiveDateRanges}
           />
 
           <ThemedView style={styles.buttonContainer}>
@@ -101,7 +121,7 @@ export default function OnboardingScreen() {
           </ThemedView>
         </ThemedView>
       )}
-      {/* Screen 4: Average Length of Period */}
+      {/* Screen 3b: Average Length of Period IF the user doesn't know the last period */}
       {step === 4 && (
         <ThemedView>
           <ThemedText style={styles.header}>
