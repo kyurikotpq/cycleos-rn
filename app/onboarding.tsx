@@ -1,20 +1,37 @@
 import React, { useState } from "react";
 import { TextInput, Image, TouchableOpacity, StyleSheet } from "react-native";
 
+import * as SecureStore from "expo-secure-store";
+import {
+  initialize,
+  requestPermission,
+  readRecords,
+} from "react-native-health-connect";
+
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import DateRangePicker from "@/components/DateRangePicker";
 import { useDateRange } from "@marceloterreiro/flash-calendar";
+import { initDB } from "./models/init-db";
+import * as Cycles from "./models/cycles";
+import DateUtil from "@/constants/Date";
+import PERMISSIONS from "@/constants/Permissions";
 
-export default function OnboardingScreen() {
+interface OnboardingScreenProps {
+  onComplete: () => void;
+}
+
+export default function OnboardingScreen({
+  onComplete,
+}: OnboardingScreenProps) {
   const [step, setStep] = useState(1);
   const [avgPeriodLength, setAvgPeriodLength] = useState("");
   const [avgCycleLength, setAvgCycleLength] = useState("");
-  const [firstDayofLastPeriod, setFirstDayofLastPeriod] = useState("");
+  const MAX_STEPS = 5;
 
   // Go to the next step
   const nextStep = () => {
-    if (step < 3) {
+    if (step < MAX_STEPS) {
       setStep(step + 1);
     }
   };
@@ -28,11 +45,71 @@ export default function OnboardingScreen() {
     // onClearDateRange, // () => void
   } = useDateRange();
 
+  // Save onboarding data to SecureStore
+  const saveOnboardingData = async () => {
+    // Store running averages in SecureStore
+    if (avgPeriodLength !== "") {
+      const _ = await SecureStore.setItemAsync(
+        "avgPeriodLength",
+        avgPeriodLength
+      );
+    }
+    if (avgCycleLength !== "") {
+      const _ = await SecureStore.setItemAsync(
+        "avgCycleLength",
+        avgCycleLength
+      );
+    }
 
-  const saveOnboardingData = () => {
-    console.log("Onboarding complete:", { avgPeriodLength, avgCycleLength, dateRange });
+    // Store last period as a SQL record
+    if (avgPeriodLength === "" && dateRange.startId && dateRange.endId) {
+      const _ = await initDB();
+
+      // Get the timezone offset in minutes and convert it to hours
+      const zone_offset = DateUtil.getTimezoneOffset(new Date());
+
+      const result = await Cycles.create({
+        start_date: dateRange.startId,
+        start_zone_offset: zone_offset,
+        end_date: dateRange.endId,
+        end_zone_offset: zone_offset,
+
+        period_length: DateUtil.getDuration(dateRange.startId, dateRange.endId),
+        cycle_length: parseInt(avgCycleLength),
+      });
+
+      console.log("Onboarding complete:", {
+        avgPeriodLength,
+        avgCycleLength,
+        dateRange,
+      });
+
+      // Route to HealthConnect Page
+      setStep(5);
+    }
   };
 
+  const requestHCPermission = async () => {
+    // Initialize the client
+    const _ = await initialize();
+
+    // request permissions
+    const grantedPermissions = await requestPermission(PERMISSIONS);
+
+    // check if granted
+    const result = await readRecords("Steps", {
+      timeRangeFilter: {
+        operator: "between",
+        startTime: "2024-01-09T12:00:00.405Z",
+        endTime: "2024-01-10T23:53:15.405Z",
+      },
+    });
+
+    console.log("HealthConnect permissions granted:", result);
+    
+    // Route to the index page
+    // onComplete();
+  };
 
   return (
     <ThemedView style={styles.container}>
@@ -145,6 +222,27 @@ export default function OnboardingScreen() {
               style={styles.button}
             >
               <ThemedText style={styles.buttonText}>Finish</ThemedText>
+            </TouchableOpacity>
+          </ThemedView>
+        </ThemedView>
+      )}
+      {/* Screen 5: HealthConnect Permissions */}
+      {step === 5 && (
+        <ThemedView>
+          <ThemedText style={styles.header}>
+            Connect CycleOS to HealthConnect
+          </ThemedText>
+          <ThemedText>
+            To provide you with the best experience, please grant CycleOS
+            permissions to read your health data. We will only read your workout
+            sessions, daily step count, and sleep sessions.
+          </ThemedText>
+          <ThemedView style={styles.buttonContainer}>
+            <TouchableOpacity
+              onPress={requestHCPermission}
+              style={styles.button}
+            >
+              <ThemedText style={styles.buttonText}>Allow Access</ThemedText>
             </TouchableOpacity>
           </ThemedView>
         </ThemedView>

@@ -19,10 +19,11 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
-  // If the user is not onboarded, redirect them to the onboarding screen.
   const [isLoaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
+
+  // Track if the user is onboarded
   const [isOnboarded, setIsOnboarded] = useState(false);
 
   // Check for onboarding status in SecureStore.
@@ -30,6 +31,11 @@ export default function RootLayout() {
     const result = await SecureStore.getItemAsync("isOnboarded");
     setIsOnboarded(JSON.parse(result || "false"));
   };
+
+  const completeOnboarding = async () => {
+    setIsOnboarded(true);
+    const _ = await SecureStore.setItemAsync("isOnboarded", JSON.stringify(isOnboarded));
+  }
 
   useEffect(() => {
     if (isLoaded) {
@@ -41,7 +47,7 @@ export default function RootLayout() {
 
   // Show the onboarding screen if user is not onboarded yet
   if (!isOnboarded) {
-    return <OnboardingScreen />;
+    return <OnboardingScreen onComplete={completeOnboarding} />;
   }
 
   return (
