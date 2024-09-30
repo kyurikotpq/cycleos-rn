@@ -1,50 +1,35 @@
-# Welcome to your Expo app 👋
+> For more details, including weekly progress updates and technical details, you can visit this project's homepage [here](/https://kyurikotpq.com/research/cycleos).
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+# Rationale
 
-## Get started
+The luteal (pre-menstrual) phase of the menstrual cycle is often associated with negative emotional, physical, and behavioral changes.[^1] While the pre-menstrual symptoms of most menstruators do not impair daily life, nor reach the severity required for clinical diagnosis,[^2] they can still affect one’s quality of life. For example, in a survey of 32,748 menstruators in The Netherlands, menstrual symptoms have resulted in large losses in productivity.[^3]
 
-1. Install dependencies
+However, _most menstruators are not aware of these influences_, which makes them vulnerable to _self-criticism over their lost productivity_. This could potentially create a feedback loop where menstruators overexert themselves to make up for lost productivity, which exacerbates their menstrual symptoms, and the cycle repeats.
 
-   ```bash
-   npm install
-   ```
+Additionally, most period-tracking apps in the market focus on the relationship between _menstrual symptoms_ and only _one_ lifestyle factor, such as productivity, exercise, diet, or sleep, thus failing to provide a holistic view of the bidirectional relationships between their lifestyle factors and menstrual symptoms.
 
-2. Start the app
+As such, the need exists for an app that _encourages sustainable productivity in menstruators_ by:
 
-   ```bash
-    npx expo start
-   ```
+1. **Aggregating sleep and exercise data**—securely and automatically—from other health apps on the user’s device wherever possible
+2. **Visualizing the bidirectional relationships** between their wearable data, menstrual symptoms, and productivity to increase awareness about how their lifestyle affects their menstrual cycle
+3. **Encouraging them to exercise self-compassion and self-care**, especially when healthy baselines are breached and/or menstrual symptoms are particularly intense, through the use of in-app messages as well as app notifications
 
-In the output, you'll find options to open the app in a
+# Proposed Deliverables and Timeline
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+| Component                                                                                                                                                                                                                                                                                                                                                                                                                                       | Deadline            |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| **1. Reading Health Data from Wearables via HealthConnect**<br /> [ ] Use React Native package to read Exercise (steps, workouts) and Sleep data from HealthConnect<br /> [ ] Store data securely on-device                                                                                                                                                                                                                                     | Fall 2024, Week 2   |
+| **2. Onboarding Flow**<br /> [x] Prompt first-time users to enter 1) the average length of their menstruation, 2) the average length of their cycle, and if possible, 3) the first day of their last period<br />                                                                                                                                                                                                                               | Fall 2024, Week 2   |
+| **3. Predicting Ovulation Window and Start of Next Menstruation**<br /> [ ] Determine the start of the next menstruation from the running average length of the past three menstrual cycles<br /> [ ] Determine the window of ovulation based on the running average length of the past three menstruations and the predicted start of the next menstruation                                                                                    | Fall 2024, Week 2   |
+| **4. Daily Check-Ins to Self-Report Menstrual Symptoms**<br /> [ ] Allow users to self-report menstrual symptoms (mood, cramps, fatigue, etc.)<br /> [ ] Create notifications to remind users to check in at the beginning and end of the day                                                                                                                                                                                                   | Fall 2024, Week 3   |
+| **5. Google Calendar Integration**<br /> [ ] Create a new Google Calendar in the user’s Google account that shows the phases of the menstrual cycle as all-day events<br /> [ ] Display user’s Google Calendar events on the home page of the app<br /> [ ] Encourage users to connect their Google Calendar during onboarding, but allow them to skip at first                                                                                 | Fall 2024, Week 4   |
+| **6. Visualizing Sleep, Exercise, Menstrual Symptom, and Calendar Data**<br /> [ ] Visualize the trend of individual constructs and subconstructs over time<br /> [ ] E.g. Sleep can be broken down into duration, wakefulness, fragmentation, deep sleep, sleep and wake times<br /> [ ] Visualize menstrual symptoms in relation to menstrual phase, sleep, exercise, and productivity data (types of work done and duration of hours worked) | Fall 2024, Week 6   |
+| **7. Deterministic Suggestions after Breaching Healthy Baselines**<br /> [ ] Decide on which health baselines to account for (lack of exercise, less than 6.5 hours of sleep, etc.)<br /> [ ] Craft suggestions for lifestyle adjustments when these baselines are breached                                                                                                                                                                     | Fall 2024, Week 6   |
+| **8. (Stretch Goal) Account for Menstruators with Irregular Periods**<br /> [ ] Adjust onboarding flow to allow self-reported irregularity<br />[ ] Adjust next-period prediction algorithm (e.g. running average no longer makes sense)                                                                                                                                                                                                        | Spring 2025, Week 3 |
+| **9. (Stretch Goal) Unsupervised Classification of Google Calendar Events**<br /> [ ] Use unsupervised classification techniques like topic modelling to classify Google Calendar events from their titles                                                                                                                                                                                                                                      | Spring 2025, Week 3 |
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+# References
 
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+[^1]: Dilbaz, B., & Aksan, A. (2021). Premenstrual syndrome, a common but underrated entity: review of the clinical literature. _Journal of the Turkish-German Gynecological Association, 22_(2), 139–148. https://doi.org/10.4274/jtgga.galenos.2021.2020.0133
+[^2]: Schoep, M. E., Adang, E. M. M., Maas, J. W. M., Bianca De Bie, Aarts, J. W. M., & Nieboer, T. E. (2019). Productivity loss due to menstruation-related symptoms: a nationwide cross-sectional survey among 32 748 women. _BMJ Open, 9_(6), e026186–e026186. https://doi.org/10.1136/bmjopen-2018-026186
+[^3]: Wittchen, H.-U., Becker, E., Lieb, R., & Krause, P. (2002). Prevalence, incidence and stability of premenstrual dysphoric disorder in the community. _Psychological Medicine, 32_(1), 119–132. https://doi.org/10.1017/s0033291701004925
