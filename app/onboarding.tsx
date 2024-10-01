@@ -12,10 +12,10 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import DateRangePicker from "@/components/DateRangePicker";
 import { useDateRange } from "@marceloterreiro/flash-calendar";
-import { initDB } from "./models/init-db";
-import * as Cycles from "./models/cycles";
 import DateUtil from "@/constants/Date";
 import PERMISSIONS from "@/constants/Permissions";
+import { initDB } from "@/db/init_db";
+import { insertCycle } from "@/db/cycles";
 
 interface OnboardingScreenProps {
   onComplete: () => void;
@@ -68,14 +68,13 @@ export default function OnboardingScreen({
       // Get the timezone offset in minutes and convert it to hours
       const zone_offset = DateUtil.getTimezoneOffset(new Date());
 
-      const result = await Cycles.create({
-        start_date: dateRange.startId,
-        start_zone_offset: zone_offset,
-        end_date: dateRange.endId,
-        end_zone_offset: zone_offset,
-
-        period_length: DateUtil.getDuration(dateRange.startId, dateRange.endId),
-        cycle_length: parseInt(avgCycleLength),
+      const result = await insertCycle({
+        startDate: new Date(dateRange.startId).getTime(),
+        startZoneOffset: zone_offset,
+        endDate: new Date(dateRange.endId).getTime(),
+        endZoneOffset: zone_offset,
+        periodLength: DateUtil.getDuration(dateRange.startId, dateRange.endId),
+        cycleLength: parseInt(avgCycleLength),
       });
 
       console.log("Onboarding complete:", {
@@ -92,21 +91,23 @@ export default function OnboardingScreen({
   const requestHCPermission = async () => {
     // Initialize the client
     const _ = await initialize();
-
+    console.log("HealthConnect initialized");
+    
     // request permissions
     const grantedPermissions = await requestPermission(PERMISSIONS);
-
+    console.log("HealthConnect permissions granted:", grantedPermissions);
+    
     // check if granted
     const result = await readRecords("Steps", {
       timeRangeFilter: {
         operator: "between",
-        startTime: "2024-01-09T12:00:00.405Z",
-        endTime: "2024-01-10T23:53:15.405Z",
+        startTime: "2024-08-09T12:00:00.405Z",
+        endTime: "2024-10-10T23:53:15.405Z",
       },
     });
 
     console.log("HealthConnect permissions granted:", result);
-    
+
     // Route to the index page
     // onComplete();
   };
