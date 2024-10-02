@@ -49,12 +49,19 @@ export default function OnboardingScreen({
   // Save onboarding data to SecureStore
   const saveOnboardingData = async () => {
     // Store running averages in SecureStore
-    if (avgPeriodLength !== "") {
+    if (!dateRange.startId && !dateRange.endId) {
+      // The user doesn't know their last period was.
+      // Set default period length to 4 if not provided
+      // @TODO: Show dialog explaining a default value will be used for now
+      if (avgPeriodLength === "")
+        console.log("No period length provided. Using default value of 4");
+
       const _ = await SecureStore.setItemAsync(
         "avgPeriodLength",
-        avgPeriodLength
+        avgPeriodLength || "4"
       );
     }
+
     if (avgCycleLength !== "") {
       const _ = await SecureStore.setItemAsync(
         "avgCycleLength",
@@ -62,10 +69,11 @@ export default function OnboardingScreen({
       );
     }
 
-    // Store last period as a SQL record
-    if (avgPeriodLength === "" && dateRange.startId && dateRange.endId) {
-      const _ = await initDB();
+    // Initialize the database
+    const _ = await initDB();
 
+    // Store last period as a SQL record if it exists
+    if (avgPeriodLength === "" && dateRange.startId && dateRange.endId) {
       // Get the timezone offset in minutes and convert it to hours
       const zoneOffset = DateUtil.getTimezoneOffset(new Date());
       const startDate = new Date(dateRange.startId);
@@ -83,6 +91,7 @@ export default function OnboardingScreen({
         cycleLength: parseInt(avgCycleLength),
       });
 
+      // Insert the menstrual days as cycle days
       const cycleDays = DateUtil.getRange(
         dateRange.startId,
         dateRange.endId
@@ -100,10 +109,10 @@ export default function OnboardingScreen({
         avgCycleLength,
         dateRange,
       });
-
-      // Route to HealthConnect Page
-      setStep(5);
     }
+
+    // Route to HealthConnect Page
+    setStep(5);
   };
 
   const requestHCPermission = async () => {
@@ -113,7 +122,7 @@ export default function OnboardingScreen({
 
     // request permissions
     const grantedPermissions = await requestPermission(PERMISSIONS);
-    console.log("HealthConnect permissions granted:", grantedPermissions);
+    console.log("HealthConnect permissions granted");
 
     // check if granted
     const result = await readRecords("Steps", {
@@ -124,7 +133,7 @@ export default function OnboardingScreen({
       },
     });
 
-    console.log("HealthConnect permissions granted:", result);
+    console.log("HealthConnect test read:", result);
 
     // Route to the index page
     onComplete();
@@ -231,7 +240,7 @@ export default function OnboardingScreen({
           />
           <ThemedView style={styles.buttonContainer}>
             <TouchableOpacity
-              onPress={saveOnboardingData}
+              onPress={() => setAvgPeriodLength("4")}
               style={styles.button}
             >
               <ThemedText style={styles.buttonText}>I don't know</ThemedText>
