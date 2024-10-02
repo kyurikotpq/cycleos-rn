@@ -20,7 +20,10 @@ export default function TabLayout() {
         options={{
           title: "Agenda",
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? "list" : "list-outline"} color={color} />
+            <TabBarIcon
+              name={focused ? "list" : "list-outline"}
+              color={color}
+            />
           ),
         }}
       />
@@ -28,21 +31,36 @@ export default function TabLayout() {
         name="insights"
         options={{
           title: "Insights",
-          tabBarIcon: ({ color, focused }) => <TabBarIcon name={focused ? "stats-chart" : "stats-chart-outline"}  color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon
+              name={focused ? "stats-chart" : "stats-chart-outline"}
+              color={color}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="cycles"
         options={{
           title: "Cycles",
-          tabBarIcon: ({ color, focused }) => <TabBarIcon name={focused ? "calendar" : "calendar-outline"} color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon
+              name={focused ? "calendar" : "calendar-outline"}
+              color={color}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="account"
         options={{
           title: "Account",
-          tabBarIcon: ({ color, focused }) => <TabBarIcon name={focused ? "person" : "person-outline"} color={color} />,
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon
+              name={focused ? "person" : "person-outline"}
+              color={color}
+            />
+          ),
         }}
       />
     </Tabs>
