@@ -14,9 +14,9 @@ import DateRangePicker from "@/components/DateRangePicker";
 import { useDateRange } from "@marceloterreiro/flash-calendar";
 import DateUtil from "@/constants/Date";
 import PERMISSIONS from "@/constants/Permissions";
-import { initDB } from "@/db/init_db";
 import { insertCycle } from "@/db/cycles";
 import { insertCycleDays } from "@/db/cycle_days";
+import { initDB } from "@/db/init_db";
 
 interface OnboardingScreenProps {
   onComplete: () => void;
@@ -127,7 +127,7 @@ export default function OnboardingScreen({
     console.log("HealthConnect permissions granted:", result);
 
     // Route to the index page
-    // onComplete();
+    onComplete();
   };
 
   return (

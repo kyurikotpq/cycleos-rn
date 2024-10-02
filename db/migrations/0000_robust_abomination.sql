@@ -71,3 +71,5 @@ CREATE TABLE `symptoms` (
 	`construct_value` integer,
 	FOREIGN KEY (`day_id`) REFERENCES `cycle_days`(`id`) ON UPDATE no action ON DELETE no action
 );
+--> statement-breakpoint
+CREATE UNIQUE INDEX `dateIdIdx` ON `cycle_days` (`date_id`);

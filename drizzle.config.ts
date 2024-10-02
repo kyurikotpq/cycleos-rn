@@ -3,4 +3,5 @@ export default defineConfig({
   schema: "./db/schema.ts",
   out: "./db/migrations",
   dialect: "sqlite", // 'postgresql' | 'mysql' | 'sqlite'
+  driver: "expo", // For Drizzle Migration
 });

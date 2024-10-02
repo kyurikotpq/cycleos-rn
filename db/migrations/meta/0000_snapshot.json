@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "a0b1d57c-d256-4f88-a497-e783930f65a7",
+  "id": "5565cc8b-ab6d-4d55-acbf-10ea66b44f34",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "cycle_days": {
@@ -43,7 +43,15 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "dateIdIdx": {
+          "name": "dateIdIdx",
+          "columns": [
+            "date_id"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
         "cycle_days_cycle_id_cycles_id_fk": {
           "name": "cycle_days_cycle_id_cycles_id_fk",

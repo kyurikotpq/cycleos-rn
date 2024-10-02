@@ -1,4 +1,10 @@
-import { integer, numeric, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+  integer,
+  numeric,
+  sqliteTable,
+  text,
+  uniqueIndex,
+} from "drizzle-orm/sqlite-core";
 
 /** Cycles */
 export const cycles = sqliteTable("cycles", {
@@ -14,21 +20,25 @@ export const cycles = sqliteTable("cycles", {
 export type Cycle = typeof cycles.$inferSelect;
 export type InsertCycle = typeof cycles.$inferInsert;
 
-
 /** Cycle Days */
-export const cycle_days = sqliteTable("cycle_days", {
-  id: integer("id").primaryKey(),
-  cycleId: integer("cycle_id")
-    .notNull()
-    .references(() => cycles.id),
-  dateId: text("date_id").notNull(),
-  zoneOffset: integer("zone_offset").notNull(),
-  phase: text("phase", { length: 20 }),
-});
+export const cycle_days = sqliteTable(
+  "cycle_days",
+  {
+    id: integer("id").primaryKey(),
+    cycleId: integer("cycle_id")
+      .notNull()
+      .references(() => cycles.id),
+    dateId: text("date_id").notNull(),
+    zoneOffset: integer("zone_offset").notNull(),
+    phase: text("phase", { length: 20 }),
+  },
+  (cycle_days) => ({
+    nameIdx: uniqueIndex("dateIdIdx").on(cycle_days.dateId),
+  })
+);
 
 export type CycleDay = typeof cycle_days.$inferSelect;
 export type InsertCycleDay = typeof cycle_days.$inferInsert;
-
 
 /** Symptoms */
 export const symptoms = sqliteTable("symptoms", {
@@ -42,7 +52,6 @@ export const symptoms = sqliteTable("symptoms", {
 
 export type Symptom = typeof symptoms.$inferSelect;
 export type InsertSymptom = typeof symptoms.$inferInsert;
-
 
 /** Exercises */
 export const exercises = sqliteTable("exercises", {
@@ -61,7 +70,6 @@ export const exercises = sqliteTable("exercises", {
 export type Exercise = typeof exercises.$inferSelect;
 export type InsertExercise = typeof exercises.$inferInsert;
 
-
 /** Steps */
 export const steps = sqliteTable("steps", {
   id: integer("id").primaryKey().notNull(),
@@ -73,7 +81,6 @@ export const steps = sqliteTable("steps", {
 
 export type Step = typeof steps.$inferSelect;
 export type InsertStep = typeof steps.$inferInsert;
-
 
 /** Sleep Sessions */
 export const sleep_sessions = sqliteTable("sleep_sessions", {
@@ -98,7 +105,6 @@ export const sleep_sessions = sqliteTable("sleep_sessions", {
 export type SleepSession = typeof sleep_sessions.$inferSelect;
 export type InsertSleepSession = typeof sleep_sessions.$inferInsert;
 
-
 /** Sleep Stages */
 export const sleep_stages = sqliteTable("sleep_stages", {
   id: integer("id").primaryKey().notNull(),
@@ -114,4 +120,3 @@ export const sleep_stages = sqliteTable("sleep_stages", {
 
 export type SleepStage = typeof sleep_stages.$inferSelect;
 export type InsertSleepStage = typeof sleep_stages.$inferInsert;
-
