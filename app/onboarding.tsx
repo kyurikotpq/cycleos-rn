@@ -125,15 +125,19 @@ export default function OnboardingScreen({
     console.log("HealthConnect permissions granted");
 
     // check if granted
-    const result = await readRecords("Steps", {
-      timeRangeFilter: {
-        operator: "between",
-        startTime: "2024-08-09T12:00:00.405Z",
-        endTime: "2024-10-10T23:53:15.405Z",
-      },
-    });
+    try {
+      const result = await readRecords("Steps", {
+        timeRangeFilter: {
+          operator: "between",
+          startTime: "2024-08-09T12:00:00.405Z",
+          endTime: "2024-10-10T23:53:15.405Z",
+        },
+      });
 
-    console.log("HealthConnect test read:", result);
+      console.log("HealthConnect test read:", result);
+    } catch (error) {
+      console.error("HealthConnect error:", error);
+    }
 
     // Route to the index page
     onComplete();

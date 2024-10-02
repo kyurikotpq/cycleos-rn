@@ -33,8 +33,8 @@ export default function RootLayout() {
   };
 
   const completeOnboarding = async () => {
+    const _ = await SecureStore.setItemAsync("isOnboarded", "true");
     setIsOnboarded(true);
-    const _ = await SecureStore.setItemAsync("isOnboarded", JSON.stringify(isOnboarded));
   }
 
   useEffect(() => {
