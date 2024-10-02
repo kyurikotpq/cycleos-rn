@@ -16,6 +16,7 @@ import DateUtil from "@/constants/Date";
 import PERMISSIONS from "@/constants/Permissions";
 import { initDB } from "@/db/init_db";
 import { insertCycle } from "@/db/cycles";
+import { insertCycleDays } from "@/db/cycle_days";
 
 interface OnboardingScreenProps {
   onComplete: () => void;
@@ -66,16 +67,33 @@ export default function OnboardingScreen({
       const _ = await initDB();
 
       // Get the timezone offset in minutes and convert it to hours
-      const zone_offset = DateUtil.getTimezoneOffset(new Date());
+      const zoneOffset = DateUtil.getTimezoneOffset(new Date());
+      const startDate = new Date(dateRange.startId);
 
-      const result = await insertCycle({
-        startDate: new Date(dateRange.startId).getTime(),
-        startZoneOffset: zone_offset,
-        endDate: new Date(dateRange.endId).getTime(),
-        endZoneOffset: zone_offset,
+      const addCycleResult = await insertCycle({
+        startDate: startDate.getTime(),
+        startZoneOffset: zoneOffset,
+        endDate: DateUtil.add(
+          startDate,
+          "d",
+          parseInt(avgCycleLength)
+        ).getTime(), // Predicted end date
+        endZoneOffset: zoneOffset,
         periodLength: DateUtil.getDuration(dateRange.startId, dateRange.endId),
         cycleLength: parseInt(avgCycleLength),
       });
+
+      const cycleDays = DateUtil.getRange(
+        dateRange.startId,
+        dateRange.endId
+      ).map((dateId) => ({
+        cycleId: addCycleResult[0].insertedId,
+        dateId,
+        zoneOffset,
+        phase: "menstrual",
+      }));
+
+      const addPeriodResult = await insertCycleDays(cycleDays);
 
       console.log("Onboarding complete:", {
         avgPeriodLength,
@@ -92,11 +110,11 @@ export default function OnboardingScreen({
     // Initialize the client
     const _ = await initialize();
     console.log("HealthConnect initialized");
-    
+
     // request permissions
     const grantedPermissions = await requestPermission(PERMISSIONS);
     console.log("HealthConnect permissions granted:", grantedPermissions);
-    
+
     // check if granted
     const result = await readRecords("Steps", {
       timeRangeFilter: {

@@ -78,6 +78,21 @@ const getTimezoneOffset = (date: Date | string): number => {
   return date.getTimezoneOffset() / 60;
 };
 
-const DateUtil = { getMs, add, sub, getDuration, getTimezoneOffset };
+const getRange = (start: Date | string, end: Date | string): string[] => {
+  if (typeof start === "string") start = new Date(start);
+  if (typeof end === "string") end = new Date(end);
+
+  let range: string[] = [];
+  let current = new Date(start);
+
+  while (current <= end) {
+    range.push(new Date(current).toLocaleDateString("en-CA"));
+    current = add(current, "d", 1);
+  }
+
+  return range;
+};
+
+const DateUtil = { getMs, add, sub, getDuration, getTimezoneOffset, getRange };
 
 export default DateUtil;

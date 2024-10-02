@@ -25,4 +25,4 @@ export const insertCycle = async ({
     endZoneOffset,
     periodLength,
     cycleLength,
-  });
+  }).returning({ insertedId: cycles.id });
