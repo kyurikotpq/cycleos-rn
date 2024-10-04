@@ -1,45 +1,49 @@
-import { Image, StyleSheet, Platform } from "react-native";
+import { Image, StyleSheet, Platform, View } from "react-native";
 
-import { HelloWave } from "@/components/HelloWave";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { Appbar, Avatar, Drawer, Card, Text, FAB } from "react-native-paper";
+import HormonoscopeCard from "@/components/HormonoscopeCard";
+import { router } from "expo-router";
 
 export default function AgendaScreen() {
-
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
-      headerImage={
-        <Image
-          source={require("@/assets/images/partial-react-logo.png")}
-          style={styles.reactLogo}
-        />
-      }
-    >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
+    <>
+      <Appbar.Header>
+        {/* @TODO: This will open the drawer for changing to a weekly or monthly view */}
+        <Appbar.Action icon="menu" onPress={() => {}} />
+
+        {/* @TODO: Include a drawer component to show/hide */}
+      </Appbar.Header>
+      <ThemedView style={styles.p20}>
+        <ThemedView style={styles.p20}>
+          <ThemedText>@TODO: Date picker goes here at some point</ThemedText>
+        </ThemedView>
+        <HormonoscopeCard style={{ marginBottom: 40 }} />
+
+        <Text variant="labelLarge">Agenda</Text>
+        <ThemedView>
+          <Card>
+            <ThemedText>
+              @TODO: Event show up here in a list (flex column)
+            </ThemedText>
+          </Card>
+        </ThemedView>
       </ThemedView>
-    </ParallaxScrollView>
+      <FAB icon="emoticon-outline" style={styles.fab} onPress={() => router.push("/tracking")} />
+
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
+  p20: {
+    padding: 20,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
+  fab: {
+    position: 'absolute',
+    margin: 25,
+    right: 0,
     bottom: 0,
-    left: 0,
-    position: "absolute",
   },
 });

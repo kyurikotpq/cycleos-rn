@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { TextInput, Image, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  TextInput,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
+} from "react-native";
 
 import * as SecureStore from "expo-secure-store";
 import {
@@ -144,142 +150,144 @@ export default function OnboardingScreen({
   };
 
   return (
-    <ThemedView style={styles.container}>
-      {/* Screen 1: CycleOS Welcome Screen */}
-      {/* @TODO: can be more fancy and add animations */}
-      {step === 1 && (
-        <ThemedView style={styles.screen}>
-          <Image
-            source={require("@/assets/images/undraw-womens-day.png")}
-            style={{
-              alignSelf: "center",
-              height: "40%",
-              resizeMode: "contain",
-            }}
-          />
-          <ThemedText>Hustle Less, Flow More.</ThemedText>
+    <SafeAreaView>
+      <ThemedView style={styles.container}>
+        {/* Screen 1: CycleOS Welcome Screen */}
+        {/* @TODO: can be more fancy and add animations */}
+        {step === 1 && (
+          <ThemedView style={styles.screen}>
+            <Image
+              source={require("@/assets/images/undraw-womens-day.png")}
+              style={{
+                alignSelf: "center",
+                height: "40%",
+                resizeMode: "contain",
+              }}
+            />
+            <ThemedText>Hustle Less, Flow More.</ThemedText>
 
-          {/* @TODO Perhaps refactor this into a button component */}
-          <TouchableOpacity
-            onPress={nextStep}
-            style={{
-              ...styles.button,
-              position: "absolute",
-              bottom: 0,
-              width: "100%",
-            }}
-          >
-            <ThemedText style={styles.buttonText}>Get Started</ThemedText>
-          </TouchableOpacity>
-        </ThemedView>
-      )}
-
-      {/* Screen 2: Average Cycle Length */}
-      {step === 2 && (
-        <ThemedView>
-          <ThemedText style={styles.header}>
-            What is the average length of your cycle?
-          </ThemedText>
-          <ThemedText>
-            Count from the first day of one period to the day before the next
-            period starts.
-          </ThemedText>
-          {/* @TODO: Allow checkbox for cycle irregularity */}
-          <TextInput
-            style={styles.input}
-            value={avgCycleLength}
-            onChangeText={setAvgCycleLength}
-            keyboardType="numeric"
-          />
-
-          <ThemedView style={styles.buttonContainer}>
+            {/* @TODO Perhaps refactor this into a button component */}
             <TouchableOpacity
-              onPress={() => setAvgCycleLength("28")}
-              style={styles.button}
+              onPress={nextStep}
+              style={{
+                ...styles.button,
+                position: "absolute",
+                bottom: 0,
+                width: "100%",
+              }}
             >
-              <ThemedText style={styles.buttonText}>I don't know</ThemedText>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={nextStep} style={styles.button}>
-              <ThemedText style={styles.buttonText}>Next</ThemedText>
+              <ThemedText style={styles.buttonText}>Get Started</ThemedText>
             </TouchableOpacity>
           </ThemedView>
-        </ThemedView>
-      )}
+        )}
 
-      {/* Screen 3a: Start and end of last Period */}
-      {step === 3 && (
-        <ThemedView style={styles.container}>
-          <ThemedText style={styles.header}>
-            When was your last period? Select start and end dates.
-          </ThemedText>
-          <DateRangePicker
-            onCalendarDayPress={onCalendarDayPress}
-            calendarActiveDateRanges={calendarActiveDateRanges}
-          />
+        {/* Screen 2: Average Cycle Length */}
+        {step === 2 && (
+          <ThemedView>
+            <ThemedText style={styles.header}>
+              What is the average length of your cycle?
+            </ThemedText>
+            <ThemedText>
+              Count from the first day of one period to the day before the next
+              period starts.
+            </ThemedText>
+            {/* @TODO: Allow checkbox for cycle irregularity */}
+            <TextInput
+              style={styles.input}
+              value={avgCycleLength}
+              onChangeText={setAvgCycleLength}
+              keyboardType="numeric"
+            />
 
-          <ThemedView style={styles.buttonContainer}>
-            <TouchableOpacity onPress={nextStep} style={styles.button}>
-              <ThemedText style={styles.buttonText}>I don't know</ThemedText>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={saveOnboardingData}
-              style={styles.button}
-            >
-              <ThemedText style={styles.buttonText}>Finish</ThemedText>
-            </TouchableOpacity>
+            <ThemedView style={styles.buttonContainer}>
+              <TouchableOpacity
+                onPress={() => setAvgCycleLength("28")}
+                style={styles.button}
+              >
+                <ThemedText style={styles.buttonText}>I don't know</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={nextStep} style={styles.button}>
+                <ThemedText style={styles.buttonText}>Next</ThemedText>
+              </TouchableOpacity>
+            </ThemedView>
           </ThemedView>
-        </ThemedView>
-      )}
-      {/* Screen 3b: Average Length of Period IF the user doesn't know the last period */}
-      {step === 4 && (
-        <ThemedView>
-          <ThemedText style={styles.header}>
-            What is the average length of your period?
-          </ThemedText>
-          <TextInput
-            style={styles.input}
-            value={avgPeriodLength}
-            onChangeText={setAvgPeriodLength}
-            keyboardType="numeric"
-          />
-          <ThemedView style={styles.buttonContainer}>
-            <TouchableOpacity
-              onPress={() => setAvgPeriodLength("4")}
-              style={styles.button}
-            >
-              <ThemedText style={styles.buttonText}>I don't know</ThemedText>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={saveOnboardingData}
-              style={styles.button}
-            >
-              <ThemedText style={styles.buttonText}>Finish</ThemedText>
-            </TouchableOpacity>
+        )}
+
+        {/* Screen 3a: Start and end of last Period */}
+        {step === 3 && (
+          <ThemedView style={styles.container}>
+            <ThemedText style={styles.header}>
+              When was your last period? Select start and end dates.
+            </ThemedText>
+            <DateRangePicker
+              onCalendarDayPress={onCalendarDayPress}
+              calendarActiveDateRanges={calendarActiveDateRanges}
+            />
+
+            <ThemedView style={styles.buttonContainer}>
+              <TouchableOpacity onPress={nextStep} style={styles.button}>
+                <ThemedText style={styles.buttonText}>I don't know</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={saveOnboardingData}
+                style={styles.button}
+              >
+                <ThemedText style={styles.buttonText}>Finish</ThemedText>
+              </TouchableOpacity>
+            </ThemedView>
           </ThemedView>
-        </ThemedView>
-      )}
-      {/* Screen 5: HealthConnect Permissions */}
-      {step === 5 && (
-        <ThemedView>
-          <ThemedText style={styles.header}>
-            Connect CycleOS to HealthConnect
-          </ThemedText>
-          <ThemedText>
-            To provide you with the best experience, please grant CycleOS
-            permissions to read your health data. We will only read your workout
-            sessions, daily step count, and sleep sessions.
-          </ThemedText>
-          <ThemedView style={styles.buttonContainer}>
-            <TouchableOpacity
-              onPress={requestHCPermission}
-              style={styles.button}
-            >
-              <ThemedText style={styles.buttonText}>Allow Access</ThemedText>
-            </TouchableOpacity>
+        )}
+        {/* Screen 3b: Average Length of Period IF the user doesn't know the last period */}
+        {step === 4 && (
+          <ThemedView>
+            <ThemedText style={styles.header}>
+              What is the average length of your period?
+            </ThemedText>
+            <TextInput
+              style={styles.input}
+              value={avgPeriodLength}
+              onChangeText={setAvgPeriodLength}
+              keyboardType="numeric"
+            />
+            <ThemedView style={styles.buttonContainer}>
+              <TouchableOpacity
+                onPress={() => setAvgPeriodLength("4")}
+                style={styles.button}
+              >
+                <ThemedText style={styles.buttonText}>I don't know</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={saveOnboardingData}
+                style={styles.button}
+              >
+                <ThemedText style={styles.buttonText}>Finish</ThemedText>
+              </TouchableOpacity>
+            </ThemedView>
           </ThemedView>
-        </ThemedView>
-      )}
-    </ThemedView>
+        )}
+        {/* Screen 5: HealthConnect Permissions */}
+        {step === 5 && (
+          <ThemedView>
+            <ThemedText style={styles.header}>
+              Connect CycleOS to HealthConnect
+            </ThemedText>
+            <ThemedText>
+              To provide you with the best experience, please grant CycleOS
+              permissions to read your health data. We will only read your
+              workout sessions, daily step count, and sleep sessions.
+            </ThemedText>
+            <ThemedView style={styles.buttonContainer}>
+              <TouchableOpacity
+                onPress={requestHCPermission}
+                style={styles.button}
+              >
+                <ThemedText style={styles.buttonText}>Allow Access</ThemedText>
+              </TouchableOpacity>
+            </ThemedView>
+          </ThemedView>
+        )}
+      </ThemedView>
+    </SafeAreaView>
   );
 }
 

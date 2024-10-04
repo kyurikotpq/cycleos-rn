@@ -35,7 +35,7 @@ export default function RootLayout() {
   const completeOnboarding = async () => {
     const _ = await SecureStore.setItemAsync("isOnboarded", "true");
     setIsOnboarded(true);
-  }
+  };
 
   useEffect(() => {
     if (isLoaded) {
@@ -55,6 +55,18 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
+        <Stack.Screen
+          name="hormonoscope"
+          options={{ title: "Today at a Glance" }}
+        />
+        <Stack.Screen
+          name="tracking"
+          options={{
+            presentation: "modal",
+            animation: "slide_from_bottom",
+            headerShown: false,
+          }}
+        />
       </Stack>
     </ThemeProvider>
   );
