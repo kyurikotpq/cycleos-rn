@@ -1,4 +1,11 @@
-const SYMPTOMS = [
+export type Symptom = {
+  label: string;
+  items: SymptomItem[];
+};
+
+export type SymptomItem = { label: string; value: number };
+
+export const SYMPTOMS = [
   {
     label: "Menstruation",
     items: [
@@ -88,4 +95,3 @@ const SYMPTOMS = [
   },
 ];
 
-export default SYMPTOMS;
