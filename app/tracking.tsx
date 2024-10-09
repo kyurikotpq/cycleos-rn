@@ -2,24 +2,17 @@ import { SafeAreaView, ScrollView, StyleSheet } from "react-native";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import {
-  Chip,
-  Searchbar,
-  Text,
-  Appbar,
-  Divider,
-  Button,
-} from "react-native-paper";
+import { Chip, Searchbar, Appbar, Button } from "react-native-paper";
 import { useEffect, useState } from "react";
 import { router } from "expo-router";
 import { SYMPTOMS, SymptomItem } from "@/constants/Symptoms";
 
 /**
  * This page shows:
- * 1) daily suggestions based on menstrual phase, exercise, and sleep data
- * 2) a prompt to do their daily symptom check-in
+ * 1) a list of symptoms that the user can select from
+ * 2) @TODO: a calendar picker that allows retrospective tagging of symptoms (NOT implemented yet)
  */
-export default function Hormonoscope() {
+export default function TrackingScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSymptoms, setSelectedSymptoms] = useState<SymptomItem[]>([]);
   const [filteredSymptoms, setFilteredSymptoms] = useState<Symptom[]>(SYMPTOMS);
@@ -40,16 +33,20 @@ export default function Hormonoscope() {
     return symptomLabel.toLowerCase().includes(searchQuery.toLowerCase());
   };
 
+  const saveSymptoms = () => {};
+
   useEffect(() => {
-    setFilteredSymptoms(
-      SYMPTOMS.filter((category) =>
-        category.items.some((symptom) => isSymptom(symptom.label))
-      )
-    );
+    if (searchQuery.length > 2) {
+      setFilteredSymptoms(
+        SYMPTOMS.filter((category) =>
+          category.items.some((symptom) => isSymptom(symptom.label))
+        )
+      );
+    }
   }, [searchQuery]);
 
   return (
-    <SafeAreaView style={{ height: "100%" }}>
+    <SafeAreaView style={{ flex: 1 }}>
       <Appbar.Header>
         <Appbar.Action
           icon="close"
@@ -60,7 +57,7 @@ export default function Hormonoscope() {
 
         <Appbar.Content
           title={`Logs for ${new Date().toLocaleDateString()}`}
-          titleStyle={{ textAlign: "center" }}
+          titleStyle={{ textAlign: "center", fontWeight: "bold" }}
         />
         <Appbar.Action icon="calendar" onPress={() => {}} />
       </Appbar.Header>
@@ -70,29 +67,32 @@ export default function Hormonoscope() {
         <ThemedView style={styles.p20}>
           <ThemedText>@TODO: Date picker goes here at some point</ThemedText>
         </ThemedView>
-        <Text
-          variant="titleLarge"
+        <ThemedText
+          variant="title"
           style={{ fontWeight: 700, marginBottom: 10 }}
         >
           How are you feeling today?
-        </Text>
+        </ThemedText>
         <Searchbar
           mode="view"
           placeholder="E.g. Bloating"
           onChangeText={setSearchQuery}
           value={searchQuery}
-          style={{ marginBottom: 20 }}
+          style={{ marginBottom: 30 }}
         />
 
-        <Divider style={{ marginBottom: 30 }} />
         {/* @TODO: Figure out custom icons */}
+        {/* @TODO: Maybe make categories collapsible? */}
         {filteredSymptoms.map(
           (category) =>
             category.items.length > 0 && (
               <ThemedView style={{ marginBottom: 30 }} key={category.label}>
-                <Text variant="labelLarge" style={{ marginBottom: 10 }}>
+                <ThemedText
+                  variant="defaultSemiBold"
+                  style={{ marginBottom: 10 }}
+                >
                   {category.label}
-                </Text>
+                </ThemedText>
                 <ThemedView style={{ flexDirection: "row", flexWrap: "wrap" }}>
                   {category.items.map(
                     (symptom: SymptomItem) =>
@@ -121,6 +121,7 @@ export default function Hormonoscope() {
           marginLeft: 20,
           marginRight: 20,
         }}
+        onPress={saveSymptoms}
       >
         Save
       </Button>

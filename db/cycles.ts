@@ -1,5 +1,5 @@
 import { db } from "./client";
-import { cycles } from "./schema";
+import { cycle } from "./schema";
 
 interface CreateCycleProps {
   startDate: number;
@@ -18,11 +18,14 @@ export const insertCycle = async ({
   periodLength,
   cycleLength,
 }: CreateCycleProps) =>
-  await db.insert(cycles).values({
+  await db.insert(cycle).values({
     startDate,
     startZoneOffset,
     endDate,
     endZoneOffset,
     periodLength,
     cycleLength,
-  }).returning({ insertedId: cycles.id });
+  }).returning({ insertedId: cycle.id });
+
+
+export const fetchCycles = async () => await db.select().from(cycle);

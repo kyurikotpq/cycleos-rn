@@ -1,12 +1,3 @@
-CREATE TABLE `cycle_days` (
-	`id` integer PRIMARY KEY NOT NULL,
-	`cycle_id` integer NOT NULL,
-	`date_id` text NOT NULL,
-	`zone_offset` integer NOT NULL,
-	`phase` text(20),
-	FOREIGN KEY (`cycle_id`) REFERENCES `cycles`(`id`) ON UPDATE no action ON DELETE no action
-);
---> statement-breakpoint
 CREATE TABLE `cycles` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`start_date` integer,
@@ -14,6 +5,16 @@ CREATE TABLE `cycles` (
 	`end_date` integer,
 	`period_length` integer,
 	`cycle_length` integer
+);
+--> statement-breakpoint
+CREATE TABLE `cycle_days` (
+	`id` integer PRIMARY KEY NOT NULL,
+	`cycle_id` integer,
+	`date_id` text NOT NULL,
+	`zone_offset` integer NOT NULL,
+	`phase` text(20),
+	`notes` text(255),
+	FOREIGN KEY (`cycle_id`) REFERENCES `cycles`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `exercises` (
@@ -72,4 +73,4 @@ CREATE TABLE `symptoms` (
 	FOREIGN KEY (`day_id`) REFERENCES `cycle_days`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `dateIdIdx` ON `cycle_days` (`date_id`);
+CREATE UNIQUE INDEX `cycle_days_date_id_unique` ON `cycle_days` (`date_id`);

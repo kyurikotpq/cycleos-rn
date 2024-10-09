@@ -65,12 +65,20 @@ const sub = (date: Date | string, type: string, amount: number): Date => {
   return new Date(newDate.setTime(date.getTime() - numMsToSub));
 };
 
-const getDuration = (start: Date | string, end: Date | string): number => {
-  if (typeof start === "string") start = new Date(start);
-  if (typeof end === "string") end = new Date(end);
+const getDuration = (
+  start: Date | string,
+  end: Date | string,
+  includingEnd = false
+): number => {
+  if (typeof start === "string") start = new Date(`${start}T00:00:00`);
+  if (typeof end === "string") end = new Date(`${end}T00:00:00`);
 
   const durationMs = end.getTime() - start.getTime();
-  return durationMs / numMsPerDay;
+  const finalDuration = includingEnd
+    ? durationMs / numMsPerDay + 1
+    : durationMs / numMsPerDay;
+
+  return finalDuration;
 };
 
 const getTimezoneOffset = (date: Date | string): number => {
@@ -79,8 +87,8 @@ const getTimezoneOffset = (date: Date | string): number => {
 };
 
 const getRange = (start: Date | string, end: Date | string): string[] => {
-  if (typeof start === "string") start = new Date(start);
-  if (typeof end === "string") end = new Date(end);
+  if (typeof start === "string") start = new Date(`${start}T00:00:00`);
+  if (typeof end === "string") end = new Date(`${end}T00:00:00`);
 
   let range: string[] = [];
   let current = new Date(start);

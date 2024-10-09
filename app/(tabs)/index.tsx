@@ -21,7 +21,7 @@ export default function AgendaScreen() {
         </ThemedView>
         <HormonoscopeCard style={{ marginBottom: 40 }} />
 
-        <Text variant="labelLarge">Agenda</Text>
+        <ThemedText variant="title">Agenda</ThemedText>
         <ThemedView>
           <Card>
             <ThemedText>

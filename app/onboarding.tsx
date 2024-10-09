@@ -22,7 +22,6 @@ import DateUtil from "@/constants/Date";
 import PERMISSIONS from "@/constants/Permissions";
 import { insertCycle } from "@/db/cycles";
 import { insertCycleDays } from "@/db/cycle_days";
-import { initDB } from "@/db/init_db";
 
 interface OnboardingScreenProps {
   onComplete: () => void;
@@ -72,15 +71,14 @@ export default function OnboardingScreen({
       );
     }
 
-    // Initialize the database
-    const _ = await initDB();
-
     // Store last period as a SQL record if it exists
     if (avgPeriodLength === "" && dateRange.startId && dateRange.endId) {
       // Get the timezone offset in minutes and convert it to hours
       const zoneOffset = DateUtil.getTimezoneOffset(new Date());
-      const startDate = new Date(dateRange.startId);
+      const startDate = new Date(`${dateRange.startId}T00:00:00`);
 
+      const periodDays = DateUtil.getRange(dateRange.startId, dateRange.endId);
+      
       const addCycleResult = await insertCycle({
         startDate: startDate.getTime(),
         startZoneOffset: zoneOffset,
@@ -90,15 +88,12 @@ export default function OnboardingScreen({
           parseInt(avgCycleLength)
         ).getTime(), // Predicted end date
         endZoneOffset: zoneOffset,
-        periodLength: DateUtil.getDuration(dateRange.startId, dateRange.endId),
+        periodLength: periodDays.length,
         cycleLength: parseInt(avgCycleLength),
       });
 
       // Insert the menstrual days as cycle days
-      const cycleDays = DateUtil.getRange(
-        dateRange.startId,
-        dateRange.endId
-      ).map((dateId) => ({
+      const cycleDays = periodDays.map((dateId) => ({
         cycleId: addCycleResult[0].insertedId,
         dateId,
         zoneOffset,

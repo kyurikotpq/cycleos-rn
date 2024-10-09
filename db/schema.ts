@@ -3,11 +3,17 @@ import {
   numeric,
   sqliteTable,
   text,
-  uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 
 /** Cycles */
-export const cycles = sqliteTable("cycles", {
+/**
+ * !!! THIS IS A DRIZZLE BUG! !!!
+ * Using `export const cycles` (i.e. plural `cycles` spelling)
+ * will cause the migrations to generate the CREATE TABLE
+ * queries in the wrong order (i.e. `cycle_days` will be
+ * created before `cycles`).
+ * */
+export const cycle = sqliteTable("cycles", {
   id: integer("id").primaryKey(),
   startDate: integer("start_date"),
   startZoneOffset: integer("start_zone_offset"),
@@ -17,25 +23,18 @@ export const cycles = sqliteTable("cycles", {
   cycleLength: integer("cycle_length"),
 });
 
-export type Cycle = typeof cycles.$inferSelect;
-export type InsertCycle = typeof cycles.$inferInsert;
+export type Cycle = typeof cycle.$inferSelect;
+export type InsertCycle = typeof cycle.$inferInsert;
 
 /** Cycle Days */
-export const cycle_days = sqliteTable(
-  "cycle_days",
-  {
-    id: integer("id").primaryKey(),
-    cycleId: integer("cycle_id")
-      .notNull()
-      .references(() => cycles.id),
-    dateId: text("date_id").notNull(),
-    zoneOffset: integer("zone_offset").notNull(),
-    phase: text("phase", { length: 20 }),
-  },
-  (cycle_days) => ({
-    nameIdx: uniqueIndex("dateIdIdx").on(cycle_days.dateId),
-  })
-);
+export const cycle_days = sqliteTable("cycle_days", {
+  id: integer("id").primaryKey(),
+  cycleId: integer("cycle_id").references(() => cycle.id),
+  dateId: text("date_id").notNull().unique(),
+  zoneOffset: integer("zone_offset").notNull(),
+  phase: text("phase", { length: 20 }),
+  notes: text("notes", { length: 255 }),
+});
 
 export type CycleDay = typeof cycle_days.$inferSelect;
 export type InsertCycleDay = typeof cycle_days.$inferInsert;
