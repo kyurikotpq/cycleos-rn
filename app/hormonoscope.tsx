@@ -15,9 +15,9 @@ export default function Hormonoscope() {
       <ThemedView style={styles.p20}>
         {/* Note: I keep changing the font weight, might componentize it */}
         <ThemedView>
-          <Text variant="titleLarge" style={{ fontWeight: 700 }}>
+          <ThemedText variant="title" style={{ fontWeight: 700 }}>
             Today at a Glance
-          </Text>
+          </ThemedText>
           <Card>
             <ThemedText>
               @TODO: Daily suggestions based on menstrual phase, exercise, and

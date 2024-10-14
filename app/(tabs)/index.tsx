@@ -5,6 +5,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { Appbar, Avatar, Drawer, Card, Text, FAB } from "react-native-paper";
 import HormonoscopeCard from "@/components/HormonoscopeCard";
 import { router } from "expo-router";
+import { ScrollView } from "react-native";
 
 export default function AgendaScreen() {
   return (
@@ -19,19 +20,18 @@ export default function AgendaScreen() {
         <ThemedView style={styles.p20}>
           <ThemedText>@TODO: Date picker goes here at some point</ThemedText>
         </ThemedView>
-        <HormonoscopeCard style={{ marginBottom: 40 }} />
+        <HormonoscopeCard />
 
         <ThemedText variant="title">Agenda</ThemedText>
-        <ThemedView>
+        <ScrollView>
           <Card>
             <ThemedText>
               @TODO: Event show up here in a list (flex column)
             </ThemedText>
           </Card>
-        </ThemedView>
+        </ScrollView>
       </ThemedView>
       <FAB icon="emoticon-outline" style={styles.fab} onPress={() => router.push("/tracking")} />
-
     </>
   );
 }

@@ -20,7 +20,7 @@ import DateRangePicker from "@/components/DateRangePicker";
 import { useDateRange } from "@marceloterreiro/flash-calendar";
 import DateUtil from "@/constants/Date";
 import PERMISSIONS from "@/constants/Permissions";
-import { insertCycle } from "@/db/cycles";
+import { createCycle, insertCycle } from "@/db/cycles";
 import { insertCycleDays } from "@/db/cycle_days";
 
 interface OnboardingScreenProps {
@@ -73,34 +73,7 @@ export default function OnboardingScreen({
 
     // Store last period as a SQL record if it exists
     if (avgPeriodLength === "" && dateRange.startId && dateRange.endId) {
-      // Get the timezone offset in minutes and convert it to hours
-      const zoneOffset = DateUtil.getTimezoneOffset(new Date());
-      const startDate = new Date(`${dateRange.startId}T00:00:00`);
-
-      const periodDays = DateUtil.getRange(dateRange.startId, dateRange.endId);
-      
-      const addCycleResult = await insertCycle({
-        startDate: startDate.getTime(),
-        startZoneOffset: zoneOffset,
-        endDate: DateUtil.add(
-          startDate,
-          "d",
-          parseInt(avgCycleLength)
-        ).getTime(), // Predicted end date
-        endZoneOffset: zoneOffset,
-        periodLength: periodDays.length,
-        cycleLength: parseInt(avgCycleLength),
-      });
-
-      // Insert the menstrual days as cycle days
-      const cycleDays = periodDays.map((dateId) => ({
-        cycleId: addCycleResult[0].insertedId,
-        dateId,
-        zoneOffset,
-        phase: "menstrual",
-      }));
-
-      const addPeriodResult = await insertCycleDays(cycleDays);
+      const addPeriodResult = await createCycle(dateRange, parseInt(avgCycleLength));
 
       console.log("Onboarding complete:", {
         avgPeriodLength,

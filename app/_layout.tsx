@@ -58,6 +58,10 @@ export default function RootLayout() {
           options={{ title: "Today at a Glance" }}
         />
         <Stack.Screen
+          name="cycles/add-cycle"
+          options={{ title: "Enter Period" }}
+        />
+        <Stack.Screen
           name="tracking"
           options={{
             presentation: "modal",

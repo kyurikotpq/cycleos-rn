@@ -62,7 +62,7 @@ export default function TrackingScreen() {
         <Appbar.Action icon="calendar" onPress={() => {}} />
       </Appbar.Header>
       <ScrollView
-        style={{ paddingLeft: 20, paddingRight: 20, marginBottom: 40 }}
+        style={{ padding: 20, marginBottom: 40 }}
       >
         <ThemedView style={styles.p20}>
           <ThemedText>@TODO: Date picker goes here at some point</ThemedText>

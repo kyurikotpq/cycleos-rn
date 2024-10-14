@@ -70,8 +70,8 @@ const getDuration = (
   end: Date | string,
   includingEnd = false
 ): number => {
-  if (typeof start === "string") start = new Date(`${start}T00:00:00`);
-  if (typeof end === "string") end = new Date(`${end}T00:00:00`);
+  if (typeof start === "string") start = parseISODate(start);
+  if (typeof end === "string") end = parseISODate(end);
 
   const durationMs = end.getTime() - start.getTime();
   const finalDuration = includingEnd
@@ -86,21 +86,36 @@ const getTimezoneOffset = (date: Date | string): number => {
   return date.getTimezoneOffset() / 60;
 };
 
+// https://stackoverflow.com/a/26212197/11620221
+const parseISODate = (dateStr: string) => {
+  var d = dateStr.split(/\D/);
+  return new Date(Number(d[0]), Number(d[1]) - 1, Number(d[2]));
+};
+
 const getRange = (start: Date | string, end: Date | string): string[] => {
-  if (typeof start === "string") start = new Date(`${start}T00:00:00`);
-  if (typeof end === "string") end = new Date(`${end}T00:00:00`);
+  if (typeof start === "string") start = parseISODate(start);
+  if (typeof end === "string") end = parseISODate(end);
 
   let range: string[] = [];
   let current = new Date(start);
 
   while (current <= end) {
-    range.push(new Date(current).toLocaleDateString("en-CA"));
+    range.push(new Date(current).toISOString().split("T")[0]);
     current = add(current, "d", 1);
   }
 
   return range;
 };
 
-const DateUtil = { getMs, add, sub, getDuration, getTimezoneOffset, getRange };
+const DateUtil = {
+  numMsPerDay,
+  getMs,
+  add,
+  sub,
+  getDuration,
+  getTimezoneOffset,
+  getRange,
+  parseISODate,
+};
 
 export default DateUtil;
