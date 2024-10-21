@@ -5,18 +5,53 @@ import { ThemedView } from "@/components/ThemedView";
 import { Chip, Searchbar, Appbar, Button } from "react-native-paper";
 import { useEffect, useState } from "react";
 import { router } from "expo-router";
-import { SYMPTOMS, SymptomItem } from "@/constants/Symptoms";
+import {
+  SYMPTOMS,
+  SYMPTOMS_CATEGORIZED,
+  SymptomCategory,
+  SymptomItem,
+} from "@/constants/Symptoms";
+import DateUtil from "@/util/Date";
+import {
+  fetchSymptomsAtDate,
+  updateSymptomsTransaction,
+} from "@/db/controllers/symptoms";
+import WeekViewDatePicker from "@/components/WeekViewDatePicker";
 
 /**
  * This page shows:
  * 1) a list of symptoms that the user can select from
  * 2) @TODO: a calendar picker that allows retrospective tagging of symptoms (NOT implemented yet)
  */
-export default function TrackingScreen() {
+export default function SymptomTrackingScreen() {
+  const today = new Date();
+  const [saved, setSaved] = useState("Save");
   const [searchQuery, setSearchQuery] = useState("");
+  const [dbSymptoms, setDbSymptoms] = useState<SymptomItem[]>([]);
   const [selectedSymptoms, setSelectedSymptoms] = useState<SymptomItem[]>([]);
-  const [filteredSymptoms, setFilteredSymptoms] = useState<Symptom[]>(SYMPTOMS);
+  const [filteredSymptoms, setFilteredSymptoms] =
+    useState<SymptomCategory[]>(SYMPTOMS_CATEGORIZED);
+  const [currentDate, setCurrentDate] = useState(
+    today.toISOString().split("T")[0]
+  );
 
+  const compareArrays = (
+    before: number[],
+    after: number[]
+  ): { to_delete: number[]; to_insert: number[] } => {
+    // Elements to be deleted (present in 'before' but not in 'after')
+    const to_delete = before.filter((item) => !after.includes(item));
+
+    // Elements to be inserted (present in 'after' but not in 'before')
+    const to_insert = after.filter((item) => !before.includes(item));
+
+    return {
+      to_delete,
+      to_insert,
+    };
+  };
+
+  // @TODO: There's a small bug... sometimes the touch doesn't register
   const toggleSymptom = (symptom: SymptomItem) => {
     if (selectedSymptoms.includes(symptom)) {
       removeSymptom(symptom);
@@ -24,8 +59,9 @@ export default function TrackingScreen() {
   };
 
   const removeSymptom = (item: SymptomItem) => {
+    // We can do this because objects are by reference
     setSelectedSymptoms(
-      selectedSymptoms.filter((symptom) => item.label != symptom.label)
+      selectedSymptoms.filter((symptom) => symptom.id !== item.id)
     );
   };
 
@@ -33,12 +69,47 @@ export default function TrackingScreen() {
     return symptomLabel.toLowerCase().includes(searchQuery.toLowerCase());
   };
 
-  const saveSymptoms = () => {};
+  const getSymptomsAtDate = async (date: string) => {
+    const selectedDate = new Date(date);
+    if (selectedDate > today) return;
+
+    const symptoms = await fetchSymptomsAtDate(date);
+
+    setSelectedSymptoms(symptoms);
+    setDbSymptoms(symptoms);
+    setCurrentDate(date);
+  };
+
+  const saveSymptoms = async () => {
+    // Save cycle to DB
+    if (selectedSymptoms.length == 0) {
+      setSaved("Save");
+      return;
+    }
+
+    setSaved("Saving...");
+    const { to_delete, to_insert } = compareArrays(
+      dbSymptoms.map((symptom) => symptom.id),
+      selectedSymptoms.map((symptom) => symptom.id)
+    );
+    console.log(currentDate, to_insert, to_delete);
+    const transactionResult = await updateSymptomsTransaction(
+      to_insert.map((symptomId) => ({ dayId: currentDate, symptomId })),
+      to_delete,
+      currentDate
+    );
+    setSaved("Saved!");
+  };
+
+  useEffect(() => {
+    getSymptomsAtDate(currentDate);
+    console.log("called");
+  }, []);
 
   useEffect(() => {
     if (searchQuery.length > 2) {
       setFilteredSymptoms(
-        SYMPTOMS.filter((category) =>
+        SYMPTOMS_CATEGORIZED.filter((category) =>
           category.items.some((symptom) => isSymptom(symptom.label))
         )
       );
@@ -56,17 +127,26 @@ export default function TrackingScreen() {
         />
 
         <Appbar.Content
-          title={`Logs for ${new Date().toLocaleDateString()}`}
+          title={`Logs for ${DateUtil.parseISODate(
+            currentDate
+          ).toLocaleDateString()}`}
           titleStyle={{ textAlign: "center", fontWeight: "bold" }}
         />
         <Appbar.Action icon="calendar" onPress={() => {}} />
       </Appbar.Header>
-      <ScrollView
-        style={{ padding: 20, marginBottom: 40 }}
+      <ThemedView
+        style={{
+          height: 80,
+          marginBottom: 20,
+        }}
       >
-        <ThemedView style={styles.p20}>
-          <ThemedText>@TODO: Date picker goes here at some point</ThemedText>
-        </ThemedView>
+        <WeekViewDatePicker
+          maxDate={today.toISOString().split("T")[0]}
+          onDateChanged={getSymptomsAtDate}
+        />
+      </ThemedView>
+
+      <ScrollView style={{ padding: 20, marginBottom: 40 }}>
         <ThemedText
           variant="title"
           style={{ fontWeight: 700, marginBottom: 10 }}
@@ -80,7 +160,6 @@ export default function TrackingScreen() {
           value={searchQuery}
           style={{ marginBottom: 30 }}
         />
-
         {/* @TODO: Figure out custom icons */}
         {/* @TODO: Maybe make categories collapsible? */}
         {filteredSymptoms.map(
@@ -100,7 +179,7 @@ export default function TrackingScreen() {
                         <Chip
                           showSelectedCheck={true}
                           style={{ marginRight: 10 }}
-                          key={symptom.label}
+                          key={symptom.id}
                           selected={selectedSymptoms.includes(symptom)}
                           onPress={() => toggleSymptom(symptom)}
                         >
@@ -113,6 +192,7 @@ export default function TrackingScreen() {
             )
         )}
       </ScrollView>
+
       <Button
         mode="contained"
         style={{
@@ -121,6 +201,8 @@ export default function TrackingScreen() {
           marginLeft: 20,
           marginRight: 20,
         }}
+        icon={saved == "Saved!" ? "check" : undefined}
+        disabled={saved != "Save"}
         onPress={saveSymptoms}
       >
         Save

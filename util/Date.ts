@@ -1,3 +1,5 @@
+// @TODO: Might not need this anymore since I have dayjs. To re-evaluate.
+
 const numMsPerHour = 60 * 60 * 1000;
 const numMsPerDay = 24 * numMsPerHour;
 const numMsPerWeek = 7 * numMsPerDay;

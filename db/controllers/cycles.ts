@@ -1,9 +1,9 @@
-import DateUtil from "@/constants/Date";
+import DateUtil from "@/util/Date";
 import { eq, gt, lt, desc } from "drizzle-orm";
 import { CalendarActiveDateRange } from "@marceloterreiro/flash-calendar";
-import { db } from "./client";
+import { db } from "../client";
 import { insertCycleDays } from "./cycle_days";
-import { Cycle, cycle } from "./schema";
+import { Cycle, cycle } from "../schema";
 
 interface CreateCycleProps {
   startDate: number;
@@ -36,6 +36,13 @@ export const insertCycle = async ({
 
 export const fetchCycles = async () =>
   await db.select().from(cycle).orderBy(desc(cycle.startDate));
+
+export const getMostRecentCycle = async () =>
+  await db
+    .select({ id: cycle.id })
+    .from(cycle)
+    .orderBy(desc(cycle.startDate))
+    .limit(1);
 
 // Controller Actions
 const getNextCycle = async (currStartDate: number): Promise<Cycle[]> =>
@@ -106,12 +113,13 @@ export const createCycle = async (
       updateCycle(prevCycle[0].id, prevCycleDetails);
     }
 
+    // Insert cycle - @TODO: Do I need a transaction here?
     const addCycleResult = await insertCycle(cycleDetails);
 
     // Insert the menstrual days into cycle_days
     const cycleDays = periodDays.map((dateId) => ({
+      id: dateId,
       cycleId: addCycleResult[0].insertedId,
-      dateId,
       zoneOffset,
       phase: "menstrual",
     }));

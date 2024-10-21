@@ -1,8 +1,10 @@
+import { SQL, sql } from "drizzle-orm";
 import {
   integer,
   numeric,
   sqliteTable,
   text,
+  uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 
 /** Cycles */
@@ -28,9 +30,8 @@ export type InsertCycle = typeof cycle.$inferInsert;
 
 /** Cycle Days */
 export const cycle_days = sqliteTable("cycle_days", {
-  id: integer("id").primaryKey(),
+  id: text("date_id").primaryKey(), // YYYY-MM-DD
   cycleId: integer("cycle_id").references(() => cycle.id),
-  dateId: text("date_id").notNull().unique(),
   zoneOffset: integer("zone_offset").notNull(),
   phase: text("phase", { length: 20 }),
   notes: text("notes", { length: 255 }),
@@ -39,14 +40,32 @@ export const cycle_days = sqliteTable("cycle_days", {
 export type CycleDay = typeof cycle_days.$inferSelect;
 export type InsertCycleDay = typeof cycle_days.$inferInsert;
 
+/** SymptomsConstructs */
+export const symptoms_constructs = sqliteTable(
+  "symptoms_constructs",
+  {
+    id: integer("id").primaryKey().notNull(),
+    type: text("type", { length: 20 }).notNull(), // menstruation, pain, mood, skin, energy
+    label: text("label", { length: 50 }).notNull(),
+  },
+  (table) => ({
+    constructUniqueIndex: uniqueIndex("constructUniqueIndex").on(
+      sql`lower(${table.type})`,
+      sql`lower(${table.label})`
+    ),
+  })
+);
+
+export type SymptomConstruct = typeof symptoms_constructs.$inferSelect;
+export type InsertSymptomConstruct = typeof symptoms_constructs.$inferInsert;
+
 /** Symptoms */
 export const symptoms = sqliteTable("symptoms", {
   id: integer("id").primaryKey().notNull(),
-  dayId: integer("day_id")
+  dayId: text("day_id")
     .notNull()
     .references(() => cycle_days.id),
-  type: text("type", { length: 20 }).notNull(), // menstruation, pain, mood, skin, energy
-  constructValue: integer("construct_value"),
+  symptomId: integer("symptom_id").references(() => symptoms_constructs.id),
 });
 
 export type Symptom = typeof symptoms.$inferSelect;
@@ -55,7 +74,7 @@ export type InsertSymptom = typeof symptoms.$inferInsert;
 /** Exercises */
 export const exercises = sqliteTable("exercises", {
   id: integer("id").primaryKey().notNull(),
-  dayId: integer("day_id")
+  dayId: text("day_id")
     .notNull()
     .references(() => cycle_days.id),
   startDateTime: integer("start_datetime").notNull(),
@@ -72,7 +91,7 @@ export type InsertExercise = typeof exercises.$inferInsert;
 /** Steps */
 export const steps = sqliteTable("steps", {
   id: integer("id").primaryKey().notNull(),
-  dayId: integer("day_id")
+  dayId: text("day_id")
     .notNull()
     .references(() => cycle_days.id),
   steps: integer("steps").notNull(),
@@ -84,7 +103,7 @@ export type InsertStep = typeof steps.$inferInsert;
 /** Sleep Sessions */
 export const sleep_sessions = sqliteTable("sleep_sessions", {
   id: integer("id").primaryKey().notNull(),
-  dayId: integer("day_id")
+  dayId: text("day_id")
     .notNull()
     .references(() => cycle_days.id),
   startDateTime: integer("start_datetime").notNull(),
@@ -98,7 +117,7 @@ export const sleep_sessions = sqliteTable("sleep_sessions", {
   totalDeep: numeric("total_deep").notNull(),
   remLatency: numeric("rem_latency"),
   waso: numeric("WASO"), // the total number of minutes awake after initial sleep onset
-  fragmentationIndex: integer("fragmentation_index"), // Number of awakenings per hour of sleep
+  fragmentationIndex: numeric("fragmentation_index"), // Number of awakenings per hour of sleep
 });
 
 export type SleepSession = typeof sleep_sessions.$inferSelect;

@@ -6,7 +6,7 @@ import { Chip, Searchbar, Appbar, Button, Icon } from "react-native-paper";
 import { useEffect, useState } from "react";
 import { router } from "expo-router";
 import { Calendar, toDateId, useDateRange } from "@marceloterreiro/flash-calendar";
-import { createCycle } from "@/db/cycles";
+import { createCycle } from "@/db/controllers/cycles";
 
 /**
  * This page shows:

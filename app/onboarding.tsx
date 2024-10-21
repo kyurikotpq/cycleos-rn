@@ -18,10 +18,8 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import DateRangePicker from "@/components/DateRangePicker";
 import { useDateRange } from "@marceloterreiro/flash-calendar";
-import DateUtil from "@/constants/Date";
 import PERMISSIONS from "@/constants/Permissions";
-import { createCycle, insertCycle } from "@/db/cycles";
-import { insertCycleDays } from "@/db/cycle_days";
+import { createCycle } from "@/db/controllers/cycles";
 
 interface OnboardingScreenProps {
   onComplete: () => void;
