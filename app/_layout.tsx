@@ -1,27 +1,25 @@
 import {
-  DarkTheme,
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
-import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import * as SecureStore from "expo-secure-store";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
-import OnboardingScreen from "./onboarding";
+import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
+import { useLoadAssets } from "@/hooks/useLoadAssets";
+import { expoDb } from "@/db/client";
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+import OnboardingScreen from "./onboarding";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  useDrizzleStudio(expoDb);
 
-  const [isLoaded] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
-  });
+  // Load assets and run migrations
+  const { isLoaded } = useLoadAssets();
 
   // Track if the user is onboarded
   const [isOnboarded, setIsOnboarded] = useState(false);
@@ -35,15 +33,14 @@ export default function RootLayout() {
   const completeOnboarding = async () => {
     const _ = await SecureStore.setItemAsync("isOnboarded", "true");
     setIsOnboarded(true);
-  }
+  };
 
   useEffect(() => {
-    if (isLoaded) {
-      SplashScreen.hideAsync();
-    }
-
     checkForOnboarded();
-  }, [isLoaded]);
+  }, []);
+
+  // Wait for assets to load and migrations to finish
+  if (!isLoaded) return null;
 
   // Show the onboarding screen if user is not onboarded yet
   if (!isOnboarded) {
@@ -55,6 +52,22 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
+        <Stack.Screen
+          name="hormonoscope"
+          options={{ title: "Today at a Glance" }}
+        />
+        <Stack.Screen
+          name="cycles/add-cycle"
+          options={{ title: "Enter Period" }}
+        />
+        <Stack.Screen
+          name="tracking"
+          options={{
+            presentation: "modal",
+            animation: "slide_from_bottom",
+            headerShown: false,
+          }}
+        />
       </Stack>
     </ThemeProvider>
   );

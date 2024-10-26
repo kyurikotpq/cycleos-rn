@@ -1,5 +1,11 @@
-import React, { useState } from "react";
-import { TextInput, Image, TouchableOpacity, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  TextInput,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
+} from "react-native";
 
 import * as SecureStore from "expo-secure-store";
 import {
@@ -8,15 +14,13 @@ import {
   readRecords,
 } from "react-native-health-connect";
 
+import { toDateId, useDateRange } from "@marceloterreiro/flash-calendar";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import DateRangePicker from "@/components/DateRangePicker";
-import { useDateRange } from "@marceloterreiro/flash-calendar";
-import DateUtil from "@/constants/Date";
 import PERMISSIONS from "@/constants/Permissions";
-import { insertCycle } from "@/db/cycles";
-import { insertCycleDays } from "@/db/cycle_days";
-import { initDB } from "@/db/init_db";
+import { createCycle } from "@/db/controllers/cycles";
+import { seedSymptomsConstructs } from "@/db/seed";
 
 interface OnboardingScreenProps {
   onComplete: () => void;
@@ -39,12 +43,21 @@ export default function OnboardingScreen({
 
   const {
     calendarActiveDateRanges,
-    // Also available for your convenience:
     onCalendarDayPress,
     dateRange, // { startId?: string, endId?: string }
-    // isDateRangeValid, // boolean
-    // onClearDateRange, // () => void
   } = useDateRange();
+
+  // Seed database with symptoms
+  const hasSeededDatabase = async () => {
+    const result = SecureStore.getItem("isSeeded");
+    if (result && JSON.parse(result)) return;
+
+    await seedSymptomsConstructs();
+    SecureStore.setItem("isSeeded", "true");
+  };
+  useEffect(() => {
+    hasSeededDatabase();
+  }, []);
 
   // Save onboarding data to SecureStore
   const saveOnboardingData = async () => {
@@ -69,40 +82,12 @@ export default function OnboardingScreen({
       );
     }
 
-    // Initialize the database
-    const _ = await initDB();
-
     // Store last period as a SQL record if it exists
     if (avgPeriodLength === "" && dateRange.startId && dateRange.endId) {
-      // Get the timezone offset in minutes and convert it to hours
-      const zoneOffset = DateUtil.getTimezoneOffset(new Date());
-      const startDate = new Date(dateRange.startId);
-
-      const addCycleResult = await insertCycle({
-        startDate: startDate.getTime(),
-        startZoneOffset: zoneOffset,
-        endDate: DateUtil.add(
-          startDate,
-          "d",
-          parseInt(avgCycleLength)
-        ).getTime(), // Predicted end date
-        endZoneOffset: zoneOffset,
-        periodLength: DateUtil.getDuration(dateRange.startId, dateRange.endId),
-        cycleLength: parseInt(avgCycleLength),
-      });
-
-      // Insert the menstrual days as cycle days
-      const cycleDays = DateUtil.getRange(
-        dateRange.startId,
-        dateRange.endId
-      ).map((dateId) => ({
-        cycleId: addCycleResult[0].insertedId,
-        dateId,
-        zoneOffset,
-        phase: "menstrual",
-      }));
-
-      const addPeriodResult = await insertCycleDays(cycleDays);
+      const addPeriodResult = await createCycle(
+        dateRange,
+        parseInt(avgCycleLength)
+      );
 
       console.log("Onboarding complete:", {
         avgPeriodLength,
@@ -144,7 +129,7 @@ export default function OnboardingScreen({
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* Screen 1: CycleOS Welcome Screen */}
       {/* @TODO: can be more fancy and add animations */}
       {step === 1 && (
@@ -213,6 +198,7 @@ export default function OnboardingScreen({
             When was your last period? Select start and end dates.
           </ThemedText>
           <DateRangePicker
+            calendarMaxDateId={toDateId(new Date())}
             onCalendarDayPress={onCalendarDayPress}
             calendarActiveDateRanges={calendarActiveDateRanges}
           />
@@ -279,7 +265,7 @@ export default function OnboardingScreen({
           </ThemedView>
         </ThemedView>
       )}
-    </ThemedView>
+    </SafeAreaView>
   );
 }
 
@@ -297,6 +283,7 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 24,
     marginBottom: 20,
+    marginTop: 20,
     textAlign: "center",
   },
   input: {
@@ -319,6 +306,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   buttonContainer: {
+    marginTop: 20,
     flexDirection: "row",
     justifyContent: "space-between",
   },

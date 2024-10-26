@@ -1,75 +1,9 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "5565cc8b-ab6d-4d55-acbf-10ea66b44f34",
+  "id": "4b1af742-a813-4979-8371-fe44c41aafe2",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "cycle_days": {
-      "name": "cycle_days",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "cycle_id": {
-          "name": "cycle_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "date_id": {
-          "name": "date_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "zone_offset": {
-          "name": "zone_offset",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "phase": {
-          "name": "phase",
-          "type": "text(20)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "dateIdIdx": {
-          "name": "dateIdIdx",
-          "columns": [
-            "date_id"
-          ],
-          "isUnique": true
-        }
-      },
-      "foreignKeys": {
-        "cycle_days_cycle_id_cycles_id_fk": {
-          "name": "cycle_days_cycle_id_cycles_id_fk",
-          "tableFrom": "cycle_days",
-          "tableTo": "cycles",
-          "columnsFrom": [
-            "cycle_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
     "cycles": {
       "name": "cycles",
       "columns": {
@@ -119,7 +53,67 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "cycle_days": {
+      "name": "cycle_days",
+      "columns": {
+        "date_id": {
+          "name": "date_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "cycle_id": {
+          "name": "cycle_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "zone_offset": {
+          "name": "zone_offset",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "phase": {
+          "name": "phase",
+          "type": "text(20)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "cycle_days_cycle_id_cycles_id_fk": {
+          "name": "cycle_days_cycle_id_cycles_id_fk",
+          "tableFrom": "cycle_days",
+          "tableTo": "cycles",
+          "columnsFrom": [
+            "cycle_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "exercises": {
       "name": "exercises",
@@ -133,7 +127,7 @@
         },
         "day_id": {
           "name": "day_id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -183,22 +177,23 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "exercises_day_id_cycle_days_id_fk": {
-          "name": "exercises_day_id_cycle_days_id_fk",
+        "exercises_day_id_cycle_days_date_id_fk": {
+          "name": "exercises_day_id_cycle_days_date_id_fk",
           "tableFrom": "exercises",
           "tableTo": "cycle_days",
           "columnsFrom": [
             "day_id"
           ],
           "columnsTo": [
-            "id"
+            "date_id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "sleep_sessions": {
       "name": "sleep_sessions",
@@ -212,7 +207,7 @@
         },
         "day_id": {
           "name": "day_id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -287,16 +282,9 @@
           "notNull": false,
           "autoincrement": false
         },
-        "WASO": {
-          "name": "WASO",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "fragmentation_index": {
           "name": "fragmentation_index",
-          "type": "integer",
+          "type": "numeric",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -304,22 +292,23 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "sleep_sessions_day_id_cycle_days_id_fk": {
-          "name": "sleep_sessions_day_id_cycle_days_id_fk",
+        "sleep_sessions_day_id_cycle_days_date_id_fk": {
+          "name": "sleep_sessions_day_id_cycle_days_date_id_fk",
           "tableFrom": "sleep_sessions",
           "tableTo": "cycle_days",
           "columnsFrom": [
             "day_id"
           ],
           "columnsTo": [
-            "id"
+            "date_id"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "sleep_stages": {
       "name": "sleep_stages",
@@ -391,22 +380,16 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "steps": {
       "name": "steps",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
         "day_id": {
           "name": "day_id",
-          "type": "integer",
-          "primaryKey": false,
+          "type": "text",
+          "primaryKey": true,
           "notNull": true,
           "autoincrement": false
         },
@@ -420,12 +403,63 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "steps_day_id_cycle_days_id_fk": {
-          "name": "steps_day_id_cycle_days_id_fk",
+        "steps_day_id_cycle_days_date_id_fk": {
+          "name": "steps_day_id_cycle_days_date_id_fk",
           "tableFrom": "steps",
           "tableTo": "cycle_days",
           "columnsFrom": [
             "day_id"
+          ],
+          "columnsTo": [
+            "date_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "symptoms": {
+      "name": "symptoms",
+      "columns": {
+        "day_id": {
+          "name": "day_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "symptom_id": {
+          "name": "symptom_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "symptoms_day_id_cycle_days_date_id_fk": {
+          "name": "symptoms_day_id_cycle_days_date_id_fk",
+          "tableFrom": "symptoms",
+          "tableTo": "cycle_days",
+          "columnsFrom": [
+            "day_id"
+          ],
+          "columnsTo": [
+            "date_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "symptoms_symptom_id_symptoms_constructs_id_fk": {
+          "name": "symptoms_symptom_id_symptoms_constructs_id_fk",
+          "tableFrom": "symptoms",
+          "tableTo": "symptoms_constructs",
+          "columnsFrom": [
+            "symptom_id"
           ],
           "columnsTo": [
             "id"
@@ -434,23 +468,25 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "compositePrimaryKeys": {
+        "symptoms_day_id_symptom_id_pk": {
+          "columns": [
+            "day_id",
+            "symptom_id"
+          ],
+          "name": "symptoms_day_id_symptom_id_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
-    "symptoms": {
-      "name": "symptoms",
+    "symptoms_constructs": {
+      "name": "symptoms_constructs",
       "columns": {
         "id": {
           "name": "id",
           "type": "integer",
           "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "day_id": {
-          "name": "day_id",
-          "type": "integer",
-          "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
@@ -461,34 +497,31 @@
           "notNull": true,
           "autoincrement": false
         },
-        "construct_value": {
-          "name": "construct_value",
-          "type": "integer",
+        "label": {
+          "name": "label",
+          "type": "text(50)",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         }
       },
-      "indexes": {},
-      "foreignKeys": {
-        "symptoms_day_id_cycle_days_id_fk": {
-          "name": "symptoms_day_id_cycle_days_id_fk",
-          "tableFrom": "symptoms",
-          "tableTo": "cycle_days",
-          "columnsFrom": [
-            "day_id"
+      "indexes": {
+        "constructUniqueIndex": {
+          "name": "constructUniqueIndex",
+          "columns": [
+            "lower(\"type\")",
+            "lower(\"label\")"
           ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "isUnique": true
         }
       },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     }
   },
+  "views": {},
   "enums": {},
   "_meta": {
     "schemas": {},
@@ -496,6 +529,17 @@
     "columns": {}
   },
   "internal": {
-    "indexes": {}
+    "indexes": {
+      "constructUniqueIndex": {
+        "columns": {
+          "lower(\"type\")": {
+            "isExpression": true
+          },
+          "lower(\"label\")": {
+            "isExpression": true
+          }
+        }
+      }
+    }
   }
 }

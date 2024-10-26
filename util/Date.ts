@@ -1,3 +1,5 @@
+// @TODO: Might not need this anymore since I have dayjs. To re-evaluate.
+
 const numMsPerHour = 60 * 60 * 1000;
 const numMsPerDay = 24 * numMsPerHour;
 const numMsPerWeek = 7 * numMsPerDay;
@@ -65,34 +67,57 @@ const sub = (date: Date | string, type: string, amount: number): Date => {
   return new Date(newDate.setTime(date.getTime() - numMsToSub));
 };
 
-const getDuration = (start: Date | string, end: Date | string): number => {
-  if (typeof start === "string") start = new Date(start);
-  if (typeof end === "string") end = new Date(end);
+const getDuration = (
+  start: Date | string,
+  end: Date | string,
+  includingEnd = false
+): number => {
+  if (typeof start === "string") start = parseISODate(start);
+  if (typeof end === "string") end = parseISODate(end);
 
   const durationMs = end.getTime() - start.getTime();
-  return durationMs / numMsPerDay;
+  const finalDuration = includingEnd
+    ? durationMs / numMsPerDay + 1
+    : durationMs / numMsPerDay;
+
+  return finalDuration;
 };
 
 const getTimezoneOffset = (date: Date | string): number => {
   if (typeof date === "string") date = new Date(date);
-  return date.getTimezoneOffset() / 60;
+  return date.getTimezoneOffset();
+};
+
+// https://stackoverflow.com/a/26212197/11620221
+const parseISODate = (dateStr: string) => {
+  var d = dateStr.split(/\D/);
+  return new Date(Number(d[0]), Number(d[1]) - 1, Number(d[2]));
 };
 
 const getRange = (start: Date | string, end: Date | string): string[] => {
-  if (typeof start === "string") start = new Date(start);
-  if (typeof end === "string") end = new Date(end);
+  if (typeof start === "string") start = parseISODate(start);
+  if (typeof end === "string") end = parseISODate(end);
 
   let range: string[] = [];
   let current = new Date(start);
 
   while (current <= end) {
-    range.push(new Date(current).toLocaleDateString("en-CA"));
+    range.push(new Date(current).toISOString().split("T")[0]);
     current = add(current, "d", 1);
   }
 
   return range;
 };
 
-const DateUtil = { getMs, add, sub, getDuration, getTimezoneOffset, getRange };
+const DateUtil = {
+  numMsPerDay,
+  getMs,
+  add,
+  sub,
+  getDuration,
+  getTimezoneOffset,
+  getRange,
+  parseISODate,
+};
 
 export default DateUtil;
