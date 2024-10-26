@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   TextInput,
   Image,
@@ -14,12 +14,13 @@ import {
   readRecords,
 } from "react-native-health-connect";
 
+import { toDateId, useDateRange } from "@marceloterreiro/flash-calendar";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import DateRangePicker from "@/components/DateRangePicker";
-import { useDateRange } from "@marceloterreiro/flash-calendar";
 import PERMISSIONS from "@/constants/Permissions";
 import { createCycle } from "@/db/controllers/cycles";
+import { seedSymptomsConstructs } from "@/db/seed";
 
 interface OnboardingScreenProps {
   onComplete: () => void;
@@ -46,6 +47,18 @@ export default function OnboardingScreen({
     dateRange, // { startId?: string, endId?: string }
   } = useDateRange();
 
+  // Seed database with symptoms
+  const hasSeededDatabase = async () => {
+    const result = SecureStore.getItem("isSeeded");
+    if (result && JSON.parse(result)) return;
+
+    await seedSymptomsConstructs();
+    SecureStore.setItem("isSeeded", "true");
+  };
+  useEffect(() => {
+    hasSeededDatabase();
+  }, []);
+
   // Save onboarding data to SecureStore
   const saveOnboardingData = async () => {
     // Store running averages in SecureStore
@@ -71,7 +84,10 @@ export default function OnboardingScreen({
 
     // Store last period as a SQL record if it exists
     if (avgPeriodLength === "" && dateRange.startId && dateRange.endId) {
-      const addPeriodResult = await createCycle(dateRange, parseInt(avgCycleLength));
+      const addPeriodResult = await createCycle(
+        dateRange,
+        parseInt(avgCycleLength)
+      );
 
       console.log("Onboarding complete:", {
         avgPeriodLength,
@@ -182,6 +198,7 @@ export default function OnboardingScreen({
             When was your last period? Select start and end dates.
           </ThemedText>
           <DateRangePicker
+            calendarMaxDateId={toDateId(new Date())}
             onCalendarDayPress={onCalendarDayPress}
             calendarActiveDateRanges={calendarActiveDateRanges}
           />
@@ -266,6 +283,7 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 24,
     marginBottom: 20,
+    marginTop: 20,
     textAlign: "center",
   },
   input: {
@@ -288,6 +306,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   buttonContainer: {
+    marginTop: 20,
     flexDirection: "row",
     justifyContent: "space-between",
   },

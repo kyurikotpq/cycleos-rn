@@ -1,4 +1,10 @@
-import React, { useState, useMemo, useCallback } from "react";
+import {
+  useMemo,
+  useCallback,
+  useRef,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import {
   View,
   Text,
@@ -13,16 +19,21 @@ import { Surface } from "react-native-paper";
 interface WeekViewDatePickerProps {
   initialDate?: string;
   maxDate?: string;
+  currentSelectedDate?: string;
   onDateChanged: (date: string) => void;
 }
 const screenWidth = Dimensions.get("window").width;
 const NUM_WEEKS = 12;
 
-const WeekViewDatePicker: React.FC<WeekViewDatePickerProps> = ({
-  initialDate,
-  maxDate,
-  onDateChanged,
-}) => {
+const WeekViewDatePicker = (
+  {
+    initialDate,
+    maxDate,
+    onDateChanged,
+    currentSelectedDate,
+  }: WeekViewDatePickerProps,
+  ref: React.ForwardedRef<any>
+) => {
   const initialDay = useMemo(
     () => (initialDate ? dayjs(initialDate) : dayjs()),
     [initialDate]
@@ -33,7 +44,19 @@ const WeekViewDatePicker: React.FC<WeekViewDatePickerProps> = ({
     []
   );
 
-  const [currentDate, setCurrentDate] = useState(initialDay);
+  const flatListRef = useRef<FlatList>(null);
+
+  const scrollToToday = () => {
+    if (flatListRef.current) {
+      flatListRef.current.scrollToIndex({
+        index: NUM_WEEKS,
+        animated: true,
+      });
+    }
+  };
+  useImperativeHandle(ref, () => ({
+    scrollToToday,
+  }));
 
   const getWeekDays = (startDate: dayjs.Dayjs) => {
     return Array.from({ length: 7 }, (_, i) => startDate.add(i, "day"));
@@ -54,7 +77,6 @@ const WeekViewDatePicker: React.FC<WeekViewDatePickerProps> = ({
   const handleDatePress = useCallback(
     (date: dayjs.Dayjs) => {
       if (!maxDay || date.isBefore(maxDay) || date.isSame(maxDay, "day")) {
-        setCurrentDate(date);
         onDateChanged(date.format("YYYY-MM-DD"));
       }
     },
@@ -64,12 +86,14 @@ const WeekViewDatePicker: React.FC<WeekViewDatePickerProps> = ({
   const renderWeek = (days: dayjs.Dayjs[]) => {
     return days.map((date) => {
       const isToday = date.isSame(dayjs(), "day");
-      const isCurrentDate = date.isSame(currentDate, "day");
+      const isCurrentDate = date.isSame(currentSelectedDate, "day");
+
+      // @TODO: The touching animation feels a little slow, I'm not sure what the issue is...
       return (
         <TouchableOpacity
           key={date.format("YYYY-MM-DD")}
           onPress={() => handleDatePress(date)}
-          disabled={maxDay && date.isAfter(maxDay)}
+          disabled={maxDay != null && date.isAfter(maxDay)}
           style={[
             styles.dateContainer,
             isCurrentDate && styles.currentDate,
@@ -95,6 +119,7 @@ const WeekViewDatePicker: React.FC<WeekViewDatePickerProps> = ({
         </View>
         <FlatList
           horizontal
+          ref={flatListRef}
           pagingEnabled={true}
           data={getAllWeeks}
           renderItem={({ item }) => (
@@ -112,6 +137,8 @@ const WeekViewDatePicker: React.FC<WeekViewDatePickerProps> = ({
     </GestureHandlerRootView>
   );
 };
+
+export default forwardRef(WeekViewDatePicker);
 
 const styles = StyleSheet.create({
   headerText: {
@@ -155,5 +182,3 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffd000",
   },
 });
-
-export default WeekViewDatePicker;

@@ -2,6 +2,7 @@ import { SQL, sql } from "drizzle-orm";
 import {
   integer,
   numeric,
+  primaryKey,
   sqliteTable,
   text,
   uniqueIndex,
@@ -31,7 +32,9 @@ export type InsertCycle = typeof cycle.$inferInsert;
 /** Cycle Days */
 export const cycle_days = sqliteTable("cycle_days", {
   id: text("date_id").primaryKey(), // YYYY-MM-DD
-  cycleId: integer("cycle_id").references(() => cycle.id),
+  cycleId: integer("cycle_id").references(() => cycle.id, {
+    onDelete: "set null",
+  }),
   zoneOffset: integer("zone_offset").notNull(),
   phase: text("phase", { length: 20 }),
   notes: text("notes", { length: 255 }),
@@ -60,13 +63,20 @@ export type SymptomConstruct = typeof symptoms_constructs.$inferSelect;
 export type InsertSymptomConstruct = typeof symptoms_constructs.$inferInsert;
 
 /** Symptoms */
-export const symptoms = sqliteTable("symptoms", {
-  id: integer("id").primaryKey().notNull(),
-  dayId: text("day_id")
-    .notNull()
-    .references(() => cycle_days.id),
-  symptomId: integer("symptom_id").references(() => symptoms_constructs.id),
-});
+export const symptoms = sqliteTable(
+  "symptoms",
+  {
+    dayId: text("day_id")
+      .notNull()
+      .references(() => cycle_days.id),
+    symptomId: integer("symptom_id").references(() => symptoms_constructs.id),
+  },
+  (table) => {
+    return {
+      pk: primaryKey({ columns: [table.dayId, table.symptomId] }),
+    };
+  }
+);
 
 export type Symptom = typeof symptoms.$inferSelect;
 export type InsertSymptom = typeof symptoms.$inferInsert;
@@ -90,8 +100,8 @@ export type InsertExercise = typeof exercises.$inferInsert;
 
 /** Steps */
 export const steps = sqliteTable("steps", {
-  id: integer("id").primaryKey().notNull(),
   dayId: text("day_id")
+    .primaryKey()
     .notNull()
     .references(() => cycle_days.id),
   steps: integer("steps").notNull(),
@@ -111,12 +121,11 @@ export const sleep_sessions = sqliteTable("sleep_sessions", {
   endDateTime: integer("end_datetime").notNull(),
   endZoneOffset: integer("end_zone_offset").notNull(),
   duration: numeric("duration").notNull(),
-  totalAwake: numeric("total_awake").notNull(),
+  totalAwake: numeric("total_awake").notNull(), // WASO
   totalRem: numeric("total_rem").notNull(),
   totalLight: numeric("total_light").notNull(),
   totalDeep: numeric("total_deep").notNull(),
   remLatency: numeric("rem_latency"),
-  waso: numeric("WASO"), // the total number of minutes awake after initial sleep onset
   fragmentationIndex: numeric("fragmentation_index"), // Number of awakenings per hour of sleep
 });
 

@@ -1,6 +1,5 @@
 import { SafeAreaView, View, StyleSheet } from "react-native";
 import * as SecureStore from "expo-secure-store";
-import { Button } from "react-native-paper";
 import { useState } from "react";
 import { router } from "expo-router";
 import {
@@ -9,6 +8,8 @@ import {
   useDateRange,
 } from "@marceloterreiro/flash-calendar";
 import { createCycle } from "@/db/controllers/cycles";
+import DateRangePicker from "@/components/DateRangePicker";
+import IsSavingButton from "@/components/IsSavingButton";
 
 /**
  * This page shows:
@@ -16,7 +17,8 @@ import { createCycle } from "@/db/controllers/cycles";
  * 2) @TODO: a calendar picker that allows retrospective tagging of symptoms (NOT implemented yet)
  */
 export default function AddCycleScreen() {
-  const [saved, setSaved] = useState("Save");
+  const [saveState, setSaveState] = useState("Save");
+
   const {
     calendarActiveDateRanges,
     onCalendarDayPress,
@@ -30,42 +32,23 @@ export default function AddCycleScreen() {
 
   const createCycleInDB = async () => {
     // Save cycle to DB
-    setSaved("Saving...");
-
+    setSaveState("Saving...");
     const result = await createCycle(dateRange, avgCycleLength);
-    setSaved("Saved!");
-
+    setSaveState("Saved!");
     router.back();
   };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={{ flex: 1, padding: 20, marginBottom: 20 }}>
-        <Calendar.List
-          calendarDayHeight={30}
-          calendarFirstDayOfWeek="sunday"
-          calendarRowHorizontalSpacing={16}
-          calendarRowVerticalSpacing={16}
+        <DateRangePicker
           calendarPastScrollRangeInMonths={18}
           calendarMaxDateId={toDateId(new Date())}
           calendarActiveDateRanges={calendarActiveDateRanges}
           onCalendarDayPress={onCalendarDayPress}
         />
       </View>
-      <Button
-        mode="contained"
-        style={{
-          position: "fixed",
-          bottom: 20,
-          marginLeft: 20,
-          marginRight: 20,
-        }}
-        icon={saved == "Saved!" ? "check" : undefined}
-        disabled={saved != "Save"}
-        onPress={createCycleInDB}
-      >
-        {saved}
-      </Button>
+      <IsSavingButton onPressCB={createCycleInDB} saveState={saveState} />
     </SafeAreaView>
   );
 }

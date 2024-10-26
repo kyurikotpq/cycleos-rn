@@ -13,7 +13,7 @@ CREATE TABLE `cycle_days` (
 	`zone_offset` integer NOT NULL,
 	`phase` text(20),
 	`notes` text(255),
-	FOREIGN KEY (`cycle_id`) REFERENCES `cycles`(`id`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`cycle_id`) REFERENCES `cycles`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
 CREATE TABLE `exercises` (
@@ -41,7 +41,6 @@ CREATE TABLE `sleep_sessions` (
 	`total_light` numeric NOT NULL,
 	`total_deep` numeric NOT NULL,
 	`rem_latency` numeric,
-	`WASO` numeric,
 	`fragmentation_index` numeric,
 	FOREIGN KEY (`day_id`) REFERENCES `cycle_days`(`date_id`) ON UPDATE no action ON DELETE no action
 );
@@ -58,16 +57,15 @@ CREATE TABLE `sleep_stages` (
 );
 --> statement-breakpoint
 CREATE TABLE `steps` (
-	`id` integer PRIMARY KEY NOT NULL,
-	`day_id` text NOT NULL,
+	`day_id` text PRIMARY KEY NOT NULL,
 	`steps` integer NOT NULL,
 	FOREIGN KEY (`day_id`) REFERENCES `cycle_days`(`date_id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `symptoms` (
-	`id` integer PRIMARY KEY NOT NULL,
 	`day_id` text NOT NULL,
 	`symptom_id` integer,
+	PRIMARY KEY(`day_id`, `symptom_id`),
 	FOREIGN KEY (`day_id`) REFERENCES `cycle_days`(`date_id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`symptom_id`) REFERENCES `symptoms_constructs`(`id`) ON UPDATE no action ON DELETE no action
 );

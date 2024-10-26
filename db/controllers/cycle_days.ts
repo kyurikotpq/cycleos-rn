@@ -6,7 +6,7 @@ export interface CreateCycleDayProps {
   id: string;
   cycleId?: number;
   zoneOffset: number;
-  phase: string;
+  phase?: string;
 }
 
 export const upsertCycleDays = async (cycleDays: CreateCycleDayProps[]) =>
@@ -22,5 +22,5 @@ export const upsertCycleDays = async (cycleDays: CreateCycleDayProps[]) =>
       },
     });
 
-export const insertCycleDayNoConflict = async (cycleDay: CreateCycleDayProps) =>
+export const insertCycleDayConflictDoNothing = async (cycleDay: CreateCycleDayProps) =>
   await db.insert(cycle_days).values(cycleDay).onConflictDoNothing();

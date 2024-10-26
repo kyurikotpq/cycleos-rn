@@ -12,7 +12,6 @@ const linearAccent = "#FF6459";
 const linearTheme: CalendarTheme = {
   rowMonth: {
     content: {
-      textAlign: "left",
       color: "rgba(0, 0, 0, 0.5)",
       fontWeight: "700",
     },
@@ -73,16 +72,19 @@ interface DateRangePickerProps {
 export default function DateRangePicker({
   onCalendarDayPress,
   calendarActiveDateRanges,
-}: DateRangePickerProps) {
+  ...props
+}: DateRangePickerProps & Record<string, any>) {
   return (
     <Calendar.List
       calendarDayHeight={30}
+      calendarSpacing={40}
       calendarFirstDayOfWeek="sunday"
       calendarRowHorizontalSpacing={16}
       calendarRowVerticalSpacing={16}
       calendarActiveDateRanges={calendarActiveDateRanges}
       onCalendarDayPress={onCalendarDayPress}
       theme={linearTheme}
+      {...props}
     />
   );
 }

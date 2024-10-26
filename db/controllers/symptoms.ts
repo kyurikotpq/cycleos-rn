@@ -1,13 +1,15 @@
-import { eq, gt, lt, desc, sql, inArray } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { db } from "../client";
 import { symptoms, symptoms_constructs } from "../schema";
-import { insertCycleDayNoConflict } from "./cycle_days";
-import { getMostRecentCycle } from "./cycles";
+import {
+  CreateCycleDayProps,
+  insertCycleDayConflictDoNothing,
+} from "./cycle_days";
 
 export const fetchSymptomsAtDate = async (date: string) =>
   await db
     .select({
-      id: symptoms.id,
+      id: symptoms_constructs.id,
       type: symptoms_constructs.type,
       label: symptoms_constructs.label,
     })
@@ -18,30 +20,29 @@ export const fetchSymptomsAtDate = async (date: string) =>
     )
     .where(eq(symptoms.dayId, date));
 
-export const insertSymptoms = async (symptoms: any[]) =>
-  await db.insert(symptoms).values(symptoms);
+export const insertSymptoms = async (symptomsToInsert: any[]) =>
+  await db.insert(symptoms).values(symptomsToInsert).onConflictDoNothing();
 
-export const deleteSymptoms = async (symptomIds: number[]) =>
-  await db.delete(symptoms).where(inArray(symptoms.id, symptomIds));
+export const deleteSymptoms = async (dayId: string, symptomIds: number[]) =>
+  await db
+    .delete(symptoms)
+    .where(
+      and(eq(symptoms.dayId, dayId), inArray(symptoms.symptomId, symptomIds))
+    );
 
 export const updateSymptomsTransaction = async (
-  to_insert: any[],
-  to_delete: number[],
-  cycle_day: any
+  toInsert: any[],
+  toDelete: number[],
+  cycleDay: CreateCycleDayProps
 ) => {
   await db.transaction(async (tx) => {
-    const mostRecentCycle = await getMostRecentCycle();
-    if (!mostRecentCycle) {
-      throw new Error("No cycles found");
-    }
+    let cycleDayInsertResult = await insertCycleDayConflictDoNothing(cycleDay);
 
-    let cycleDayInsertResult = await insertCycleDayNoConflict(cycle_day);
-
-    if (to_insert.length > 0) {
-      const _ = await insertSymptoms(to_insert);
+    if (toInsert.length > 0) {
+      const _ = await insertSymptoms(toInsert);
     }
-    if (to_delete.length > 0) {
-      const _ = await deleteSymptoms(to_delete);
+    if (toDelete.length > 0) {
+      const _ = await deleteSymptoms(cycleDay.id, toDelete);
     }
   });
 };

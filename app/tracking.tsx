@@ -3,10 +3,9 @@ import { SafeAreaView, ScrollView, StyleSheet } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Chip, Searchbar, Appbar, Button } from "react-native-paper";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { router } from "expo-router";
 import {
-  SYMPTOMS,
   SYMPTOMS_CATEGORIZED,
   SymptomCategory,
   SymptomItem,
@@ -17,20 +16,24 @@ import {
   updateSymptomsTransaction,
 } from "@/db/controllers/symptoms";
 import WeekViewDatePicker from "@/components/WeekViewDatePicker";
+import IsSavingButton from "@/components/IsSavingButton";
 
 /**
  * This page shows:
  * 1) a list of symptoms that the user can select from
- * 2) @TODO: a calendar picker that allows retrospective tagging of symptoms (NOT implemented yet)
+ * 2) a calendar picker that allows retrospective tagging of symptoms
  */
 export default function SymptomTrackingScreen() {
   const today = new Date();
-  const [saved, setSaved] = useState("Save");
+
   const [searchQuery, setSearchQuery] = useState("");
   const [dbSymptoms, setDbSymptoms] = useState<SymptomItem[]>([]);
   const [selectedSymptoms, setSelectedSymptoms] = useState<SymptomItem[]>([]);
   const [filteredSymptoms, setFilteredSymptoms] =
     useState<SymptomCategory[]>(SYMPTOMS_CATEGORIZED);
+  const [saveState, setSaveState] = useState("Save");
+
+  const datepickerRef = useRef<any>(null);
   const [currentDate, setCurrentDate] = useState(
     today.toISOString().split("T")[0]
   );
@@ -38,24 +41,25 @@ export default function SymptomTrackingScreen() {
   const compareArrays = (
     before: number[],
     after: number[]
-  ): { to_delete: number[]; to_insert: number[] } => {
+  ): { toDelete: number[]; toInsert: number[] } => {
     // Elements to be deleted (present in 'before' but not in 'after')
-    const to_delete = before.filter((item) => !after.includes(item));
+    const toDelete = before.filter((item) => !after.includes(item));
 
     // Elements to be inserted (present in 'after' but not in 'before')
-    const to_insert = after.filter((item) => !before.includes(item));
+    const toInsert = after.filter((item) => !before.includes(item));
 
     return {
-      to_delete,
-      to_insert,
+      toDelete,
+      toInsert,
     };
   };
 
-  // @TODO: There's a small bug... sometimes the touch doesn't register
   const toggleSymptom = (symptom: SymptomItem) => {
-    if (selectedSymptoms.includes(symptom)) {
+    if (isSelected(symptom.id)) {
       removeSymptom(symptom);
     } else setSelectedSymptoms([...selectedSymptoms, symptom]);
+
+    setSaveState("Save");
   };
 
   const removeSymptom = (item: SymptomItem) => {
@@ -65,6 +69,9 @@ export default function SymptomTrackingScreen() {
     );
   };
 
+  const isSelected = (symptomId: number) =>
+    selectedSymptoms.some((s) => s.id == symptomId);
+
   const isSymptom = (symptomLabel: string) => {
     return symptomLabel.toLowerCase().includes(searchQuery.toLowerCase());
   };
@@ -73,37 +80,43 @@ export default function SymptomTrackingScreen() {
     const selectedDate = new Date(date);
     if (selectedDate > today) return;
 
-    const symptoms = await fetchSymptomsAtDate(date);
+    const symptoms: SymptomItem[] = await fetchSymptomsAtDate(date);
 
     setSelectedSymptoms(symptoms);
     setDbSymptoms(symptoms);
     setCurrentDate(date);
+    setSaveState("Saved!");
   };
 
   const saveSymptoms = async () => {
     // Save cycle to DB
-    if (selectedSymptoms.length == 0) {
-      setSaved("Save");
-      return;
-    }
-
-    setSaved("Saving...");
-    const { to_delete, to_insert } = compareArrays(
+    setSaveState("Saving...");
+    const { toDelete, toInsert } = compareArrays(
       dbSymptoms.map((symptom) => symptom.id),
       selectedSymptoms.map((symptom) => symptom.id)
     );
-    console.log(currentDate, to_insert, to_delete);
+
+    if (toDelete.length == 0 && toInsert.length == 0) {
+      setSaveState("Saved!");
+      return;
+    }
+
+    const cycleDay = {
+      id: currentDate,
+      zoneOffset: today.getTimezoneOffset(),
+    };
+
     const transactionResult = await updateSymptomsTransaction(
-      to_insert.map((symptomId) => ({ dayId: currentDate, symptomId })),
-      to_delete,
-      currentDate
+      toInsert.map((symptomId) => ({ dayId: currentDate, symptomId })),
+      toDelete,
+      cycleDay
     );
-    setSaved("Saved!");
+
+    setSaveState("Saved!");
   };
 
   useEffect(() => {
     getSymptomsAtDate(currentDate);
-    console.log("called");
   }, []);
 
   useEffect(() => {
@@ -132,7 +145,15 @@ export default function SymptomTrackingScreen() {
           ).toLocaleDateString()}`}
           titleStyle={{ textAlign: "center", fontWeight: "bold" }}
         />
-        <Appbar.Action icon="calendar" onPress={() => {}} />
+
+        {/* Scroll to Today */}
+        <Appbar.Action
+          icon="calendar"
+          onPress={() => {
+            getSymptomsAtDate(today.toISOString().split("T")[0]);
+            datepickerRef?.current?.scrollToToday();
+          }}
+        />
       </Appbar.Header>
       <ThemedView
         style={{
@@ -143,9 +164,10 @@ export default function SymptomTrackingScreen() {
         <WeekViewDatePicker
           maxDate={today.toISOString().split("T")[0]}
           onDateChanged={getSymptomsAtDate}
+          ref={datepickerRef}
+          currentSelectedDate={currentDate}
         />
       </ThemedView>
-
       <ScrollView style={{ padding: 20, marginBottom: 40 }}>
         <ThemedText
           variant="title"
@@ -180,7 +202,7 @@ export default function SymptomTrackingScreen() {
                           showSelectedCheck={true}
                           style={{ marginRight: 10 }}
                           key={symptom.id}
-                          selected={selectedSymptoms.includes(symptom)}
+                          selected={isSelected(symptom.id)}
                           onPress={() => toggleSymptom(symptom)}
                         >
                           {symptom.label}
@@ -193,26 +215,7 @@ export default function SymptomTrackingScreen() {
         )}
       </ScrollView>
 
-      <Button
-        mode="contained"
-        style={{
-          position: "fixed",
-          bottom: 20,
-          marginLeft: 20,
-          marginRight: 20,
-        }}
-        icon={saved == "Saved!" ? "check" : undefined}
-        disabled={saved != "Save"}
-        onPress={saveSymptoms}
-      >
-        Save
-      </Button>
+      <IsSavingButton onPressCB={saveSymptoms} saveState={saveState} />
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  p20: {
-    padding: 20,
-  },
-});

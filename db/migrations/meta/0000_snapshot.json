@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "dd7aefb0-457f-4fbb-bcb5-8de9974d1597",
+  "id": "4b1af742-a813-4979-8371-fe44c41aafe2",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "cycles": {
@@ -53,7 +53,8 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "cycle_days": {
       "name": "cycle_days",
@@ -106,12 +107,13 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "exercises": {
       "name": "exercises",
@@ -190,7 +192,8 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "sleep_sessions": {
       "name": "sleep_sessions",
@@ -279,13 +282,6 @@
           "notNull": false,
           "autoincrement": false
         },
-        "WASO": {
-          "name": "WASO",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "fragmentation_index": {
           "name": "fragmentation_index",
           "type": "numeric",
@@ -311,7 +307,8 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "sleep_stages": {
       "name": "sleep_stages",
@@ -383,22 +380,16 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "steps": {
       "name": "steps",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
         "day_id": {
           "name": "day_id",
           "type": "text",
-          "primaryKey": false,
+          "primaryKey": true,
           "notNull": true,
           "autoincrement": false
         },
@@ -427,18 +418,12 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "symptoms": {
       "name": "symptoms",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
         "day_id": {
           "name": "day_id",
           "type": "text",
@@ -483,8 +468,17 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "compositePrimaryKeys": {
+        "symptoms_day_id_symptom_id_pk": {
+          "columns": [
+            "day_id",
+            "symptom_id"
+          ],
+          "name": "symptoms_day_id_symptom_id_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "symptoms_constructs": {
       "name": "symptoms_constructs",
@@ -523,9 +517,11 @@
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     }
   },
+  "views": {},
   "enums": {},
   "_meta": {
     "schemas": {},
