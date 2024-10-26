@@ -48,21 +48,21 @@ export default function CyclesScreen() {
       <ScrollView style={{ flex: 1 }}>
         {/* <Surface> is needed to establish elevation context */}
         <Surface elevation={0} style={{ padding: 20 }}>
-          <Card mode="elevated" style={{ marginBottom: 20 }}>
-            <ThemedText variant="subtitle" style={{ fontWeight: 700 }}>
-              @TODO add the circle Here
-            </ThemedText>
-            <ThemedText>
-              {currentCycle.startDate &&
-                new Date(currentCycle.startDate).toDateString().slice(4)}{" "}
-              -{" "}
-              {currentCycle.endDate
-                ? new Date(currentCycle.endDate)
-                    .toDateString()
-                    .slice(4)
-                : "??"}
-            </ThemedText>
-          </Card>
+          {currentCycle && (
+            <Card mode="elevated" style={{ marginBottom: 20 }}>
+              <ThemedText variant="subtitle" style={{ fontWeight: 700 }}>
+                @TODO add the circle Here
+              </ThemedText>
+              <ThemedText>
+                {currentCycle.startDate &&
+                  new Date(currentCycle.startDate).toDateString().slice(4)}{" "}
+                -{" "}
+                {currentCycle.endDate
+                  ? new Date(currentCycle.endDate).toDateString().slice(4)
+                  : "??"}
+              </ThemedText>
+            </Card>
+          )}
 
           <ThemedText
             variant="subtitle"
@@ -72,7 +72,11 @@ export default function CyclesScreen() {
           </ThemedText>
           {cycles.length > 0 ? (
             cycles.map((cycle) => (
-              <Card key={cycle.id} mode="elevated" style={{ padding: 20, marginBottom: 10 }}>
+              <Card
+                key={cycle.id}
+                mode="elevated"
+                style={{ padding: 20, marginBottom: 10 }}
+              >
                 <ThemedText
                   variant="defaultSemiBold"
                   style={{ marginBottom: 10 }}
@@ -86,9 +90,7 @@ export default function CyclesScreen() {
                     new Date(cycle.startDate).toDateString().slice(4)}{" "}
                   -{" "}
                   {cycle.endDate
-                    ? new Date(cycle.endDate - DateUtil.numMsPerDay)
-                        .toDateString()
-                        .slice(4)
+                    ? new Date(cycle.endDate).toDateString().slice(4)
                     : "??"}
                 </ThemedText>
               </Card>

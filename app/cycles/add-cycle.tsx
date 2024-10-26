@@ -1,11 +1,13 @@
 import { SafeAreaView, View, StyleSheet } from "react-native";
-
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { Chip, Searchbar, Appbar, Button, Icon } from "react-native-paper";
-import { useEffect, useState } from "react";
+import * as SecureStore from "expo-secure-store";
+import { Button } from "react-native-paper";
+import { useState } from "react";
 import { router } from "expo-router";
-import { Calendar, toDateId, useDateRange } from "@marceloterreiro/flash-calendar";
+import {
+  Calendar,
+  toDateId,
+  useDateRange,
+} from "@marceloterreiro/flash-calendar";
 import { createCycle } from "@/db/controllers/cycles";
 
 /**
@@ -21,10 +23,16 @@ export default function AddCycleScreen() {
     dateRange, // { startId?: string, endId?: string }
   } = useDateRange();
 
+  // @TODO: Optimize this
+  const avgCycleLength = parseInt(
+    SecureStore.getItem("avgCycleLength") || "28"
+  );
+
   const createCycleInDB = async () => {
     // Save cycle to DB
     setSaved("Saving...");
-    const result = await createCycle(dateRange);
+
+    const result = await createCycle(dateRange, avgCycleLength);
     setSaved("Saved!");
 
     router.back();

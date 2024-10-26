@@ -85,7 +85,7 @@ const getDuration = (
 
 const getTimezoneOffset = (date: Date | string): number => {
   if (typeof date === "string") date = new Date(date);
-  return date.getTimezoneOffset() / 60;
+  return date.getTimezoneOffset();
 };
 
 // https://stackoverflow.com/a/26212197/11620221

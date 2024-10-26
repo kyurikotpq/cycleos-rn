@@ -2,8 +2,11 @@ import DateUtil from "@/util/Date";
 import { eq, gt, lt, desc } from "drizzle-orm";
 import { CalendarActiveDateRange } from "@marceloterreiro/flash-calendar";
 import { db } from "../client";
-import { insertCycleDays } from "./cycle_days";
-import { Cycle, cycle } from "../schema";
+import { upsertCycleDays } from "./cycle_days";
+import { Cycle, cycle, CycleDay } from "../schema";
+import dayjs from "dayjs";
+import { getCycleDaysFromDates } from "@/util/MenstrualPhase";
+import { NUM_MS_PER_DAY } from "@/constants/Time";
 
 interface CreateCycleProps {
   startDate: number;
@@ -63,68 +66,79 @@ const getPrevCycle = async (currStartDate: number): Promise<Cycle[]> =>
 
 export const createCycle = async (
   dateRange: CalendarActiveDateRange,
-  cycleLength?: number
+  cycleLength: number
 ) => {
   if (dateRange && dateRange.startId && dateRange.endId) {
     const zoneOffset = DateUtil.getTimezoneOffset(new Date());
-    const startDate = DateUtil.parseISODate(dateRange.startId);
 
-    const periodDays = DateUtil.getRange(dateRange.startId, dateRange.endId);
+    const startDayjs = dayjs(dateRange.startId);
+    const startDayjsUnix = startDayjs.valueOf();
+    const endDayjs = dayjs(dateRange.endId); // for MENSTRUATION
+    const periodLength = endDayjs.diff(startDayjs, "day") + 1;
 
     const cycleDetails = {
-      startDate: startDate.getTime(),
+      startDate: startDayjsUnix,
       startZoneOffset: zoneOffset,
       endZoneOffset: zoneOffset,
-      periodLength: periodDays.length,
+      periodLength,
       cycleLength: 0,
       endDate: 0, // Initialize endDate
     };
 
-    if (cycleLength) {
-      (cycleDetails.endDate = DateUtil.add(
-        startDate,
-        "d",
-        parseInt(`${cycleLength}`)
-      ).getTime()), // Predicted end date
-        (cycleDetails.cycleLength = parseInt(`${cycleLength}`));
-    } else {
-      // Check if the next cycle exists
-      const nextCycle: Cycle[] = await getNextCycle(startDate.getTime());
+    // Check if the next cycle exists
+    const nextCycle: Cycle[] = await getNextCycle(startDayjsUnix);
 
-      // If yes, use that as the current cycle's endDate
-      if (nextCycle && nextCycle.length == 1 && nextCycle[0].startDate) {
-        cycleDetails.cycleLength = Math.round(
-          (nextCycle[0].startDate - startDate.getTime()) / 86400000
-        );
-        cycleDetails.endDate = nextCycle[0].startDate;
-      }
+    // If yes, use that as the current cycle's endDate
+    if (nextCycle && nextCycle.length == 1 && nextCycle[0].startDate) {
+      const thisCycleLength = Math.round(
+        (nextCycle[0].startDate - startDayjsUnix) / NUM_MS_PER_DAY
+      );
+      cycleDetails.cycleLength = thisCycleLength;
+      cycleDetails.endDate = nextCycle[0].startDate - NUM_MS_PER_DAY;
+    } else {
+      cycleDetails.endDate = startDayjs.add(cycleLength, "day").valueOf();
+      cycleDetails.cycleLength = cycleLength;
     }
 
     // Update previous cycle's end dates where relevant
-    const prevCycle = await getPrevCycle(startDate.getTime());
-    if (prevCycle && prevCycle.length == 1 && prevCycle[0].startDate) {
+    const prevCycle: Cycle[] = await getPrevCycle(startDayjsUnix);
+    if (prevCycle.length > 0 && prevCycle[0].startDate) {
       const prevCycleDetails = {
         cycleLength: Math.round(
-          (startDate.getTime() - prevCycle[0].startDate) / 86400000
+          (startDayjsUnix - prevCycle[0].startDate) / NUM_MS_PER_DAY
         ),
-        endDate: startDate.getTime(),
+        endDate: startDayjs.subtract(1, "day").valueOf(),
       };
 
-      updateCycle(prevCycle[0].id, prevCycleDetails);
+      await updateCycle(prevCycle[0].id, prevCycleDetails);
+
+      const prevCycleDays = getCycleDaysFromDates(
+        dayjs(prevCycle[0].startDate),
+        dayjs(prevCycleDetails.endDate),
+        prevCycleDetails.cycleLength,
+        prevCycle[0].periodLength ?? 0,
+        prevCycle[0].id,
+        zoneOffset
+      );
+
+      await upsertCycleDays(prevCycleDays);
     }
 
     // Insert cycle - @TODO: Do I need a transaction here?
-    const addCycleResult = await insertCycle(cycleDetails);
+    const insertedCycle = await insertCycle(cycleDetails);
 
-    // Insert the menstrual days into cycle_days
-    const cycleDays = periodDays.map((dateId) => ({
-      id: dateId,
-      cycleId: addCycleResult[0].insertedId,
-      zoneOffset,
-      phase: "menstrual",
-    }));
+    // Insert all the days into cycle_days
+    const cycleEndDayjs = dayjs(cycleDetails.endDate);
+    const cycleDays = getCycleDaysFromDates(
+      startDayjs,
+      cycleEndDayjs,
+      cycleDetails.cycleLength,
+      periodLength,
+      insertedCycle[0].insertedId,
+      zoneOffset
+    );
 
-    return insertCycleDays(cycleDays);
+    return upsertCycleDays(cycleDays);
   }
 };
 
