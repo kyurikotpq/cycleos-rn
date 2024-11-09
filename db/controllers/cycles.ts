@@ -1,9 +1,8 @@
-import DateUtil from "@/util/Date";
 import { eq, gt, lt, desc } from "drizzle-orm";
-import { CalendarActiveDateRange } from "@marceloterreiro/flash-calendar";
+import { CalendarActiveDateRange, fromDateId } from "@marceloterreiro/flash-calendar";
 import { db } from "../client";
 import { upsertCycleDays } from "./cycle_days";
-import { Cycle, cycle, CycleDay } from "../schema";
+import { Cycle, cycle } from "../schema";
 import dayjs from "dayjs";
 import { getCycleDaysFromDates } from "@/util/MenstrualPhase";
 import { NUM_MS_PER_DAY } from "@/constants/Time";
@@ -69,7 +68,7 @@ export const createCycle = async (
   cycleLength: number
 ) => {
   if (dateRange && dateRange.startId && dateRange.endId) {
-    const zoneOffset = DateUtil.getTimezoneOffset(new Date());
+    const zoneOffset = fromDateId(dateRange.startId).getTimezoneOffset();
 
     const startDayjs = dayjs(dateRange.startId);
     const startDayjsUnix = startDayjs.valueOf();

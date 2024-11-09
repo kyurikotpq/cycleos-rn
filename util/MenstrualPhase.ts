@@ -2,6 +2,7 @@ import { CreateCycleDayProps } from "@/db/controllers/cycle_days";
 import { Dayjs } from "dayjs";
 
 // Function to calculate the cycle phases
+// @TODO: Does this account for start/end of daylight savings?
 const calculateCyclePhases = (
   startDayjs: Dayjs, // format YYYY-MM-DD
   endDayjs: Dayjs,
@@ -62,7 +63,7 @@ const formatIntoCycleDays = (
 };
 
 export const getCycleDaysFromDates = (
-  startDayjs: Dayjs, // format YYYY-MM-DD
+  startDayjs: Dayjs,
   endDayjs: Dayjs,
   cycleLength: number,
   periodLength: number,
