@@ -17,8 +17,8 @@ const calculateCyclePhases = (
     phases[date] = "menstrual";
   }
 
-  // Luteal phase (last 14 days)
-  for (let i = 0; i < 14; i++) {
+  // Luteal phase (last 13 days)
+  for (let i = 0; i < 13; i++) {
     const date = endDayjs.subtract(i, "day").format("YYYY-MM-DD");
     phases[date] = "luteal";
   }

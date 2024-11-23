@@ -104,7 +104,7 @@ export default function SymptomTrackingScreen() {
 
     const cycleDay = {
       id: currentDate,
-      zoneOffset: today.getTimezoneOffset(),
+      zoneOffset: -today.getTimezoneOffset(),
     };
 
     const transactionResult = await updateSymptomsTransaction(

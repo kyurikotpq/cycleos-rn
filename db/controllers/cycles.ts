@@ -68,7 +68,7 @@ export const createCycle = async (
   cycleLength: number
 ) => {
   if (dateRange && dateRange.startId && dateRange.endId) {
-    const zoneOffset = fromDateId(dateRange.startId).getTimezoneOffset();
+    const zoneOffset = -1 * fromDateId(dateRange.startId).getTimezoneOffset();
 
     const startDayjs = dayjs(dateRange.startId);
     const startDayjsUnix = startDayjs.valueOf();

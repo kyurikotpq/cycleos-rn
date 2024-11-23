@@ -13,6 +13,7 @@ import { useLoadAssets } from "@/hooks/useLoadAssets";
 import { expoDb } from "@/db/client";
 
 import OnboardingScreen from "./onboarding";
+import { initialize } from "react-native-health-connect";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -24,8 +25,12 @@ export default function RootLayout() {
   // Track if the user is onboarded
   const [isOnboarded, setIsOnboarded] = useState(false);
 
+  
   // Check for onboarding status in SecureStore.
   const checkForOnboarded = async () => {
+    // Initialize the HealthConnect client
+    const _ = await initialize();
+    
     const result = await SecureStore.getItemAsync("isOnboarded");
     setIsOnboarded(JSON.parse(result || "false"));
   };
@@ -52,6 +57,7 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
+        {/* Non-Tab Screens */}
         <Stack.Screen
           name="hormonoscope"
           options={{ title: "Today at a Glance" }}
@@ -60,6 +66,10 @@ export default function RootLayout() {
           name="cycles/add-cycle"
           options={{ title: "Enter Period" }}
         />
+        {/* <Stack.Screen
+          name="cycles/edit-cycle"
+          options={{ title: "Edit Period" }}
+          /> */}
         <Stack.Screen
           name="tracking"
           options={{
@@ -68,6 +78,16 @@ export default function RootLayout() {
             headerShown: false,
           }}
         />
+
+        {/* Health Insights Detail Pages */}
+        <Stack.Screen
+          name="insights/steps"
+          options={{ title: "Steps" }}
+          />
+        <Stack.Screen
+          name="insights/sleep"
+          options={{ title: "Sleep" }}
+          />
       </Stack>
     </ThemeProvider>
   );
