@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "4b1af742-a813-4979-8371-fe44c41aafe2",
+  "id": "6d99e15d-6429-49a0-88b2-18caf11d02b8",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "cycles": {
@@ -35,6 +35,13 @@
           "notNull": false,
           "autoincrement": false
         },
+        "end_zone_offset": {
+          "name": "end_zone_offset",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "period_length": {
           "name": "period_length",
           "type": "integer",
@@ -50,7 +57,15 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "cycles_start_date_unique": {
+          "name": "cycles_start_date_unique",
+          "columns": [
+            "start_date"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -175,7 +190,16 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "exerciseUniqueIndex": {
+          "name": "exerciseUniqueIndex",
+          "columns": [
+            "day_id",
+            "start_datetime"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
         "exercises_day_id_cycle_days_date_id_fk": {
           "name": "exercises_day_id_cycle_days_date_id_fk",
@@ -290,7 +314,16 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "sleepSessionUniqueIndex": {
+          "name": "sleepSessionUniqueIndex",
+          "columns": [
+            "day_id",
+            "start_datetime"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
         "sleep_sessions_day_id_cycle_days_date_id_fk": {
           "name": "sleep_sessions_day_id_cycle_days_date_id_fk",
@@ -363,7 +396,16 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "sleepStageUniqueIndex": {
+          "name": "sleepStageUniqueIndex",
+          "columns": [
+            "start_datetime",
+            "sleep_type"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
         "sleep_stages_sleep_session_id_sleep_sessions_id_fk": {
           "name": "sleep_stages_sleep_session_id_sleep_sessions_id_fk",
@@ -375,7 +417,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },

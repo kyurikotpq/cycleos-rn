@@ -1,17 +1,16 @@
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { db } from "../client";
 import { Step, steps } from "../schema";
-import { insertCycleDayConflictDoNothing } from "./cycle_days";
+import { insertOrphanCycleDay } from "./cycle_days";
+import { Dayjs } from "dayjs";
 
-export const upsertStepsForDay = async (stepObj: Step, zoneOffset: number) => {
+export const upsertStepsForDay = async (stepObj: Step, startDayJS: Dayjs) => {
   await db.transaction(async (tx) => {
     // Ensure Cycle Day exists
-    const cycleDay = {
-      id: stepObj.dayId,
-      zoneOffset,
-    };
-
-    let cycleDayInsertResult = await insertCycleDayConflictDoNothing(cycleDay);
+    let cycleDayInsertResult = await insertOrphanCycleDay(
+      stepObj.dayId,
+      startDayJS.utcOffset()
+    );
 
     // Upsert step count for day
     const _ = await db

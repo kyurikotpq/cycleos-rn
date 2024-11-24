@@ -13,7 +13,6 @@ import dayjs, { Dayjs } from "dayjs";
 
 const tallyAndFormatSleepStages = (
   sessionStartTime: Dayjs,
-  todayZoneOffset: number,
   stages: any[]
 ) => {
   let totalAwake = 0;
@@ -64,7 +63,7 @@ const tallyAndFormatSleepStages = (
       // REM Sleep
       case 6:
         totalRem += durationMinutes;
-        if (!firstRemStageFound) {
+        if (!firstRemStageFound && durationMinutes > 1) {
           remLatency = startTimeDayJS.diff(sessionStartTime, "minutes");
           firstRemStageFound = true;
         }
@@ -83,9 +82,9 @@ const tallyAndFormatSleepStages = (
     formattedSleepStages.push({
       sleepType: stageObj.stage,
       startDateTime: startTimeDayJS.valueOf(),
-      startZoneOffset: todayZoneOffset,
+      startZoneOffset: startTimeDayJS.utcOffset(),
       endDateTime: endTimeDayJS.valueOf(),
-      endZoneOffset: todayZoneOffset,
+      endZoneOffset: endTimeDayJS.utcOffset(),
     });
   });
 
@@ -120,13 +119,12 @@ const tallyAndFormatSleepStages = (
  * IMPORTANT NOTE: `react-native-health-connect` currently does not attach timezone information to the sleep session and sleep stage data. The local device timezone is used. This needs to change when the package updates in future.
  * 
  * @param session 
- * @param todayZoneOffset 
  * @returns {
  *   session: SleepSession object (without database ID), 
  *   stages: SleepStages[] (without database and SleepSession ID) 
  * }
  */
-export const formatSleepSession = (session: any, todayZoneOffset: number) => {
+export const formatSleepSession = (session: any) => {
   const sessionStartTimeDayJS = dayjs(session.startTime);
   const sessionEndTimeDayJS = dayjs(session.endTime);
 
@@ -140,16 +138,15 @@ export const formatSleepSession = (session: any, todayZoneOffset: number) => {
     formattedSleepStages,
   } = tallyAndFormatSleepStages(
     sessionStartTimeDayJS,
-    todayZoneOffset,
     session.stages
   );
 
   const formattedSleepSession = {
     dayId: sessionStartTimeDayJS.format("YYYY-MM-DD"),
     startDateTime: sessionStartTimeDayJS.valueOf(),
-    startZoneOffset: todayZoneOffset,
+    startZoneOffset: sessionStartTimeDayJS.utcOffset(),
     endDateTime: sessionEndTimeDayJS.valueOf(),
-    endZoneOffset: todayZoneOffset,
+    endZoneOffset: sessionEndTimeDayJS.utcOffset(),
     duration: sessionEndTimeDayJS.diff(sessionStartTimeDayJS, "minutes"),
     totalAwake,
     totalRem,

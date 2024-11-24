@@ -18,6 +18,8 @@ import { ThemedText } from "@/components/ThemedText";
 import dayjs, { Dayjs } from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import HealthConnectService from "@/services/HealthConnect";
+import * as SecureStore from "expo-secure-store";
+import { seedSymptomsConstructs } from "@/db/seed";
 
 export default function InsightsScreen() {
   dayjs.extend(relativeTime);
@@ -39,16 +41,17 @@ export default function InsightsScreen() {
       todayDayJS
     );
 
-    if (!force || now.diff(lastRetrievalTime, "minutes") < 5) {
-      handleSyncFinish(lastRetrievalTime);
-    } else {
-      setSyncing(false);
+    if (force || now.diff(lastRetrievalTime, "minutes") > 5) {
+      setSyncing(true);
+      setSyncedText("Syncing...");
       const syncResult = await HealthConnectService.syncAll(todayDayJS);
       handleSyncFinish(now);
 
       if (Object.values(syncResult).includes(false)) {
         console.log("Error in syncing:", syncResult);
       }
+    } else {
+      handleSyncFinish(lastRetrievalTime);
     }
   };
 

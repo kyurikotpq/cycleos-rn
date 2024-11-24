@@ -1,10 +1,13 @@
 import dayjs, { Dayjs } from "dayjs";
+import utc from "dayjs/plugin/utc";
 import { readRecords } from "react-native-health-connect";
 import * as SecureStore from "expo-secure-store";
 import { insertSleepSessionAndStages } from "@/db/controllers/sleep";
 import { formatSleepSession } from "@/util/SleepSession";
 import { upsertStepsForDay } from "@/db/controllers/steps";
 import { insertExercise } from "@/db/controllers/exercise";
+
+dayjs.extend(utc);
 
 class HealthConnectService {
   private static instance: HealthConnectService;
@@ -36,29 +39,27 @@ class HealthConnectService {
   }
 
   async saveHealthRecord(type: string, records: any[]) {
-    const todayZoneOffset = -1 * new Date().getTimezoneOffset();
-
     // Save the health record to the SQLite database, depending on the type
     switch (type) {
       case "SleepSession":
         records.forEach(async (record) => {
-          const { session, stages } = formatSleepSession(
-            record,
-            todayZoneOffset
-          );
+          const { session, stages } = formatSleepSession(record);
 
-          await insertSleepSessionAndStages(session, stages);
+          const startDayJS = dayjs(record.startTime);
+
+          await insertSleepSessionAndStages(session, stages, startDayJS);
         });
         break;
       case "Steps":
         records.forEach(async (record) => {
           // Assumed timezone: User's local timezone
+          const startDayJS = dayjs(record.startTime);
           const formattedRecord = {
-            dayId: dayjs(record.startTime).format("YYYY-MM-DD"),
+            dayId: startDayJS.format("YYYY-MM-DD"),
             steps: record.count,
           };
 
-          await upsertStepsForDay(formattedRecord, todayZoneOffset);
+          await upsertStepsForDay(formattedRecord, startDayJS);
         });
         break;
       case "ExerciseSession":
@@ -68,7 +69,7 @@ class HealthConnectService {
           const startZoneOffset = record.startZoneOffset.totalSeconds / 60;
           const endZoneOffset = record.endZoneOffset.totalSeconds / 60;
 
-          const startDayJS = dayjs(record.startTime);
+          const startDayJS = dayjs(record.startTime).utcOffset(startZoneOffset);
 
           const exerciseSession = {
             dayId: startDayJS.format("YYYY-MM-DD"),

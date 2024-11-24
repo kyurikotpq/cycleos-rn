@@ -21,7 +21,7 @@ export const cycle = sqliteTable("cycles", {
   startDate: integer("start_date").unique(),
   startZoneOffset: integer("start_zone_offset"),
   endDate: integer("end_date"),
-  endZoneOffset: integer("start_zone_offset"),
+  endZoneOffset: integer("end_zone_offset"),
   periodLength: integer("period_length"),
   cycleLength: integer("cycle_length"),
 });

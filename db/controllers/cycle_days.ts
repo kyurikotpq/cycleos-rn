@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import { db } from "../client";
 import { cycle_days } from "../schema";
+import dayjs, { Dayjs } from "dayjs";
 
 export interface CreateCycleDayProps {
   id: string;
@@ -22,5 +23,23 @@ export const upsertCycleDays = async (cycleDays: CreateCycleDayProps[]) =>
       },
     });
 
-export const insertCycleDayConflictDoNothing = async (cycleDay: CreateCycleDayProps) =>
-  await db.insert(cycle_days).values(cycleDay).onConflictDoNothing();
+export const insertCycleDayConflictDoNothing = (
+  cycleDay: CreateCycleDayProps
+) => db.insert(cycle_days).values(cycleDay).onConflictDoNothing();
+
+export const insertOrphanCycleDay = async (
+  dayId: string,
+  zoneOffset?: number
+) => {
+  // Set timezone if specified, else use local device timezone
+  const dayJSObject = zoneOffset
+    ? dayjs(dayId).utcOffset(zoneOffset)
+    : dayjs(dayId);
+
+  const cycleDay = {
+    id: dayId,
+    zoneOffset: dayJSObject.utcOffset(),
+  };
+
+  return insertCycleDayConflictDoNothing(cycleDay);
+};

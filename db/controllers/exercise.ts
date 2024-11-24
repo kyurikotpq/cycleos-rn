@@ -1,17 +1,15 @@
-import { and, eq, inArray, sql } from "drizzle-orm";
 import { db } from "../client";
 import { exercises } from "../schema";
-import { insertCycleDayConflictDoNothing } from "./cycle_days";
+import { insertOrphanCycleDay } from "./cycle_days";
+import { Dayjs } from "dayjs";
 
 export const insertExercise = async (exerciseObj: any, zoneOffset: number) => {
   await db.transaction(async (tx) => {
     // Ensure Cycle Day exists
-    const cycleDay = {
-      id: exerciseObj.dayId,
-      zoneOffset,
-    };
-
-    let cycleDayInsertResult = await insertCycleDayConflictDoNothing(cycleDay);
+    let cycleDayInsertResult = await insertOrphanCycleDay(
+      exerciseObj.dayId,
+      zoneOffset
+    );
 
     // Insert Exercise Record
     const _ = await db

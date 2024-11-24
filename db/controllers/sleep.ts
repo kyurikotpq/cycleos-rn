@@ -1,7 +1,8 @@
 import { and, eq, sql } from "drizzle-orm";
 import { db } from "../client";
 import { sleep_sessions, sleep_stages } from "../schema";
-import { insertCycleDayConflictDoNothing } from "./cycle_days";
+import { insertOrphanCycleDay } from "./cycle_days";
+import { Dayjs } from "dayjs";
 
 const addSessionIdToStage = (sleepSessionId: number, stages: any[]) => {
   // Note: Stages should already be formatted by formatSleepSession in util/SleepSession.ts
@@ -13,16 +14,15 @@ const addSessionIdToStage = (sleepSessionId: number, stages: any[]) => {
 
 export const insertSleepSessionAndStages = async (
   sleepSessionToInsert: any,
-  sleepStagesToInsert: any[]
+  sleepStagesToInsert: any[],
+  startDayJS: Dayjs
 ) => {
   await db.transaction(async (tx) => {
     // Ensure Cycle Day exists
-    const cycleDay = {
-      id: sleepSessionToInsert.dayId,
-      zoneOffset: sleepSessionToInsert.startZoneOffset,
-    };
-
-    let cycleDayInsertResult = await insertCycleDayConflictDoNothing(cycleDay);
+    let cycleDayInsertResult = await insertOrphanCycleDay(
+      sleepSessionToInsert.dayId,
+      startDayJS.utcOffset()
+    );
 
     // Insert Sleep Session
     // Since we're doing onConflictDoUpdate, an "inserted ID" will always be returned

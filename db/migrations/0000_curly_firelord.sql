@@ -3,10 +3,12 @@ CREATE TABLE `cycles` (
 	`start_date` integer,
 	`start_zone_offset` integer,
 	`end_date` integer,
+	`end_zone_offset` integer,
 	`period_length` integer,
 	`cycle_length` integer
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `cycles_start_date_unique` ON `cycles` (`start_date`);--> statement-breakpoint
 CREATE TABLE `cycle_days` (
 	`date_id` text PRIMARY KEY NOT NULL,
 	`cycle_id` integer,
@@ -28,6 +30,7 @@ CREATE TABLE `exercises` (
 	FOREIGN KEY (`day_id`) REFERENCES `cycle_days`(`date_id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `exerciseUniqueIndex` ON `exercises` (`day_id`,`start_datetime`);--> statement-breakpoint
 CREATE TABLE `sleep_sessions` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`day_id` text NOT NULL,
@@ -45,6 +48,7 @@ CREATE TABLE `sleep_sessions` (
 	FOREIGN KEY (`day_id`) REFERENCES `cycle_days`(`date_id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `sleepSessionUniqueIndex` ON `sleep_sessions` (`day_id`,`start_datetime`);--> statement-breakpoint
 CREATE TABLE `sleep_stages` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`sleep_session_id` integer NOT NULL,
@@ -53,9 +57,10 @@ CREATE TABLE `sleep_stages` (
 	`end_datetime` integer NOT NULL,
 	`end_zone_offset` integer NOT NULL,
 	`sleep_type` integer NOT NULL,
-	FOREIGN KEY (`sleep_session_id`) REFERENCES `sleep_sessions`(`id`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`sleep_session_id`) REFERENCES `sleep_sessions`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `sleepStageUniqueIndex` ON `sleep_stages` (`start_datetime`,`sleep_type`);--> statement-breakpoint
 CREATE TABLE `steps` (
 	`day_id` text PRIMARY KEY NOT NULL,
 	`steps` integer NOT NULL,
