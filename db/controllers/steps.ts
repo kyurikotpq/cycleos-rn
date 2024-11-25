@@ -1,8 +1,11 @@
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { db } from "../client";
-import { Step, steps } from "../schema";
+import { Step, steps } from "../schema.ts";
 import { insertOrphanCycleDay } from "./cycle_days";
 import { Dayjs } from "dayjs";
+
+export const getStepsForDay = async (dayId: string) =>
+  await db.select().from(steps).where(eq(steps.dayId, dayId));
 
 export const upsertStepsForDay = async (stepObj: Step, startDayJS: Dayjs) => {
   await db.transaction(async (tx) => {

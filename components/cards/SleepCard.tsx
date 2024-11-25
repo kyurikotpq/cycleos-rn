@@ -1,23 +1,23 @@
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { useEffect, useState } from "react";
-import { View } from "react-native";
 import { router } from "expo-router";
-import { Chip, Card } from "react-native-paper";
+import { Card } from "react-native-paper";
 import dayjs, { Dayjs } from "dayjs";
 import { Ionicons } from "@expo/vector-icons";
 
 interface SleepCardProps {
-  todayDayJS: Dayjs;
+  score: string; // One of the energy construct values from Symptoms.ts
+  sleepTime: Dayjs | null;
+  wakeUpTime: Dayjs | null;
+  duration: number;
 }
 
-export default function SleepCard() {
-  const [TODAY_SLEEP, setTodaySleep] = useState(0);
-  const [lastRetrievalTime, setLastRetrievalTime] = useState<number | null>(
-    null
-  );
-
-  
+export default function SleepCard({
+  score,
+  sleepTime,
+  wakeUpTime,
+  duration,
+}: SleepCardProps) {
   return (
     <Card
       mode="elevated"
@@ -32,59 +32,76 @@ export default function SleepCard() {
         }}
       >
         <ThemedView style={{ flexDirection: "column" }}>
-          <ThemedText variant="title" style={{ marginBottom: 0 }}>
-            88
-          </ThemedText>
-          <ThemedText>Sleep Score</ThemedText>
+          {duration > 0 ? (
+            <>
+              <ThemedText>I'm feeling</ThemedText>
+              <ThemedText variant="title" style={{ marginBottom: 0 }}>
+                {score != "" ? score : "..."}
+              </ThemedText>
+            </>
+          ) : (
+            <>
+              <ThemedText variant="defaultSemiBold">
+                No sleep recorded last night.
+              </ThemedText>
+              <ThemedText variant="link" style={{ fontSize: 14 }}>
+                See previous sleep records ➡️
+              </ThemedText>
+            </>
+          )}
         </ThemedView>
-
-        <ThemedView style={{ flexDirection: "column" }}>
-          <ThemedView
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: 5,
-            }}
-          >
-            <Ionicons
-              name="bed"
-              style={{ marginRight: 5 }}
-              size={20}
-              color="black"
-            />
-            <ThemedText>Sleep Time</ThemedText>
+        {/* If a sleep was recorded last night, show detail */}
+        {duration > 0 && (
+          <ThemedView style={{ flexDirection: "column" }}>
+            <ThemedView
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginBottom: 5,
+              }}
+            >
+              <Ionicons
+                name="bed"
+                style={{ marginRight: 5 }}
+                size={20}
+                color="black"
+              />
+              <ThemedText>{sleepTime?.format("hh:mm A")}</ThemedText>
+            </ThemedView>
+            <ThemedView
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginBottom: 5,
+              }}
+            >
+              <Ionicons
+                name="alarm"
+                style={{ marginRight: 5 }}
+                size={20}
+                color="black"
+              />
+              <ThemedText>{wakeUpTime?.format("hh:mm A")}</ThemedText>
+            </ThemedView>
+            <ThemedView
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginBottom: 5,
+              }}
+            >
+              <Ionicons
+                name="time"
+                style={{ marginRight: 5 }}
+                size={20}
+                color="black"
+              />
+              <ThemedText>{`${Math.floor(duration / 60)}h ${
+                duration % 60
+              }m`}</ThemedText>
+            </ThemedView>
           </ThemedView>
-          <ThemedView
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: 5,
-            }}
-          >
-            <Ionicons
-              name="alarm"
-              style={{ marginRight: 5 }}
-              size={20}
-              color="black"
-            />
-            <ThemedText>Wake Up Time</ThemedText>
-          </ThemedView>
-          <ThemedView
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: 5,
-            }}
-          >
-            <Ionicons
-              name="time"
-              style={{ marginRight: 5 }}
-              size={20}
-              color="black"
-            />
-            <ThemedText>Duration Time</ThemedText>
-          </ThemedView>
-        </ThemedView>
+        )}
       </Card.Content>
     </Card>
   );

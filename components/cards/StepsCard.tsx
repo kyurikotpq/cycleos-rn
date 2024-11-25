@@ -10,38 +10,10 @@ import { Dayjs } from "dayjs";
 
 interface StepsCardProps {
   todaySteps: number;
+  targetSteps: number;
 }
 
-export default function StepsCard({ todaySteps }: StepsCardProps) {
-  const [TARGET_STEPS, setTargetSteps] = useState(1);
-  const [TODAY_STEPS, setTodaySteps] = useState(0);
-
-  const getData = async () => {
-    const targetStepsResult = await SecureStore.getItemAsync("targetSteps");
-    setTargetSteps(JSON.parse(targetStepsResult || "6000"));
-
-    // Get Steps, Exercise, and Sleep data from HealthConnect
-    // since the last retrieval time and store inside the database
-    const stepsResult = await readRecords("Steps", {
-      timeRangeFilter: {
-        operator: "between",
-        startTime: todayDayJS.startOf("day").toISOString(), // @TODO: get since last retrieval time
-        endTime: todayDayJS.endOf("day").toISOString(),
-      },
-      ascendingOrder: false,
-    });
-
-    if (stepsResult?.records.length > 0) {
-      // @TODO: Store the steps data inside the database
-
-      setTodaySteps(stepsResult.records[0].count);
-    }
-  };
-
-  // useEffect(() => {
-  //   getData();
-  // }, []);
-
+export default function StepsCard({ todaySteps, targetSteps }: StepsCardProps) {
   return (
     <Card
       mode="elevated"
@@ -58,14 +30,14 @@ export default function StepsCard({ todaySteps }: StepsCardProps) {
             top: 0,
             bottom: 0,
             left: 0,
-            width: `${(todaySteps / TARGET_STEPS) * 100}%`,
+            width: `${(todaySteps / targetSteps) * 100}%`,
           }}
         />
         <ThemedView style={{ flexDirection: "column" }}>
           <ThemedText variant="title" style={{ marginBottom: 0 }}>
             {todaySteps}
           </ThemedText>
-          <ThemedText>/ {TARGET_STEPS} steps</ThemedText>
+          <ThemedText>/ {targetSteps} steps</ThemedText>
         </ThemedView>
       </Card.Content>
     </Card>

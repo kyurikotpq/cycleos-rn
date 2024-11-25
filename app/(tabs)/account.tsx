@@ -2,7 +2,6 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { StyleSheet, Image, Platform, SafeAreaView } from "react-native";
 import {
   openHealthConnectSettings,
-  openHealthConnectDataManagement,
 } from "react-native-health-connect";
 import { Appbar, List } from "react-native-paper";
 
@@ -11,7 +10,7 @@ export default function TabTwoScreen() {
     <SafeAreaView>
       <Appbar.Header>
         <Appbar.Content
-          title={`Account Settings`}
+          title={`Preferences`}
           titleStyle={{ fontWeight: "bold" }}
         />
       </Appbar.Header>

@@ -131,13 +131,15 @@ export const sleep_sessions = sqliteTable(
     startZoneOffset: integer("start_zone_offset").notNull(),
     endDateTime: integer("end_datetime").notNull(),
     endZoneOffset: integer("end_zone_offset").notNull(),
-    duration: numeric("duration").notNull(),
-    totalAwake: numeric("total_awake").notNull(), // WASO
-    totalRem: numeric("total_rem").notNull(),
-    totalLight: numeric("total_light").notNull(),
-    totalDeep: numeric("total_deep").notNull(),
-    remLatency: numeric("rem_latency"),
-    fragmentationIndex: numeric("fragmentation_index"), // Number of awakenings per hour of sleep
+
+    // TS Typecasting: https://github.com/drizzle-team/drizzle-orm/issues/2681#issuecomment-2282660800
+    duration: numeric("duration").$type<number>().notNull(),
+    totalAwake: numeric("total_awake").$type<number>().notNull(), // WASO
+    totalRem: numeric("total_rem").$type<number>().notNull(),
+    totalLight: numeric("total_light").$type<number>().notNull(),
+    totalDeep: numeric("total_deep").$type<number>().notNull(),
+    remLatency: numeric("rem_latency").$type<number>(),
+    fragmentationIndex: numeric("fragmentation_index").$type<number>(), // Number of awakenings per hour of sleep
   },
   // Ensure the same sleep session isn't imported twice
   (table) => ({

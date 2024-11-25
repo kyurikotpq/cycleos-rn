@@ -66,7 +66,7 @@ export default function InsightsScreen() {
           title={`Life Insights`}
           titleStyle={{ fontWeight: "bold" }}
         />
-        <ThemedText style={{ marginRight: 10 }}>{syncedText}</ThemedText>
+        <ThemedText style={{ fontSize: 14, marginRight: 10 }}>{syncedText}</ThemedText>
         {syncing && (
           <ActivityIndicator animating={syncing} style={{ marginRight: 20 }} />
         )}

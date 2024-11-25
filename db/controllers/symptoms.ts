@@ -1,10 +1,26 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, between, eq, inArray } from "drizzle-orm";
 import { db } from "../client";
 import { symptoms, symptoms_constructs } from "../schema";
 import {
   CreateCycleDayProps,
   insertCycleDayConflictDoNothing,
 } from "./cycle_days";
+
+export const fetchEnergyAtDate = async (date: string) =>
+  await db
+    .select({
+      id: symptoms_constructs.id,
+      type: symptoms_constructs.type,
+      label: symptoms_constructs.label,
+    })
+    .from(symptoms)
+    .innerJoin(
+      symptoms_constructs,
+      eq(symptoms_constructs.id, symptoms.symptomId)
+    )
+    .where(
+      and(eq(symptoms.dayId, date), eq(symptoms_constructs.type, "energy"))
+    );
 
 export const fetchSymptomsAtDate = async (date: string) =>
   await db

@@ -1,6 +1,6 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, gt, desc, sql } from "drizzle-orm";
 import { db } from "../client";
-import { sleep_sessions, sleep_stages } from "../schema";
+import { sleep_sessions, sleep_stages } from "../schema.ts";
 import { insertOrphanCycleDay } from "./cycle_days";
 import { Dayjs } from "dayjs";
 
@@ -61,3 +61,18 @@ export const insertSleepSessionAndStages = async (
       .onConflictDoNothing();
   });
 };
+
+// Get the last sleep session that started after the specified time
+export const getLastNightSleepSession = async (startTime: number) =>
+  await db
+    .select()
+    .from(sleep_sessions)
+    .where(
+      and(
+        gt(sleep_sessions.startDateTime, startTime),
+        // Include sessions that have potential for > 2 sleep cycles
+        gt(sleep_sessions.duration, 180)
+      )
+    )
+    .orderBy(desc(sleep_sessions.startDateTime))
+    .limit(1);

@@ -79,6 +79,7 @@ class HealthConnectService {
             endZoneOffset,
             exerciseType: record.exerciseType,
           };
+          console.log(record)
 
           // Save the exercise record to the SQLite database
           await insertExercise(exerciseSession, startZoneOffset);
