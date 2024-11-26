@@ -5,7 +5,9 @@ import { Text } from "react-native";
 
 type HeatmapCell = {
   date: string | null; // Null for padding cells
-  value?: number; // Optional value for the heatmap intensity
+  text: string | null;
+  opacityValue?: number; // Optional value for the heatmap intensity
+  borderColor?: string;
 };
 
 type Label = {
@@ -32,7 +34,8 @@ export default function YearHeatMap({ year }: YearHeatMapProps) {
   const calculateHeatmapData = () => {
     const firstDayOfYear = dayjs(`${year}-01-01`);
     const lastDayOfYear = dayjs(`${year + 1}-01-01`);
-    setOffsetX(firstDayOfYear.day()); // Offset for the first row
+    const offset = firstDayOfYear.day();
+    setOffsetX(offset); // Offset for the first row
 
     let all_days: HeatmapCell[] = [];
     let all_month_labels: string[] = [];
@@ -45,26 +48,26 @@ export default function YearHeatMap({ year }: YearHeatMapProps) {
       // There should be a better separation between the days and the data coloring
       all_days.push({
         date: currentDate.format("YYYY-MM-DD"),
-        value: Math.random() * 100,
+        text: currentDate.format("D") == "1" ? currentDate.format("D") : null,
+        opacityValue: Math.random(),
       });
 
-      // Check if the current day is the start of a new month
-      if ((numDays + firstDayOfYear.day()) % 7 === 0) {
+      // Check if the current week starts and end in the same month
+      // (Our week starts on Sunday)
+      if (currentDate.day() == 0 || numDays == 0) {
         const month = currentDate.month();
+        const endOfWeek = currentDate.endOf("week");
 
-        if (month !== previousMonth) {
-          all_month_labels.push(dayjs(currentDate).format("MMM"));
-          previousMonth = month;
-        } else {
+        if (month != endOfWeek.month() || currentDate.date() == 1)
+          all_month_labels.push(endOfWeek.format("MMM"));
+        else
           all_month_labels.push("");
-        }
-      }
+      } 
 
       currentDate = currentDate.add(1, "day");
       numDays++;
     }
 
-    console.log(monthLabels);
     setDays(all_days);
     setMonthLabels(all_month_labels);
   };
@@ -81,6 +84,9 @@ export default function YearHeatMap({ year }: YearHeatMapProps) {
       yLabels={monthLabels}
       xLabels={dayLabels}
       offsetX={offsetX}
+      onPress={(cell) => {
+        console.log(cell);
+      }}
     />
   );
 }

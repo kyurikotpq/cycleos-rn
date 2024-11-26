@@ -2,7 +2,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import Dropdown from "@/components/Dropdown";
 import { useState } from "react";
-import { SafeAreaView, ScrollView } from "react-native";
+import { SafeAreaView } from "react-native";
 import YearHeatMap from "@/components/HeatMap/YearHeatMap";
 
 const HEALTH_OPTIONS = [

@@ -43,7 +43,7 @@ export default function DropdownInput({
       style={{
         ...style,
         paddingTop: 10,
-        paddingRight: 48,
+        paddingRight: 44,
         paddingBottom: 10,
         paddingLeft: 16,
         backgroundColor: "#e0e0e0",
@@ -62,7 +62,7 @@ export default function DropdownInput({
       <ThemedText variant="default">{selectedLabel != "" ? selectedLabel : placeholder}</ThemedText>
       <Ionicons
         name="caret-down"
-        size={24}
+        size={20}
         color="black"
         style={{ position: "absolute", right: 10, top: "48%" }}
       />

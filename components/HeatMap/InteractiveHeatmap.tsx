@@ -98,12 +98,6 @@ export default function InteractiveHeatmap({
         setFinalNumColumns(Math.ceil(data.length / numRows));
       }
     }
-
-    if (direction === "horizontal" && offsetX) {
-      data.unshift(...Array(offsetX).fill(null));
-    } else if (direction === "vertical" && finalNumColumns && offsetY) {
-      data.unshift(...Array(offsetY).fill(null));
-    }
   }, [numColumns, numRows]);
 
   const renderCells = () => {
@@ -123,8 +117,6 @@ export default function InteractiveHeatmap({
           <View
             key={`heatmap-suf-label-${index}`}
             style={[
-              // style.itemBox,
-
               {
                 width: cellSize,
                 height: cellSize,
@@ -132,6 +124,8 @@ export default function InteractiveHeatmap({
                 backgroundColor: "transparent",
                 marginRight: CELL_SPACING,
                 marginBottom: CELL_SPACING,
+                display: "flex",
+                justifyContent: "center",
               },
             ]}
           >
@@ -147,14 +141,13 @@ export default function InteractiveHeatmap({
           </View>
         );
       }
-      // Render padding cells
-      if (index < numColumns && index < offset) {
+      // Render padding cells in the first row
+      if (index == 0) {
         for (let i = 0; i < offset; i++) {
           cells.push(
             <View
               key={`heatmap-suf-padding-${i}`}
               style={[
-                // style.itemBox,
                 {
                   width: cellSize,
                   height: cellSize,
@@ -172,18 +165,25 @@ export default function InteractiveHeatmap({
         <Pressable
           key={`heatmap-suf-${index}`}
           style={[
-            // style.itemBox,
             {
               width: cellSize,
               height: cellSize,
-              backgroundColor: "#aaa", // Make this themable
+              backgroundColor: `rgba(100, 100, 100, ${item.opacityValue})`, // Make this themable
               marginRight: CELL_SPACING,
               marginBottom: CELL_SPACING,
-              // opacity: getOpacityByNumber(color.opacitys, item),
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             },
           ]}
-          onPress={onPress ? () => onPress(index) : undefined}
-        />
+          onPress={onPress ? () => onPress(item) : undefined}
+        >
+          {item.text ? (
+            <Text style={{ fontWeight: "bold" }}>{item.text}</Text>
+          ) : (
+            <></>
+          )}
+        </Pressable>
       );
     });
 
