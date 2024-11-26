@@ -4,6 +4,7 @@ import Dropdown from "@/components/Dropdown";
 import { useState } from "react";
 import { SafeAreaView } from "react-native";
 import YearHeatMap from "@/components/HeatMap/YearHeatMap";
+import { Chip } from "react-native-paper";
 
 const HEALTH_OPTIONS = [
   { label: "Total Sleep Time (mins)", value: "sleepDuration" },
@@ -24,7 +25,7 @@ const PHASE_OPTIONS = [
 
 export default function PhaseBasedInsightsScreen() {
   const [healthConstruct, setHealthConstruct] = useState<string>("");
-  const [phase, setPhase] = useState<string>("");
+  const [selectedPhases, setSelectedPhases] = useState<string[]>([]);
   const [heatMapWidthHeight, setHeatMapWidthHeight] = useState({
     width: 0,
     height: 0,
@@ -34,10 +35,18 @@ export default function PhaseBasedInsightsScreen() {
   const handleHealthSelect = (value: string) => {
     setHealthConstruct(value);
   };
-  const handlePhaseSelect = (value: string) => {
-    setPhase(value);
+  const togglePhase = (phase: string) => {
+    if (isPhaseSelected(phase)) {
+      removePhase(phase);
+    } else setSelectedPhases([...selectedPhases, phase]);
   };
 
+  const removePhase = (phase: string) => {
+    setSelectedPhases(selectedPhases.filter((p) => p !== phase));
+  };
+
+  const isPhaseSelected = (phase: string) =>
+    selectedPhases.some((p) => p == phase);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -51,9 +60,8 @@ export default function PhaseBasedInsightsScreen() {
         <ThemedView
           style={{
             display: "flex",
-            maxWidth: "50%",
             marginRight: 20,
-            marginBottom: 20
+            marginBottom: 20,
           }}
         >
           {/* Maybe should use Chip instead, takes up too much screen space */}
@@ -65,13 +73,19 @@ export default function PhaseBasedInsightsScreen() {
             onSelect={handleHealthSelect}
             style={{ marginBottom: 20 }}
           />
-          <Dropdown
-            label="Menstrual Phase"
-            placeholder="Phase"
-            options={PHASE_OPTIONS}
-            selectedLabel={phase}
-            onSelect={handlePhaseSelect}
-          />
+          <ThemedView
+            style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}
+          >
+            {PHASE_OPTIONS.map((phase) => (
+              <Chip
+                style={{ marginRight: 5, marginBottom: 5 }}
+                onPress={() => togglePhase(phase.value)}
+                selected={isPhaseSelected(phase.value)}
+              >
+                {phase.label}
+              </Chip>
+            ))}
+          </ThemedView>
         </ThemedView>
         <YearHeatMap year={year} />
       </ThemedView>

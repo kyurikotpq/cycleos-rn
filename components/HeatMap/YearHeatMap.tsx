@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Text } from "react-native";
 
 type HeatmapCell = {
+  id: string;
   date: string | null; // Null for padding cells
   text: string | null;
   opacityValue?: number; // Optional value for the heatmap intensity
@@ -40,13 +41,13 @@ export default function YearHeatMap({ year }: YearHeatMapProps) {
     let all_days: HeatmapCell[] = [];
     let all_month_labels: string[] = [];
     let currentDate = firstDayOfYear;
-    let previousMonth = -1;
     let numDays = 0;
 
     while (currentDate.isBefore(lastDayOfYear, "day")) {
       // @TODO: Add data coloring, currently it's random
       // There should be a better separation between the days and the data coloring
       all_days.push({
+        id: currentDate.format("YYYY-MM-DD"),
         date: currentDate.format("YYYY-MM-DD"),
         text: currentDate.format("D") == "1" ? currentDate.format("D") : null,
         opacityValue: Math.random(),

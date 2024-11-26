@@ -69,7 +69,7 @@ export default function InteractiveHeatmap({
   const [finalNumRows, setFinalNumRows] = useState(numRows ?? 0);
   const [finalNumColumns, setFinalNumColumns] = useState(numColumns ?? 0);
 
-  const CELL_SPACING = 2;
+  const CELL_SPACING = 4;
 
   useEffect(() => {
     // Either numColumns or numRows should be provided
@@ -100,7 +100,7 @@ export default function InteractiveHeatmap({
     }
   }, [numColumns, numRows]);
 
-  const renderCells = () => {
+  const renderCells = useMemo(() => {
     let cells: any[] = [];
 
     const offset = direction === "horizontal" ? offsetX : offsetY;
@@ -151,6 +151,8 @@ export default function InteractiveHeatmap({
                 {
                   width: cellSize,
                   height: cellSize,
+                  borderWidth: CELL_SPACING / 2,
+                  borderColor: "transparent",
                   backgroundColor: "transparent",
                   marginRight: CELL_SPACING,
                   marginBottom: CELL_SPACING,
@@ -171,6 +173,9 @@ export default function InteractiveHeatmap({
               backgroundColor: `rgba(100, 100, 100, ${item.opacityValue})`, // Make this themable
               marginRight: CELL_SPACING,
               marginBottom: CELL_SPACING,
+              borderWidth: CELL_SPACING / 2,
+              borderColor: item.borderColor ?? "transparent",
+              borderStyle: item.borderStyle ?? "solid",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -189,7 +194,7 @@ export default function InteractiveHeatmap({
 
     console.log("Number of cells", cells.length);
     return cells;
-  };
+  }, [data]);
 
   return (
     <ScrollView
@@ -247,7 +252,7 @@ export default function InteractiveHeatmap({
           ))}
 
         {/* Render cells (with yLabels) */}
-        {renderCells()}
+        {renderCells}
       </View>
     </ScrollView>
   );
