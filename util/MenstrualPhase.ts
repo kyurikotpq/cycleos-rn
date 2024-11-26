@@ -20,7 +20,8 @@ const calculateCyclePhases = (
   // Luteal phase (last 13 days)
   for (let i = 0; i < 13; i++) {
     const date = endDayjs.subtract(i, "day").format("YYYY-MM-DD");
-    phases[date] = "luteal";
+    // Differentiate between mid-luteal (last 6 days) and early-luteal (the first 7 days)
+    phases[date] = i < 6 ? "mid-luteal" : "early-luteal";
   }
 
   // Ovulatory phase (5 days in the middle of the cycle)

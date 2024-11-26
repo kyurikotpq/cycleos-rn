@@ -6,6 +6,7 @@ import {
   insertCycleDayConflictDoNothing,
 } from "./cycle_days";
 
+// @TODO: I will need to account for the case where my watch was loose during the night and recorded my sleep in several different chunks. This means getting sleep duration in a specified time range and caring less about sleep duration. 
 export const fetchEnergyAtDate = async (date: string) =>
   await db
     .select({

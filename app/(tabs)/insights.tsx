@@ -20,6 +20,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import HealthConnectService from "@/services/HealthConnect";
 import * as SecureStore from "expo-secure-store";
 import { seedSymptomsConstructs } from "@/db/seed";
+import IntegratedInsightsScreen from "../insights/integrated";
 
 export default function InsightsScreen() {
   dayjs.extend(relativeTime);
@@ -66,7 +67,9 @@ export default function InsightsScreen() {
           title={`Life Insights`}
           titleStyle={{ fontWeight: "bold" }}
         />
-        <ThemedText style={{ fontSize: 14, marginRight: 10 }}>{syncedText}</ThemedText>
+        <ThemedText style={{ fontSize: 14, marginRight: 10 }}>
+          {syncedText}
+        </ThemedText>
         {syncing && (
           <ActivityIndicator animating={syncing} style={{ marginRight: 20 }} />
         )}
@@ -74,7 +77,12 @@ export default function InsightsScreen() {
       <SegmentedButtons
         value={screen}
         onValueChange={setScreen}
-        style={{ margin: 20 }}
+        style={{
+          marginTop: 20,
+          marginRight: 20,
+          marginBottom: 30,
+          marginLeft: 20,
+        }}
         buttons={[
           {
             value: "health",
@@ -95,15 +103,12 @@ export default function InsightsScreen() {
           />
         }
       >
-        <Surface elevation={0} style={{ padding: 20 }}>
+        <Surface
+          elevation={0}
+          style={{ paddingBottom: 20, paddingRight: 20, paddingLeft: 20 }}
+        >
           {screen === "health" && <HealthInsightsScreen />}
-          {screen === "trends" && (
-            <Ionicons
-              name="stats-chart"
-              size={300}
-              style={styles.headerImage}
-            />
-          )}
+          {screen === "trends" && <IntegratedInsightsScreen />}
         </Surface>
       </ScrollView>
     </SafeAreaView>

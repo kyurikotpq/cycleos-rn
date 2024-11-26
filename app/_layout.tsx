@@ -1,7 +1,3 @@
-import {
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
 import * as SecureStore from "expo-secure-store";
@@ -14,6 +10,18 @@ import { expoDb } from "@/db/client";
 
 import OnboardingScreen from "./onboarding";
 import { initialize } from "react-native-health-connect";
+
+import { MD3LightTheme as DefaultTheme, PaperProvider } from 'react-native-paper';
+
+// @TODO Fake theming to get over it
+const theme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: 'tomato',
+    secondary: 'yellow',
+  },
+};
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -53,7 +61,7 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={DefaultTheme}>
+    <PaperProvider theme={theme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
@@ -81,14 +89,14 @@ export default function RootLayout() {
 
         {/* Health Insights Detail Pages */}
         <Stack.Screen
-          name="insights/steps"
+          name="insights/health/steps"
           options={{ title: "Steps" }}
           />
         <Stack.Screen
-          name="insights/sleep"
+          name="insights/health/sleep"
           options={{ title: "Sleep" }}
           />
       </Stack>
-    </ThemeProvider>
+    </PaperProvider>
   );
 }

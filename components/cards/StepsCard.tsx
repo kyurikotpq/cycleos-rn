@@ -5,7 +5,6 @@ import { View } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { router } from "expo-router";
 import { Card } from "react-native-paper";
-import { readRecords, StepsRecord } from "react-native-health-connect";
 import { Dayjs } from "dayjs";
 
 interface StepsCardProps {
@@ -18,7 +17,7 @@ export default function StepsCard({ todaySteps, targetSteps }: StepsCardProps) {
     <Card
       mode="elevated"
       style={{ marginBottom: 20, overflow: "hidden" }}
-      onPress={() => router.push("/insights/steps")}
+      onPress={() => router.push("/insights/health/steps")}
     >
       <Card.Content
         style={{ flexDirection: "row", justifyContent: "space-between" }}

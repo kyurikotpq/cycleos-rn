@@ -12,14 +12,16 @@ import { getStepsForDay } from "@/db/controllers/steps";
 export default function HealthInsightsScreen() {
   const todayDayJS = useMemo(() => dayjs(), []);
 
-  const [TARGET_STEPS, setTargetSteps] = useState(1);
-  const [TODAY_STEPS, setTodaySteps] = useState(0);
-
+  // Summary Statistics for Sleep Data
   const [TODAY_SLEEP_SCORE, setTodaySleepScore] = useState("");
   const [TODAY_SLEEP_DURATION, setTodaySleepDuration] = useState(0);
   const [TODAY_SLEEP_TIME, setTodaySleepTime] = useState<Dayjs | null>(null);
   const [TODAY_SLEEP_WAKEUP, setTodayWakeup] = useState<Dayjs | null>(null);
 
+  // Summary Statistics for Steps Data
+  const [TARGET_STEPS, setTargetSteps] = useState(1);
+  const [TODAY_STEPS, setTodaySteps] = useState(0);
+  
   const getSleepData = async () => {
     // Get last night's sleep data
     const sleepResult = await getLastNightSleepSession(

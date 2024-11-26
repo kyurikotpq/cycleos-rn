@@ -22,7 +22,7 @@ export default function SleepCard({
     <Card
       mode="elevated"
       style={{ marginBottom: 20, overflow: "hidden" }}
-      onPress={() => router.push("/insights/sleep")}
+      onPress={() => router.push("/insights/health/sleep")}
     >
       <Card.Content
         style={{
