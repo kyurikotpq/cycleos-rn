@@ -96,6 +96,14 @@ export default function RootLayout() {
           name="insights/health/sleep"
           options={{ title: "Sleep" }}
           />
+        <Stack.Screen
+          name="insights/integrated/phase"
+          options={{ title: "Phase-based Insights" }}
+          />
+        <Stack.Screen
+          name="insights/integrated/correlation"
+          options={{ title: "Integrated Insights" }}
+          />
       </Stack>
     </PaperProvider>
   );

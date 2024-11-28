@@ -5,31 +5,12 @@ import { useState } from "react";
 import { SafeAreaView } from "react-native";
 import YearHeatMap from "@/components/HeatMap/YearHeatMap";
 import { Chip } from "react-native-paper";
+import { HEALTH_OPTIONS, PHASE_OPTIONS } from "@/constants/Insights";
 
-const HEALTH_OPTIONS = [
-  { label: "Total Sleep Time (mins)", value: "sleepDuration" },
-  { label: "Total Time Awake (%)", value: "totalAwake" },
-  { label: "Total REM (%)", value: "totalREM" },
-  { label: "Total Deep Sleep (%)", value: "totalDeep" },
-  { label: "REM Latency (mins)", value: "remLatency" },
-  { label: "Exercise Duration (mins)", value: "exerciseDuration" },
-  { label: "Steps", value: "steps" },
-];
-const PHASE_OPTIONS = [
-  { label: "Menstrual", value: "menstrual" },
-  { label: "Follicular", value: "follicular" },
-  { label: "Ovulation", value: "ovulation" },
-  { label: "Early Luteal", value: "early-luteal" },
-  { label: "Mid Luteal", value: "mid-luteal" },
-];
-
+// How does one's sleep and exercise vary across the cycle?
 export default function PhaseBasedInsightsScreen() {
   const [healthConstruct, setHealthConstruct] = useState<string>("");
   const [selectedPhases, setSelectedPhases] = useState<string[]>([]);
-  const [heatMapWidthHeight, setHeatMapWidthHeight] = useState({
-    width: 0,
-    height: 0,
-  });
   const [year, setYear] = useState<number>(new Date().getFullYear());
 
   const handleHealthSelect = (value: string) => {
@@ -64,7 +45,6 @@ export default function PhaseBasedInsightsScreen() {
             marginBottom: 20,
           }}
         >
-          {/* Maybe should use Chip instead, takes up too much screen space */}
           <Dropdown
             label="Health Item"
             placeholder="Health Item"

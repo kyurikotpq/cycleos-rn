@@ -17,7 +17,22 @@ export default function IntegratedInsightsScreen() {
           </ThemedText>
         </Card.Content>
       </Card>
-      <Card mode="elevated" style={{ marginBottom: 20 }}>
+      <Card
+        mode="elevated"
+        style={{ marginBottom: 20 }}
+        onPress={() => router.push("/insights/integrated/correlation")}
+      >
+        <Card.Content>
+          <ThemedText variant="subtitle">
+            Do your exercise habits affect your sleep (or vice versa)?
+          </ThemedText>
+        </Card.Content>
+      </Card>
+      <Card
+        mode="elevated"
+        style={{ marginBottom: 20 }}
+        // onPress={() => router.push("/insights/integrated/symptoms")}
+      >
         <Card.Content>
           <ThemedText variant="subtitle">
             How do your menstrual symptoms vary with sleep & exercise?
