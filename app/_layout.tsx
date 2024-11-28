@@ -31,7 +31,7 @@ export default function RootLayout() {
   const { isLoaded } = useLoadAssets();
 
   // Track if the user is onboarded
-  const [isOnboarded, setIsOnboarded] = useState(false);
+  const [isOnboarded, setIsOnboarded] = useState(true);
 
   
   // Check for onboarding status in SecureStore.
