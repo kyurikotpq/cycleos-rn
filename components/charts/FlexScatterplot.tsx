@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { ScrollView, View } from "react-native";
 import {
   Canvas,
   Circle,
@@ -9,6 +9,8 @@ import {
   useFonts,
 } from "@shopify/react-native-skia";
 import { useState } from "react";
+import { Avatar, Card, Chip } from "react-native-paper";
+import { ThemedText } from "../ThemedText";
 
 interface ScatterplotProps {
   data: any[]; // array of objects with at least `xKey`, `yKey`, and `colorKey
@@ -22,12 +24,17 @@ interface ScatterplotProps {
   yMin?: number;
   yMax?: number;
 
+  numXTicks?: number;
+  numYTicks?: number;
+  style?: any;
+
   // e.g. { "menstrual": { color: "red", "label": "Menstrual"}, ... }
   colorMap: { [key: string]: { color: string; label: string } };
   title: string;
 
   radius?: number;
   legend?: boolean;
+  legendTitle?: string;
 }
 
 export default function FlexScatterplot({
@@ -42,15 +49,21 @@ export default function FlexScatterplot({
   yMin = 0,
   yMax,
 
+  numYTicks = 10,
+  numXTicks = 10,
+
   // @TODO
+  style,
   title,
   legend,
+  legendTitle,
 }: ScatterplotProps) {
-  const [width, setWidth] = useState(300); // Canvas width
   const [height, setHeight] = useState(300); // Canvas width
-  const [dimensions, setDimensions] = useState({ width, height });
   const padding = 40; // Padding around the plot area
-  const FONT_SIZE = 16;
+  const FONT_SIZE = 14;
+  const xTickSpacing = FONT_SIZE * 3;
+  const canvasWidth =
+    numXTicks * xTickSpacing + 2 * padding + (padding + 1.5 * FONT_SIZE);
 
   // Define axis limits based on data if not provided
   const xValues = data.map((d) => d[xKey]);
@@ -62,7 +75,9 @@ export default function FlexScatterplot({
 
   // Helper function to scale data points to canvas size
   const scaleX = (value: number) =>
-    ((value - xMin) / (xMax - xMin)) * (width - 2 * padding) + padding;
+    ((value - xMin) / (xMax - xMin)) * (canvasWidth - 2 * padding) +
+    padding +
+    1.5 * FONT_SIZE;
   const scaleY = (value: number) =>
     height -
     (((value - yMin) / (yMax - yMin)) * (height - 2 * padding) + padding);
@@ -73,20 +88,12 @@ export default function FlexScatterplot({
   };
 
   // Ticks
-  const xTicks = 5; // Number of x-axis ticks
-  const yTicks = 5; // Number of y-axis ticks
   const getTicks = (min: number, max: number, numTicks: number) => {
     const step = (max - min) / (numTicks - 1);
-    return Array.from({ length: numTicks }, (_, i) => min + i * step);
+    return Array.from({ length: numTicks }, (_, i) =>
+      parseFloat((min + i * step).toFixed(2))
+    );
   };
-
-  // Extract unique, sorted values for axes
-  const uniqueSortedX = [...new Set(data.map((d) => d[xKey]))].sort(
-    (a, b) => a - b
-  );
-  const uniqueSortedY = [...new Set(data.map((d) => d[yKey]))].sort(
-    (a, b) => a - b
-  );
 
   // @TODO: Update fonts later
   const fontMgr = useFonts({
@@ -104,85 +111,123 @@ export default function FlexScatterplot({
   const font = matchFont(fontStyle, fontMgr);
 
   return (
-    <View
-      style={{ flex: 1, justifyContent: "center", backgroundColor: "#eee" }}
-      onLayout={(event) => {
-        event.target.measure((x, y, width, height, pageX, pageY) => {
-          setWidth(width);
-          setHeight(height);
-          setDimensions({ width, height });
-        });
-      }}
-    >
-      <Canvas style={{ flex: 1 }}>
-        {/* Draw X and Y axes */}
-        <Line
-          p1={{ x: padding, y: padding - 10 }}
-          p2={{ x: padding, y: height - padding }}
-          color="black"
-          strokeWidth={2}
-        />
-        <Line
-          p1={{ x: padding, y: height - padding }}
-          p2={{ x: width - padding + 10, y: height - padding }}
-          color="black"
-          strokeWidth={2}
-        />
+    <View style={{ ...style, flex: 1 }}>
+      <ScrollView
+        horizontal={true}
+        style={{
+          marginBottom: 10,
+          flex: 1,
+        }}
+        onLayout={(event) => {
+          event.target.measure((x, y, width, height, pageX, pageY) => {
+            setHeight(height);
+          });
+        }}
+      >
+        <Canvas style={{ flex: 1, width: canvasWidth }}>
+          {/* Draw Y-Axis */}
+          <Line
+            p1={{ x: padding + 1.5 * FONT_SIZE, y: padding - 10 }}
+            p2={{ x: padding + 1.5 * FONT_SIZE, y: height - padding }}
+            color="black"
+            strokeWidth={2}
+          />
+          {/* Draw X-Axis */}
+          <Line
+            p1={{ x: padding + 1.5 * FONT_SIZE, y: height - padding }}
+            p2={{ x: canvasWidth - 10, y: height - padding }}
+            color="black"
+            strokeWidth={2}
+          />
 
-        {/* X-axis ticks and labels */}
-        {uniqueSortedX.map((tick, index) => {
-          const x = scaleX(tick);
-          return (
-            <>
-              <Line
-                key={`x-tick-${index}`}
-                p1={{ x, y: height - padding }}
-                p2={{ x, y: height - padding + 7 }}
-                color="black"
-                strokeWidth={2}
-              />
-              <Text
-                x={x - (FONT_SIZE / 3)}
-                y={height - (padding / 3)}
-                text={tick.toString()}
-                color="black"
-                font={font}
-              />
-            </>
-          );
-        })}
+          {/* X-axis ticks and labels */}
+          {getTicks(xMin, xMax, numXTicks).map((tick, index) => {
+            const x = scaleX(tick);
+            return (
+              <>
+                <Line
+                  key={`x-tick-${index}`}
+                  p1={{ x, y: height - padding }}
+                  p2={{ x, y: height - padding + 7 }}
+                  color="black"
+                  strokeWidth={2}
+                />
+                <Text
+                  key={`x-tick-label-${index}`}
+                  x={x - FONT_SIZE / 3}
+                  y={height - padding / 3}
+                  text={tick.toString()}
+                  color="black"
+                  font={font}
+                />
+              </>
+            );
+          })}
 
-        {/* Y-axis ticks and labels */}
-        {uniqueSortedY.map((tick, index) => {
-          const y = scaleY(tick);
-          return (
-            <>
-              <Line
-                key={`y-tick-${index}`}
-                p1={{ x: padding - 7, y }}
-                p2={{ x: padding, y }}
-                color="black"
-                strokeWidth={2}
-              />
-              <Text
-                x={padding / 3}
-                y={y + (FONT_SIZE / 3)}
-                text={tick.toString()}
-                color="#000"
-                font={font}
-              />
-            </>
-          );
-        })}
+          {/* Y-axis ticks and labels */}
+          {getTicks(yMin, yMax, numYTicks).map((tick, index) => {
+            const y = scaleY(tick);
+            return (
+              <>
+                <Line
+                  key={`y-tick-${index}`}
+                  p1={{ x: padding + 1.5 * FONT_SIZE - 7, y }}
+                  p2={{ x: padding + 1.5 * FONT_SIZE, y }}
+                  color="black"
+                  strokeWidth={2}
+                />
+                <Text
+                  key={`y-tick-label-${index}`}
+                  x={padding / 3}
+                  y={y + FONT_SIZE / 3}
+                  text={tick.toString()}
+                  color="#000"
+                  font={font}
+                />
+              </>
+            );
+          })}
 
-        {/* Render data points */}
-        {data.map((point, index) => {
-          const x = scaleX(point[xKey]);
-          const y = scaleY(point[yKey]);
-          const color = colorMap[point[colorKey]]?.color || "grey";
-          return renderShape(x, y, color, index);
-        })}
-      </Canvas>
+          {/* Render data points */}
+          {data.map((point, index) => {
+            const x = scaleX(point[xKey]);
+            const y = scaleY(point[yKey]);
+            const color = colorMap[point[colorKey]]?.color || "grey";
+            return renderShape(x, y, color, index);
+          })}
+        </Canvas>
+      </ScrollView>
+
+      {/* Render legend */}
+      {legend && (
+        <Card mode="contained">
+          <Card.Content
+            style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}
+          >
+            <ThemedText
+              variant="defaultSemiBold"
+              style={{ marginRight: 10, width: "100%" }}
+            >
+              {legendTitle ?? "Legend"}
+            </ThemedText>
+            {Object.entries(colorMap).map(([key, { color, label }]) => (
+              <Chip
+                compact={true}
+                key={key}
+                avatar={
+                  <Avatar.Text
+                    style={{ backgroundColor: color, width: 10, height: 10 }}
+                    label=""
+                  />
+                }
+                style={{ backgroundColor: "transparent", marginRight: 10 }}
+              >
+                {label}
+              </Chip>
+            ))}
+          </Card.Content>
+        </Card>
+      )}
     </View>
   );
 }
