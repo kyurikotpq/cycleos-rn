@@ -31,10 +31,7 @@ interface ScatterplotProps {
   // e.g. { "menstrual": { color: "red", "label": "Menstrual"}, ... }
   colorMap: { [key: string]: { color: string; label: string } };
   title: string;
-
-  radius?: number;
-  legend?: boolean;
-  legendTitle?: string;
+  radius?: number; // Radius of the data points
 }
 
 export default function FlexScatterplot({
@@ -55,8 +52,6 @@ export default function FlexScatterplot({
   // @TODO
   style,
   title,
-  legend,
-  legendTitle,
 }: ScatterplotProps) {
   const [height, setHeight] = useState(300); // Canvas width
   const padding = 40; // Padding around the plot area
@@ -118,6 +113,7 @@ export default function FlexScatterplot({
           marginBottom: 10,
           flex: 1,
         }}
+        // Resize the canvas to fit the available height
         onLayout={(event) => {
           event.target.measure((x, y, width, height, pageX, pageY) => {
             setHeight(height);
@@ -193,41 +189,10 @@ export default function FlexScatterplot({
             const x = scaleX(point[xKey]);
             const y = scaleY(point[yKey]);
             const color = colorMap[point[colorKey]]?.color || "grey";
-            return renderShape(x, y, color, index);
+            return renderShape(x, y, color, `${index}`);
           })}
         </Canvas>
       </ScrollView>
-
-      {/* Render legend */}
-      {legend && (
-        <Card mode="contained">
-          <Card.Content
-            style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}
-          >
-            <ThemedText
-              variant="defaultSemiBold"
-              style={{ marginRight: 10, width: "100%" }}
-            >
-              {legendTitle ?? "Legend"}
-            </ThemedText>
-            {Object.entries(colorMap).map(([key, { color, label }]) => (
-              <Chip
-                compact={true}
-                key={key}
-                avatar={
-                  <Avatar.Text
-                    style={{ backgroundColor: color, width: 10, height: 10 }}
-                    label=""
-                  />
-                }
-                style={{ backgroundColor: "transparent", marginRight: 10 }}
-              >
-                {label}
-              </Chip>
-            ))}
-          </Card.Content>
-        </Card>
-      )}
     </View>
   );
 }
