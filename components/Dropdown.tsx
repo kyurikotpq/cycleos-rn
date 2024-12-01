@@ -5,7 +5,7 @@ import { Menu, TextInput } from "react-native-paper";
 import { ThemedText } from "./ThemedText";
 import { Ionicons } from "@expo/vector-icons";
 
-interface Options {
+interface Option {
   label: string;
   value: string;
 }
@@ -16,8 +16,8 @@ interface DropdownInputProps {
   mode?: "flat" | "outlined";
   disabled?: boolean;
   error?: boolean;
-  onSelect: (value: string) => void;
-  options: Options[];
+  onSelect: (option: Option) => void;
+  options: Option[];
   style?: any;
 }
 
@@ -59,7 +59,9 @@ export default function DropdownInput({
       }}
       onPress={() => setShowMenu(true)}
     >
-      <ThemedText variant="default">{selectedLabel != "" ? selectedLabel : placeholder}</ThemedText>
+      <ThemedText variant="default">
+        {selectedLabel != "" ? selectedLabel : placeholder}
+      </ThemedText>
       <Ionicons
         name="caret-down"
         size={20}
@@ -71,14 +73,14 @@ export default function DropdownInput({
         onDismiss={() => setShowMenu(false)}
         anchor={anchorPosition}
       >
-        {options.map(({ label, value }) => (
+        {options.map((option: Option) => (
           <Menu.Item
-            key={value}
+            key={option.value}
             onPress={() => {
-              onSelect(value);
+              onSelect(option);
               setShowMenu(false);
             }}
-            title={label}
+            title={option.label}
           />
         ))}
       </Menu>

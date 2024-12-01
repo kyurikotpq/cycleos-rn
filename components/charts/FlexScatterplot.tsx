@@ -8,7 +8,7 @@ import {
   matchFont,
   useFonts,
 } from "@shopify/react-native-skia";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Avatar, Card, Chip } from "react-native-paper";
 import { ThemedText } from "../ThemedText";
 
@@ -29,6 +29,7 @@ interface ScatterplotProps {
   style?: any;
 
   // e.g. { "menstrual": { color: "red", "label": "Menstrual"}, ... }
+  // Should have a "default" key (with color and label values) for the default color
   colorMap: { [key: string]: { color: string; label: string } };
   title: string;
   radius?: number; // Radius of the data points
@@ -49,16 +50,13 @@ export default function FlexScatterplot({
   numYTicks = 10,
   numXTicks = 10,
 
-  // @TODO
   style,
+  // @TODO
   title,
 }: ScatterplotProps) {
   const [height, setHeight] = useState(300); // Canvas width
   const padding = 40; // Padding around the plot area
   const FONT_SIZE = 14;
-  const xTickSpacing = FONT_SIZE * 3;
-  const canvasWidth =
-    numXTicks * xTickSpacing + 2 * padding + (padding + 1.5 * FONT_SIZE);
 
   // Define axis limits based on data if not provided
   const xValues = data.map((d) => d[xKey]);
@@ -68,25 +66,43 @@ export default function FlexScatterplot({
   if (yMin == undefined) yMin = Math.min(...yValues);
   if (yMax == undefined) yMax = Math.max(...yValues);
 
+  const [originX, setOriginX] = useState(
+    padding + `${yMax.toFixed(2)}`.length * 1.5
+  );
+
+  const [xTickSpacing, setXTickSpacing] = useState(
+    `${xMax.toFixed(1)}`.length * (FONT_SIZE / 1.5)
+  );
+  const [canvasWidth, setCanvasWidth] = useState(
+    numXTicks * xTickSpacing + 2 * padding + originX
+  );
+
   // Helper function to scale data points to canvas size
   const scaleX = (value: number) =>
-    ((value - xMin) / (xMax - xMin)) * (canvasWidth - 2 * padding) +
-    padding +
-    1.5 * FONT_SIZE;
+    ((value - xMin) / (xMax - xMin)) * (canvasWidth - 2 * padding) + originX;
   const scaleY = (value: number) =>
     height -
     (((value - yMin) / (yMax - yMin)) * (height - 2 * padding) + padding);
 
   // Function to render different shapes
   const renderShape = (x: number, y: number, color: string, key: string) => {
-    return <Circle key={key} cx={x} cy={y} r={radius / 2} color={color} />;
+    return (
+      <Circle
+        key={key}
+        cx={x}
+        cy={y}
+        r={radius / 2}
+        color={color}
+        opacity={0.7}
+      />
+    );
   };
 
   // Ticks
   const getTicks = (min: number, max: number, numTicks: number) => {
     const step = (max - min) / (numTicks - 1);
     return Array.from({ length: numTicks }, (_, i) =>
-      parseFloat((min + i * step).toFixed(2))
+      parseFloat((min + i * step).toFixed(1))
     );
   };
 
@@ -123,14 +139,14 @@ export default function FlexScatterplot({
         <Canvas style={{ flex: 1, width: canvasWidth }}>
           {/* Draw Y-Axis */}
           <Line
-            p1={{ x: padding + 1.5 * FONT_SIZE, y: padding - 10 }}
-            p2={{ x: padding + 1.5 * FONT_SIZE, y: height - padding }}
+            p1={{ x: originX, y: padding - 10 }}
+            p2={{ x: originX, y: height - padding }}
             color="black"
             strokeWidth={2}
           />
           {/* Draw X-Axis */}
           <Line
-            p1={{ x: padding + 1.5 * FONT_SIZE, y: height - padding }}
+            p1={{ x: originX, y: height - padding }}
             p2={{ x: canvasWidth - 10, y: height - padding }}
             color="black"
             strokeWidth={2}
@@ -167,14 +183,14 @@ export default function FlexScatterplot({
               <>
                 <Line
                   key={`y-tick-${index}`}
-                  p1={{ x: padding + 1.5 * FONT_SIZE - 7, y }}
-                  p2={{ x: padding + 1.5 * FONT_SIZE, y }}
+                  p1={{ x: originX - 7, y }}
+                  p2={{ x: originX, y }}
                   color="black"
                   strokeWidth={2}
                 />
                 <Text
                   key={`y-tick-label-${index}`}
-                  x={padding / 3}
+                  x={0}
                   y={y + FONT_SIZE / 3}
                   text={tick.toString()}
                   color="#000"
@@ -188,7 +204,8 @@ export default function FlexScatterplot({
           {data.map((point, index) => {
             const x = scaleX(point[xKey]);
             const y = scaleY(point[yKey]);
-            const color = colorMap[point[colorKey]]?.color || "grey";
+            const color =
+              colorMap[point[colorKey]]?.color || colorMap.default.color;
             return renderShape(x, y, color, `${index}`);
           })}
         </Canvas>

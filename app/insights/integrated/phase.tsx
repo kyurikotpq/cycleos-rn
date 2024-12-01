@@ -5,7 +5,7 @@ import { useState } from "react";
 import { SafeAreaView } from "react-native";
 import YearHeatMap from "@/components/HeatMap/YearHeatMap";
 import { Chip } from "react-native-paper";
-import { HEALTH_OPTIONS, PHASE_OPTIONS } from "@/constants/Insights";
+import { HEALTH_OPTIONS, PHASE_OPTIONS } from "@/constants/InsightsOptions";
 
 // How does one's sleep and exercise vary across the cycle?
 export default function PhaseBasedInsightsScreen() {
