@@ -79,7 +79,6 @@ class HealthConnectService {
             endZoneOffset,
             exerciseType: record.exerciseType,
           };
-          console.log(record)
 
           // Save the exercise record to the SQLite database
           await insertExercise(exerciseSession, startZoneOffset);
@@ -113,7 +112,17 @@ class HealthConnectService {
       lastRetrievalTime,
       todayDayJS.endOf("day")
     );
-    this.saveHealthRecord(type, records);
+
+    /**
+     * Only save the records and update lastRetrievalTime if there are any
+     * This accounts for situations where there are no new records because the user hasn't
+     * visited their other health apps first, meaning no new data is transferred
+     * from the wearable to HealthConnect yet
+     */
+    if (records.length > 0) {
+      await this.saveHealthRecord(type, records);
+      this.updateLastRetrievalTime(type);
+    }
   }
 
   async syncAll(todayDayJS: Dayjs) {
@@ -126,9 +135,6 @@ class HealthConnectService {
     // Check if the data was successfully fetched and saved
     let status: any = {};
     results.forEach((result, index) => {
-      if (result.status === "fulfilled") {
-        this.updateLastRetrievalTime(this.HC_TYPES[index]);
-      }
       status[this.HC_TYPES[index]] = result.status === "fulfilled";
     });
 
