@@ -50,6 +50,7 @@ export const symptoms_constructs = sqliteTable(
     id: integer("id").primaryKey().notNull(),
     type: text("type", { length: 20 }).notNull(), // menstruation, pain, mood, skin, energy
     label: text("label", { length: 50 }).notNull(),
+    isNegative: integer("is_negative", { mode: "boolean" }).notNull(),
   },
   (table) => ({
     constructUniqueIndex: uniqueIndex("constructUniqueIndex").on(
@@ -131,6 +132,15 @@ export const sleep_sessions = sqliteTable(
     startZoneOffset: integer("start_zone_offset").notNull(),
     endDateTime: integer("end_datetime").notNull(),
     endZoneOffset: integer("end_zone_offset").notNull(),
+
+    // "By definition, a nap is any sleep period with a duration of less than 50% of the average major sleep period of an individual." (https://pmc.ncbi.nlm.nih.gov/articles/PMC8238550/)
+    // Since the average major sleep period is 7-9 hours, we'll <=4 hours as the
+    // duration range for a session to be considered a nap
+    isNap: integer("is_nap", { mode: "boolean" }).notNull(),
+
+    // Whether the sleep session *starts* between 6am and 7pm local time
+    // (Sunrise and sunset times vary by latitude and time of year, so this is a rough estimate)
+    isDaytime: integer("is_daytime", { mode: "boolean" }).notNull(),
 
     // TS Typecasting: https://github.com/drizzle-team/drizzle-orm/issues/2681#issuecomment-2282660800
     duration: numeric("duration").$type<number>().notNull(),

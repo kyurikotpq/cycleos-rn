@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "6d99e15d-6429-49a0-88b2-18caf11d02b8",
+  "id": "02ac3eba-6f85-47e5-86dc-886a8aeb5d10",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "cycles": {
@@ -259,6 +259,20 @@
         },
         "end_zone_offset": {
           "name": "end_zone_offset",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "is_nap": {
+          "name": "is_nap",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "is_daytime": {
+          "name": "is_daytime",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -542,6 +556,13 @@
         "label": {
           "name": "label",
           "type": "text(50)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "is_negative": {
+          "name": "is_negative",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false

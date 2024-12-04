@@ -1,77 +1,82 @@
-export type SymptomItem = { type: string; label: string; id: number };
+export type SymptomItem = {
+  id: number;
+  type: string;
+  label: string;
+  isNegative: boolean;
+};
 export type SymptomCategory = { label: string; items: SymptomItem[] };
 
 const MENSTRUATION_ITEMS = [
-  { id: 1, type: "menstruation", label: "Light" },
-  { id: 2, type: "menstruation", label: "Medium" },
-  { id: 3, type: "menstruation", label: "Heavy" },
-  { id: 4, type: "menstruation", label: "Super Heavy" },
+  { id: 1, type: "menstruation", label: "Light", isNegative: false },
+  { id: 2, type: "menstruation", label: "Medium", isNegative: false },
+  { id: 3, type: "menstruation", label: "Heavy", isNegative: true },
+  { id: 4, type: "menstruation", label: "Super Heavy", isNegative: true },
 ];
 
 const PAIN_ITEMS = [
-  { id: 5, type: "pain", label: "Pain free" },
-  { id: 6, type: "pain", label: "Cramps" },
-  { id: 7, type: "pain", label: "Headache" },
-  { id: 8, type: "pain", label: "Migraine" },
-  { id: 9, type: "pain", label: "Migraine with aura" },
-  { id: 10, type: "pain", label: "Breast Tenderness" },
-  { id: 11, type: "pain", label: "Lower Back" },
-  { id: 12, type: "pain", label: "Muscle ache" },
-  { id: 13, type: "pain", label: "Joint ache" },
-  { id: 14, type: "pain", label: "Vulvar" },
+  { id: 5, type: "pain", label: "Pain free", isNegative: false },
+  { id: 6, type: "pain", label: "Cramps", isNegative: true },
+  { id: 7, type: "pain", label: "Headache", isNegative: true },
+  { id: 8, type: "pain", label: "Migraine", isNegative: true },
+  { id: 9, type: "pain", label: "Migraine with aura", isNegative: true },
+  { id: 10, type: "pain", label: "Breast Tenderness", isNegative: true },
+  { id: 11, type: "pain", label: "Lower Back", isNegative: true },
+  { id: 12, type: "pain", label: "Muscle ache", isNegative: true },
+  { id: 13, type: "pain", label: "Joint ache", isNegative: true },
+  { id: 14, type: "pain", label: "Vulvar", isNegative: true },
 ];
 
 const DIGESTION_ITEMS = [
-  { id: 15, type: "digestion", label: "OK" },
-  { id: 16, type: "digestion", label: "Bloating" },
-  { id: 17, type: "digestion", label: "Gassy" },
-  { id: 18, type: "digestion", label: "Heartburn" },
-  { id: 19, type: "digestion", label: "Nausea" },
-  { id: 20, type: "digestion", label: "Vomitting" },
-  { id: 21, type: "digestion", label: "Diarrhea" },
-  { id: 22, type: "digestion", label: "Constipation" },
+  { id: 15, type: "digestion", label: "OK", isNegative: false },
+  { id: 16, type: "digestion", label: "Bloating", isNegative: true },
+  { id: 17, type: "digestion", label: "Gassy", isNegative: true },
+  { id: 18, type: "digestion", label: "Heartburn", isNegative: true },
+  { id: 19, type: "digestion", label: "Nausea", isNegative: true },
+  { id: 20, type: "digestion", label: "Vomitting", isNegative: true },
+  { id: 21, type: "digestion", label: "Diarrhea", isNegative: true },
+  { id: 22, type: "digestion", label: "Constipation", isNegative: true },
 ];
 
 const MOOD_ITEMS = [
-  { id: 23, type: "mood", label: "OK" },
-  { id: 24, type: "mood", label: "Happy" },
-  { id: 25, type: "mood", label: "Excited" },
-  { id: 26, type: "mood", label: "Grateful" },
-  { id: 27, type: "mood", label: "Mood Swings" },
-  { id: 28, type: "mood", label: "Sad" },
-  { id: 29, type: "mood", label: "Sensitive" },
-  { id: 30, type: "mood", label: "Angry" },
-  { id: 31, type: "mood", label: "Confident" },
-  { id: 32, type: "mood", label: "Anxious" },
-  { id: 33, type: "mood", label: "Irritable" },
-  { id: 34, type: "mood", label: "Insecure" },
+  { id: 23, type: "mood", label: "OK", isNegative: false },
+  { id: 24, type: "mood", label: "Happy", isNegative: false },
+  { id: 25, type: "mood", label: "Excited", isNegative: false },
+  { id: 26, type: "mood", label: "Grateful", isNegative: false },
+  { id: 27, type: "mood", label: "Confident", isNegative: false },
+  { id: 28, type: "mood", label: "Sad", isNegative: true },
+  { id: 29, type: "mood", label: "Mood Swings", isNegative: true },
+  { id: 30, type: "mood", label: "Sensitive", isNegative: true },
+  { id: 31, type: "mood", label: "Angry", isNegative: true },
+  { id: 32, type: "mood", label: "Anxious", isNegative: true },
+  { id: 33, type: "mood", label: "Irritable", isNegative: true },
+  { id: 34, type: "mood", label: "Insecure", isNegative: true },
 ];
 
 const MIND_ITEMS = [
-  { id: 35, type: "mind", label: "OK" },
-  { id: 36, type: "mind", label: "Brain Fog" },
-  { id: 37, type: "mind", label: "Forgetful" },
-  { id: 38, type: "mind", label: "Distracted" },
-  { id: 39, type: "mind", label: "Stressed" },
-  { id: 40, type: "mind", label: "Focused" },
-  { id: 41, type: "mind", label: "Productive" },
+  { id: 35, type: "mind", label: "OK", isNegative: false },
+  { id: 36, type: "mind", label: "Focused", isNegative: false },
+  { id: 37, type: "mind", label: "Productive", isNegative: false },
+  { id: 38, type: "mind", label: "Brain Fog", isNegative: true },
+  { id: 39, type: "mind", label: "Forgetful", isNegative: true },
+  { id: 40, type: "mind", label: "Distracted", isNegative: true },
+  { id: 41, type: "mind", label: "Stressed", isNegative: true },
 ];
 
 const SKIN_ITEMS = [
-  { id: 42, type: "skin", label: "OK" },
-  { id: 43, type: "skin", label: "Acne" },
-  { id: 44, type: "skin", label: "Dry Skin" },
-  { id: 45, type: "skin", label: "Oily Skin" },
-  { id: 46, type: "skin", label: "Dull Skin" },
-  { id: 47, type: "skin", label: "Itchy Skin" },
+  { id: 42, type: "skin", label: "OK", isNegative: false },
+  { id: 43, type: "skin", label: "Acne", isNegative: true },
+  { id: 44, type: "skin", label: "Dry Skin", isNegative: true },
+  { id: 45, type: "skin", label: "Oily Skin", isNegative: true },
+  { id: 46, type: "skin", label: "Dull Skin", isNegative: true },
+  { id: 47, type: "skin", label: "Itchy Skin", isNegative: true },
 ];
 
 const ENERGY_ITEMS = [
-  { id: 48, type: "energy", label: "OK" },
-  { id: 49, type: "energy", label: "Exhausted" },
-  { id: 50, type: "energy", label: "Tired" },
-  { id: 51, type: "energy", label: "Energetic" },
-  { id: 52, type: "energy", label: "Unstoppable" },
+  { id: 48, type: "energy", label: "OK", isNegative: false },
+  { id: 49, type: "energy", label: "Exhausted", isNegative: true },
+  { id: 50, type: "energy", label: "Tired", isNegative: true },
+  { id: 51, type: "energy", label: "Energetic", isNegative: false },
+  { id: 52, type: "energy", label: "Unstoppable", isNegative: false },
 ];
 
 export const SYMPTOMS_CATEGORIZED = [

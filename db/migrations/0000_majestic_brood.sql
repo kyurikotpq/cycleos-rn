@@ -38,6 +38,8 @@ CREATE TABLE `sleep_sessions` (
 	`start_zone_offset` integer NOT NULL,
 	`end_datetime` integer NOT NULL,
 	`end_zone_offset` integer NOT NULL,
+	`is_nap` integer NOT NULL,
+	`is_daytime` integer NOT NULL,
 	`duration` numeric NOT NULL,
 	`total_awake` numeric NOT NULL,
 	`total_rem` numeric NOT NULL,
@@ -78,7 +80,8 @@ CREATE TABLE `symptoms` (
 CREATE TABLE `symptoms_constructs` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`type` text(20) NOT NULL,
-	`label` text(50) NOT NULL
+	`label` text(50) NOT NULL,
+	`is_negative` integer NOT NULL
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `constructUniqueIndex` ON `symptoms_constructs` (lower("type"),lower("label"));

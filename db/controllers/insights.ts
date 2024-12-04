@@ -12,6 +12,8 @@ import {
 import { NUM_MS_PER_MIN } from "@/constants/Time";
 
 // Get Insights for Year
+// The sleep calculation is WRONG! You can't group by dayId because people sleep after midnight.
+// You'll need to use the startdatetime and check if it's within a specified range (maybe SQL has a way to to do this? UNIX (YYYY-MM-DD) < startdatetime xxx?)
 export const getInsightsForYear = async (year: string) => {
   // Note: The string literal for LIKE is treated as a parameter, and therefore escaped
   // https://github.com/drizzle-team/drizzle-orm/discussions/2339

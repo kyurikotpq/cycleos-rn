@@ -11,10 +11,7 @@ import dayjs, { Dayjs } from "dayjs";
  * REM	6
  */
 
-const tallyAndFormatSleepStages = (
-  sessionStartTime: Dayjs,
-  stages: any[]
-) => {
+const tallyAndFormatSleepStages = (sessionStartTime: Dayjs, stages: any[]) => {
   let totalAwake = 0;
   let totalRem = 0;
   let totalLight = 0;
@@ -92,7 +89,7 @@ const tallyAndFormatSleepStages = (
    * Note: Since wearables are NOT research-grade actigraphy, the fragmentation
    * index should not be interpreted as a clinical-/research-grade measure.
    *
-   * Calculation based on Mezick et al. (2009):
+   * The calculation used is based on Mezick et al. (2009):
    *     Number of arousals or awakenings = number of mobile epochs lasting four epochs + number of immobile epochs < 1 minute duration
    *
    *    (Number of arousals or awakenings / Number of immobile epochs > 1 minute duration) × 100
@@ -116,12 +113,12 @@ const tallyAndFormatSleepStages = (
 
 /**
  * Format a HealthConnect SleepSession object for DB
- * IMPORTANT NOTE: `react-native-health-connect` currently does not attach timezone information to the sleep session and sleep stage data. The local device timezone is used. This needs to change when the package updates in future.
- * 
- * @param session 
+ * IMPORTANT NOTE: `react-native-health-connect` currently does not attach timezone information to the sleep session and sleep stage data. The local device timezone is used, even for retrospective data. This needs to change when the package updates in future.
+ *
+ * @param session
  * @returns {
- *   session: SleepSession object (without database ID), 
- *   stages: SleepStages[] (without database and SleepSession ID) 
+ *   session: SleepSession object (without database ID),
+ *   stages: SleepStages[] (without database and SleepSession ID)
  * }
  */
 export const formatSleepSession = (session: any) => {
@@ -136,17 +133,42 @@ export const formatSleepSession = (session: any) => {
     remLatency,
     fragmentationIndex,
     formattedSleepStages,
-  } = tallyAndFormatSleepStages(
-    sessionStartTimeDayJS,
-    session.stages
-  );
+  } = tallyAndFormatSleepStages(sessionStartTimeDayJS, session.stages);
+
+  // 4 hours maximum for a session to be considered a nap
+  const isNap =
+    sessionEndTimeDayJS.diff(sessionStartTimeDayJS, "minutes") <= 4 * 60;
+
+  // Whether the sleep session *starts* between 6am and 7pm local time
+  const isDaytime =
+    sessionStartTimeDayJS.hour() >= 6 && sessionStartTimeDayJS.hour() < 19;
+
+  // dayId should reflect the day the sleep session was *intended* for
+  const startISO = sessionStartTimeDayJS.format("YYYY-MM-DD");
+  const endISO = sessionEndTimeDayJS.format("YYYY-MM-DD");
+  let dayId = endISO;
+
+  if (
+    endISO == startISO &&
+    !isDaytime &&
+    sessionEndTimeDayJS.hour() >= 19 &&
+    sessionEndTimeDayJS.hour() < 24
+  ) {
+    // E.g. If you slept at 10pm Tues night but awoke at 11pm Tues night (<4h -> isNap = true; start and end day are the same, and it's not daytime), you likely intended to sleep through the night. So include the session as part of the next day's (e.g. Wed night's) sleep total
+    dayId = sessionStartTimeDayJS.add(1, "day").format("YYYY-MM-DD");
+
+    // Note: We don't have change dayId for sessions starting/ending 12am - 6am
+    // because the default is to use the endISO, which in this case would be correct
+  }
 
   const formattedSleepSession = {
-    dayId: sessionStartTimeDayJS.format("YYYY-MM-DD"),
+    dayId,
     startDateTime: sessionStartTimeDayJS.valueOf(),
     startZoneOffset: sessionStartTimeDayJS.utcOffset(),
     endDateTime: sessionEndTimeDayJS.valueOf(),
     endZoneOffset: sessionEndTimeDayJS.utcOffset(),
+    isNap,
+    isDaytime,
     duration: sessionEndTimeDayJS.diff(sessionStartTimeDayJS, "minutes"),
     totalAwake,
     totalRem,
