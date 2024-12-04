@@ -1,19 +1,28 @@
 import { useEffect, useMemo, useState } from "react";
-import { Pressable, Text, View, StyleSheet, ScrollView } from "react-native";
+import {
+  Pressable,
+  Text,
+  View,
+  StyleSheet,
+  ScrollView,
+  Image,
+} from "react-native";
 
 export interface HeatMapProps {
-  data: any[];
-  direction?: "horizontal" | "vertical"; // Data flow (horizontal = LTR, vertical = TTB)
+  matrix: any[]; // 1D array of cells
+  data: any;
+  dataMatrixKey: string; // The key in matrix that links to `data`
+  colorKey: string; // The key in `data` to use for colors
   xLabels?: string[];
   yLabels?: string[];
   numColumns?: number; // Number of columns
-  cellSize?: number; // Number of columns
-  numRows?: number; // Number of rows
+  cellSize?: number; // Size of cell in pixels
   offsetX?: number; // Number of cells to offset in the first row (only for horizontal)
   offsetY?: number; // Number of cells to offset in the first column (only for vertical)
   color?: ColorProps;
+  cellBGImgMapping?: { [key: string]: any }; // Mapping of cell values to background image paths
+  cellBGImgKey?: string; // The key in `data` to use for cell background images. Must exist in `cellBGImgMapping`
   onPress?: (index: number) => void; // Callback when a cell is pressed
-  shape?: "rectangle" | "circle";
 }
 
 export interface OpacityProps {
@@ -53,64 +62,53 @@ const defaultColorMap: ColorProps = {
 };
 
 export default function InteractiveHeatmap({
-  direction = "horizontal",
   xLabels,
   yLabels,
+  dataMatrixKey,
+  colorKey,
   numColumns = 0,
-  numRows = 0,
-  data, // 1D array of raw values
+  matrix, // 1D array of raw values
+  data,
   offsetX = 0,
   offsetY = 0,
-  cellSize = 25,
+  cellSize = 35,
+  cellBGImgMapping,
+  cellBGImgKey,
   color = defaultColorMap,
-  shape = "rectangle",
+
   onPress,
 }: HeatMapProps) {
-  const [finalNumRows, setFinalNumRows] = useState(numRows ?? 0);
   const [finalNumColumns, setFinalNumColumns] = useState(numColumns ?? 0);
 
   const CELL_SPACING = 4;
 
   useEffect(() => {
-    // Either numColumns or numRows should be provided
-    if (!numColumns && !numRows) {
-      return;
-    } else if (direction == "horizontal") {
-      if (!numColumns)
-        throw new Error("numColumns must be provided for horizontal direction");
+    // numColumns should be provided
+    if (!numColumns) throw new Error("numColumns must be provided");
+    else if (offsetX >= numColumns)
+      throw new Error("offsetX must be smaller than numColumns");
+  }, [numColumns]);
 
-      if (offsetX >= numColumns)
-        throw new Error("offsetX must be smaller than numColumns");
-
-      // If numRows is not provided, calculate it from numColumns
-      if (!numRows && numColumns) {
-        setFinalNumRows(Math.ceil(data.length / numColumns));
-      }
-    } else if (direction == "vertical") {
-      if (!numRows)
-        throw new Error("numRows must be provided for vertical direction");
-
-      if (offsetY >= numRows)
-        throw new Error("offsetY must be smaller than numRows");
-
-      // If numColumns is not provided, calculate it from numRows
-      if (!numColumns && numRows) {
-        setFinalNumColumns(Math.ceil(data.length / numRows));
-      }
-    }
-  }, [numColumns, numRows]);
+  const normalize = (value: number, min: number, max: number) =>
+    (value - min) / (max - min);
 
   const renderCells = useMemo(() => {
     let cells: any[] = [];
 
-    const offset = direction === "horizontal" ? offsetX : offsetY;
+    const offset = offsetX;
 
-    data.forEach((item, index) => {
-      // Render the label
+    // Normalize the color values
+    const values = !data
+      ? Array.from({ length: matrix?.length || 0 }, (_, i) => 0.01)
+      : Object.values(data).map((item: any) => item[colorKey]);
+    const colorMin = Math.min(...values);
+    const colorMax = Math.max(...values);
+
+    matrix.forEach((item, index) => {
+      // Render the row labels (along the y-axis)
       if (
         numColumns &&
         yLabels &&
-        // index >= numColumns - 1 &&
         (index == 0 || (index + offset) % numColumns === 0)
       ) {
         cells.push(
@@ -120,7 +118,6 @@ export default function InteractiveHeatmap({
               {
                 width: cellSize,
                 height: cellSize,
-
                 backgroundColor: "transparent",
                 marginRight: CELL_SPACING,
                 marginBottom: CELL_SPACING,
@@ -131,7 +128,7 @@ export default function InteractiveHeatmap({
           >
             <Text
               style={{
-                fontSize: cellSize / 2 - 1,
+                fontSize: cellSize * 0.4,
                 fontWeight: "bold",
                 textAlign: "center",
               }}
@@ -151,8 +148,6 @@ export default function InteractiveHeatmap({
                 {
                   width: cellSize,
                   height: cellSize,
-                  borderWidth: CELL_SPACING / 2,
-                  borderColor: "transparent",
                   backgroundColor: "transparent",
                   marginRight: CELL_SPACING,
                   marginBottom: CELL_SPACING,
@@ -163,6 +158,25 @@ export default function InteractiveHeatmap({
         }
       }
 
+      // Render interactive data cell
+      const bgColorOpacity =
+        dataMatrixKey && colorKey && data[item[dataMatrixKey]]
+          ? normalize(data[item[dataMatrixKey]][colorKey], colorMin, colorMax)
+          : 0.05;
+
+      // Check if cellBGImgMapping and cellBGImgKey exist
+      const bgImg =
+        data &&
+        dataMatrixKey &&
+        cellBGImgMapping &&
+        cellBGImgKey &&
+        data[item[dataMatrixKey]] &&
+        data[item[dataMatrixKey]][cellBGImgKey]
+          ? cellBGImgMapping[
+              data[item[dataMatrixKey]][cellBGImgKey] ?? "default"
+            ]
+          : "";
+
       cells.push(
         <Pressable
           key={`heatmap-suf-${index}`}
@@ -170,31 +184,56 @@ export default function InteractiveHeatmap({
             {
               width: cellSize,
               height: cellSize,
-              backgroundColor: `rgba(100, 100, 100, ${item.opacityValue})`, // Make this themable
+              backgroundColor: `rgba(0, 110, 144, ${bgColorOpacity})`,
               marginRight: CELL_SPACING,
               marginBottom: CELL_SPACING,
-              borderWidth: CELL_SPACING / 2,
-              borderColor: item.borderColor ?? "transparent",
-              borderStyle: item.borderStyle ?? "solid",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              position: "relative",
+              borderColor: !bgColorOpacity ? "#c0c0c0" : "transparent",
+              borderWidth: 1,
             },
           ]}
           onPress={onPress ? () => onPress(item) : undefined}
         >
-          {item.text ? (
-            <Text style={{ fontWeight: "bold" }}>{item.text}</Text>
+          {!bgImg ? (
+            item.text && <Text style={{ fontWeight: "bold" }}>{item.text}</Text>
           ) : (
-            <></>
+            <>
+              <Image
+                source={bgImg} // @ts-ignore
+                style={{
+                  flex: 1,
+                  width: cellSize * 0.75,
+                  height: cellSize * 0.75,
+                  position: "absolute",
+                  left: 0,
+                  top: 0,
+                  opacity: bgColorOpacity > 0.5 ? 1 : 0.5
+                }}
+              />
+              {item.text && (
+                <Text
+                  style={{
+                    fontSize: cellSize * 0.35,
+                    fontWeight: "bold",
+                    position: "absolute",
+                    bottom: 0,
+                    right: 1,
+                  }}
+                >
+                  {item.text}
+                </Text>
+              )}
+            </>
           )}
         </Pressable>
       );
     });
 
-    console.log("Number of cells", cells.length);
     return cells;
-  }, [data]);
+  }, [data, colorKey]);
 
   return (
     <ScrollView
@@ -209,7 +248,7 @@ export default function InteractiveHeatmap({
             (finalNumColumns + 1) * cellSize +
             (finalNumColumns + 2) * CELL_SPACING,
           // backgroundColor: "red",
-          flexDirection: direction == "horizontal" ? "row" : "column",
+          flexDirection: "row",
           flexWrap: "wrap",
         }}
       >
@@ -226,6 +265,7 @@ export default function InteractiveHeatmap({
             ]}
           />
         )}
+        {/* Render the column labels */}
         {xLabels &&
           xLabels.map((label, index) => (
             <View
@@ -241,7 +281,7 @@ export default function InteractiveHeatmap({
             >
               <Text
                 style={{
-                  fontSize: cellSize / 2 - 1,
+                  fontSize: cellSize * 0.4,
                   fontWeight: "bold",
                   textAlign: "center",
                 }}
@@ -257,19 +297,3 @@ export default function InteractiveHeatmap({
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  mainBox: {
-    display: "flex",
-    flexDirection: "row",
-    columnGap: 1,
-    rowGap: 1,
-  },
-  sufBox: {
-    display: "flex",
-    flex: 1,
-    flexDirection: "column",
-    rowGap: 1,
-    columnGap: 1,
-  },
-});

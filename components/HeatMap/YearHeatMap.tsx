@@ -9,24 +9,38 @@ type HeatmapCell = {
   text: string | null;
   opacityValue?: number; // Optional value for the heatmap intensity
   borderColor?: string;
-};
-
-type Label = {
-  label: string;
-  rowIndex: number;
+  backgroundImage?: string;
 };
 
 type HeatmapData = {
-  weeks: HeatmapCell[][];
-  labels: Label[];
-  dayLabels: string[];
+  [key: string]: {
+    phase: string;
+    sleepDuration: number;
+    avgAwake: number;
+    avgRem: number;
+    avgDeep: number;
+    avgRemLatency: number;
+    exerciseDuration: number;
+    steps: number;
+    symptoms: number;
+  };
 };
 
 interface YearHeatMapProps {
-  year: number;
+  data: HeatmapData;
+  year: string;
+  colorKey?: string;
+  cellBGImgMapping?: { [key: string]: string }; // Mapping of cell values to background image paths
+  cellBGImgKey?: string; // The key in `data` to use for cell background images. Must exist in `cellBGImgMapping`
 }
 
-export default function YearHeatMap({ year }: YearHeatMapProps) {
+export default function YearHeatMap({
+  data,
+  year,
+  colorKey,
+  cellBGImgMapping,
+  cellBGImgKey,
+}: YearHeatMapProps) {
   const dayLabels = ["SUN", "", "", "WED", "", "", "SAT"];
   const [days, setDays] = useState<HeatmapCell[]>([]);
   const [offsetX, setOffsetX] = useState<number>(0);
@@ -34,7 +48,7 @@ export default function YearHeatMap({ year }: YearHeatMapProps) {
 
   const calculateHeatmapData = () => {
     const firstDayOfYear = dayjs(`${year}-01-01`);
-    const lastDayOfYear = dayjs(`${year + 1}-01-01`);
+    const lastDayOfYear = dayjs(`${parseInt(year) + 1}-01-01`);
     const offset = firstDayOfYear.day();
     setOffsetX(offset); // Offset for the first row
 
@@ -44,13 +58,14 @@ export default function YearHeatMap({ year }: YearHeatMapProps) {
     let numDays = 0;
 
     while (currentDate.isBefore(lastDayOfYear, "day")) {
-      // @TODO: Add data coloring, currently it's random
+      // @TODO: Add data coloring, currently it's monochrome
       // There should be a better separation between the days and the data coloring
+      const dayId = currentDate.format("YYYY-MM-DD");
+
       all_days.push({
-        id: currentDate.format("YYYY-MM-DD"),
-        date: currentDate.format("YYYY-MM-DD"),
+        id: dayId,
+        date: dayId,
         text: currentDate.format("D") == "1" ? currentDate.format("D") : null,
-        opacityValue: Math.random(),
       });
 
       // Check if the current week starts and end in the same month
@@ -61,9 +76,8 @@ export default function YearHeatMap({ year }: YearHeatMapProps) {
 
         if (month != endOfWeek.month() || currentDate.date() == 1)
           all_month_labels.push(endOfWeek.format("MMM"));
-        else
-          all_month_labels.push("");
-      } 
+        else all_month_labels.push("");
+      }
 
       currentDate = currentDate.add(1, "day");
       numDays++;
@@ -79,12 +93,16 @@ export default function YearHeatMap({ year }: YearHeatMapProps) {
 
   return (
     <InteractiveHeatmap
-      data={days}
+      matrix={days}
+      data={data}
+      dataMatrixKey="date"
+      colorKey={colorKey ?? ""}
       numColumns={7}
-      numRows={Math.ceil(days.length / 7)}
-      yLabels={monthLabels}
       xLabels={dayLabels}
+      yLabels={monthLabels}
       offsetX={offsetX}
+      cellBGImgMapping={cellBGImgMapping}
+      cellBGImgKey={cellBGImgKey ?? ""}
       onPress={(cell) => {
         console.log(cell);
       }}
