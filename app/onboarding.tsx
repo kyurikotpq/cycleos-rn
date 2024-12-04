@@ -9,7 +9,6 @@ import {
 
 import * as SecureStore from "expo-secure-store";
 import {
-  initialize,
   requestPermission,
   readRecords,
 } from "react-native-health-connect";
@@ -101,10 +100,6 @@ export default function OnboardingScreen({
   };
 
   const requestHCPermission = async () => {
-    // Initialize the client
-    const _ = await initialize();
-    console.log("HealthConnect initialized");
-
     // request permissions
     const grantedPermissions = await requestPermission(PERMISSIONS);
     console.log("HealthConnect permissions granted");

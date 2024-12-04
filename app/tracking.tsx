@@ -10,13 +10,13 @@ import {
   SymptomCategory,
   SymptomItem,
 } from "@/constants/Symptoms";
-import DateUtil from "@/util/Date";
 import {
   fetchSymptomsAtDate,
   updateSymptomsTransaction,
 } from "@/db/controllers/symptoms";
 import WeekViewDatePicker from "@/components/WeekViewDatePicker";
 import IsSavingButton from "@/components/IsSavingButton";
+import { fromDateId, toDateId } from "@marceloterreiro/flash-calendar";
 
 /**
  * This page shows:
@@ -34,9 +34,7 @@ export default function SymptomTrackingScreen() {
   const [saveState, setSaveState] = useState("Save");
 
   const datepickerRef = useRef<any>(null);
-  const [currentDate, setCurrentDate] = useState(
-    today.toISOString().split("T")[0]
-  );
+  const [currentDate, setCurrentDate] = useState(toDateId(today));
 
   const compareArrays = (
     before: number[],
@@ -73,7 +71,10 @@ export default function SymptomTrackingScreen() {
     selectedSymptoms.some((s) => s.id == symptomId);
 
   const isSymptom = (symptomLabel: string) => {
-    return symptomLabel.toLowerCase().includes(searchQuery.toLowerCase());
+    return (
+      searchQuery.length < 2 ||
+      symptomLabel.toLowerCase().includes(searchQuery.toLowerCase())
+    );
   };
 
   const getSymptomsAtDate = async (date: string) => {
@@ -103,7 +104,7 @@ export default function SymptomTrackingScreen() {
 
     const cycleDay = {
       id: currentDate,
-      zoneOffset: today.getTimezoneOffset(),
+      zoneOffset: -today.getTimezoneOffset(),
     };
 
     const transactionResult = await updateSymptomsTransaction(
@@ -120,12 +121,14 @@ export default function SymptomTrackingScreen() {
   }, []);
 
   useEffect(() => {
-    if (searchQuery.length > 2) {
+    if (searchQuery.length >= 2) {
       setFilteredSymptoms(
         SYMPTOMS_CATEGORIZED.filter((category) =>
           category.items.some((symptom) => isSymptom(symptom.label))
         )
       );
+    } else if (searchQuery.length == 0) {
+      setFilteredSymptoms(SYMPTOMS_CATEGORIZED);
     }
   }, [searchQuery]);
 
@@ -140,9 +143,7 @@ export default function SymptomTrackingScreen() {
         />
 
         <Appbar.Content
-          title={`Logs for ${DateUtil.parseISODate(
-            currentDate
-          ).toLocaleDateString()}`}
+          title={`Logs for ${fromDateId(currentDate).toLocaleDateString()}`}
           titleStyle={{ textAlign: "center", fontWeight: "bold" }}
         />
 
@@ -150,7 +151,7 @@ export default function SymptomTrackingScreen() {
         <Appbar.Action
           icon="calendar"
           onPress={() => {
-            getSymptomsAtDate(today.toISOString().split("T")[0]);
+            getSymptomsAtDate(toDateId(today));
             datepickerRef?.current?.scrollToToday();
           }}
         />
@@ -162,7 +163,7 @@ export default function SymptomTrackingScreen() {
         }}
       >
         <WeekViewDatePicker
-          maxDate={today.toISOString().split("T")[0]}
+          maxDate={toDateId(today)}
           onDateChanged={getSymptomsAtDate}
           ref={datepickerRef}
           currentSelectedDate={currentDate}

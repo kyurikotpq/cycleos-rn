@@ -8,7 +8,6 @@ import { useFocusEffect } from "@react-navigation/native";
 import { CycleCircle } from "@/components/charts/CycleCircle";
 import { fetchCycles } from "@/db/controllers/cycles";
 import { router } from "expo-router";
-import DateUtil from "@/util/Date";
 
 export default function CyclesScreen() {
   const [cycles, setCycles] = useState([]);
