@@ -3,9 +3,8 @@ import {
   Pressable,
   Text,
   View,
-  StyleSheet,
   ScrollView,
-  Image,
+  ImageBackground,
 } from "react-native";
 
 export interface HeatMapProps {
@@ -18,7 +17,6 @@ export interface HeatMapProps {
   numColumns?: number; // Number of columns
   cellSize?: number; // Size of cell in pixels
   offsetX?: number; // Number of cells to offset in the first row (only for horizontal)
-  offsetY?: number; // Number of cells to offset in the first column (only for vertical)
   color?: ColorProps;
   cellBGImgMapping?: { [key: string]: any }; // Mapping of cell values to background image paths
   cellBGImgKey?: string; // The key in `data` to use for cell background images. Must exist in `cellBGImgMapping`
@@ -70,7 +68,6 @@ export default function InteractiveHeatmap({
   matrix, // 1D array of raw values
   data,
   offsetX = 0,
-  offsetY = 0,
   cellSize = 35,
   cellBGImgMapping,
   cellBGImgKey,
@@ -198,11 +195,23 @@ export default function InteractiveHeatmap({
           onPress={onPress ? () => onPress(item) : undefined}
         >
           {!bgImg ? (
-            item.text && <Text style={{ fontWeight: "bold" }}>{item.text}</Text>
+            item.text && (
+              <Text
+                style={{
+                  fontWeight: "bold",
+                  color: bgColorOpacity < 0.5 ? "black" : "white",
+                }}
+              >
+                {item.text}
+              </Text>
+            )
           ) : (
             <>
-              <Image
+              <ImageBackground
                 source={bgImg} // @ts-ignore
+                tintColor={
+                  bgColorOpacity < 0.5 ? "rgba(0, 0, 0, 0.7)" : "white"
+                }
                 style={{
                   flex: 1,
                   width: cellSize * 0.75,
@@ -210,12 +219,12 @@ export default function InteractiveHeatmap({
                   position: "absolute",
                   left: 0,
                   top: 0,
-                  opacity: bgColorOpacity > 0.5 ? 1 : 0.5
                 }}
               />
               {item.text && (
                 <Text
                   style={{
+                    color: bgColorOpacity < 0.5 ? "black" : "white",
                     fontSize: cellSize * 0.35,
                     fontWeight: "bold",
                     position: "absolute",
