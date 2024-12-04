@@ -158,8 +158,10 @@ export default function InteractiveHeatmap({
       // Render interactive data cell
       const bgColorOpacity =
         dataMatrixKey && colorKey && data[item[dataMatrixKey]]
-          ? normalize(data[item[dataMatrixKey]][colorKey], colorMin, colorMax)
-          : 0.05;
+          ? data[item[dataMatrixKey]][colorKey] == colorMin
+            ? 0.05 // Make sure the minimum has some color
+            : normalize(data[item[dataMatrixKey]][colorKey], colorMin, colorMax)
+          : 0;
 
       // Check if cellBGImgMapping and cellBGImgKey exist
       const bgImg =
@@ -192,7 +194,9 @@ export default function InteractiveHeatmap({
               borderWidth: 1,
             },
           ]}
-          onPress={onPress ? () => onPress(item) : undefined}
+          onPress={
+            onPress ? () => onPress(data[item[dataMatrixKey]]) : undefined
+          }
         >
           {!bgImg ? (
             item.text && (
@@ -245,12 +249,7 @@ export default function InteractiveHeatmap({
   }, [data, colorKey]);
 
   return (
-    <ScrollView
-      style={{
-        display: "flex",
-        flex: 1,
-      }}
-    >
+    <>
       <View
         style={{
           width:
@@ -261,7 +260,7 @@ export default function InteractiveHeatmap({
           flexWrap: "wrap",
         }}
       >
-        {/* Render xLabels */}
+        {/* Render xLabels (in the topmost "row") */}
         {xLabels && (
           <View
             style={[
@@ -299,10 +298,27 @@ export default function InteractiveHeatmap({
               </Text>
             </View>
           ))}
-
-        {/* Render cells (with yLabels) */}
-        {renderCells}
       </View>
-    </ScrollView>
+      <ScrollView
+        style={{
+          display: "flex",
+          flex: 1,
+        }}
+      >
+        <View
+          style={{
+            width:
+              (finalNumColumns + 1) * cellSize +
+              (finalNumColumns + 2) * CELL_SPACING,
+            // backgroundColor: "red",
+            flexDirection: "row",
+            flexWrap: "wrap",
+          }}
+        >
+          {/* Render cells (with yLabels) */}
+          {renderCells}
+        </View>
+      </ScrollView>
+    </>
   );
 }

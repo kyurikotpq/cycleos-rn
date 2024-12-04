@@ -22,8 +22,10 @@ export const getInsightsForYear = async (year: string) => {
       dayId: cycle_days.id,
       phase: cycle_days.phase,
 
-      // Total sleep duration per day (includes naps)
-      sleepDuration: sql<number>`SUM(${sleep_sessions.duration})`,
+      // Total nighttime sleep duration
+      // (It is highly unlikely to have the same duration of sleep sessions per day,
+      // but we still run the risk of missing out on a record with SUM(DISTINCT()))
+      sleepDuration: sql<number>`SUM(DISTINCT(${sleep_sessions.duration}))`,
 
       // % of sleep stage wrt to sleep duration per session, averaged across all sleep sessions per day
       avgAwake: sql`AVG(CAST(${sleep_sessions.totalAwake} AS REAL) / CAST(${sleep_sessions.duration} AS REAL) * 100)`,
@@ -53,9 +55,11 @@ export const getInsightsForYear = async (year: string) => {
     .where(
       and(
         like(cycle_days.id, `${year}-%`),
+        // Nighttime sleep sessions only
+        eq(sleep_sessions.isDaytime, false),
         or(
           eq(db.$count(symptoms, eq(symptoms.dayId, cycle_days.id)), 0),
-          ne(symptoms_constructs.label, "OK")
+          eq(symptoms_constructs.isNegative, true)
         )
       )
     )

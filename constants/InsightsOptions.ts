@@ -1,6 +1,6 @@
 // Available options for Insights pages
 export const HEALTH_OPTIONS = [
-  { label: "Total Sleep Time (mins)", value: "sleepDuration" },
+  { label: "Total Night Sleep (mins)", value: "sleepDuration" },
   { label: "Average Time Awake (%)", value: "avgAwake" },
   { label: "Average REM (%)", value: "avgRem" },
   { label: "Average Deep Sleep (%)", value: "avgDeep" },

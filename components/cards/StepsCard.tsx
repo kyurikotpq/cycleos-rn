@@ -20,7 +20,11 @@ export default function StepsCard({ todaySteps, targetSteps }: StepsCardProps) {
       onPress={() => router.push("/insights/health/steps")}
     >
       <Card.Content
-        style={{ flexDirection: "row", justifyContent: "space-between" }}
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
       >
         <View
           style={{
@@ -38,6 +42,11 @@ export default function StepsCard({ todaySteps, targetSteps }: StepsCardProps) {
           </ThemedText>
           <ThemedText>/ {targetSteps} steps</ThemedText>
         </ThemedView>
+        {todaySteps > targetSteps && (
+          <ThemedText variant="title" style={{ marginBottom: 0 }}>
+            🎉
+          </ThemedText>
+        )}
       </Card.Content>
     </Card>
   );

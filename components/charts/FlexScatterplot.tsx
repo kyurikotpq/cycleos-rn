@@ -66,12 +66,10 @@ export default function FlexScatterplot({
   if (yMin == undefined) yMin = Math.min(...yValues);
   if (yMax == undefined) yMax = Math.max(...yValues);
 
-  const [originX, setOriginX] = useState(
-    padding + `${yMax.toFixed(2)}`.length * 1.5
-  );
+  const [originX, setOriginX] = useState(padding + `${yMax}`.length * 1.5);
 
   const [xTickSpacing, setXTickSpacing] = useState(
-    `${xMax.toFixed(1)}`.length * (FONT_SIZE / 1.5)
+    `${xMax}`.length * (FONT_SIZE / 1.5)
   );
   const [canvasWidth, setCanvasWidth] = useState(
     numXTicks * xTickSpacing + 2 * padding + originX
@@ -101,9 +99,7 @@ export default function FlexScatterplot({
   // Ticks
   const getTicks = (min: number, max: number, numTicks: number) => {
     const step = (max - min) / (numTicks - 1);
-    return Array.from({ length: numTicks }, (_, i) =>
-      parseFloat((min + i * step).toFixed(1))
-    );
+    return Array.from({ length: numTicks }, (_, i) => min + i * step);
   };
 
   // @TODO: Update fonts later
@@ -168,7 +164,7 @@ export default function FlexScatterplot({
                   key={`x-tick-label-${index}`}
                   x={x - FONT_SIZE / 3}
                   y={height - padding / 3}
-                  text={tick.toString()}
+                  text={tick.toFixed(1)}
                   color="black"
                   font={font}
                 />
@@ -192,7 +188,7 @@ export default function FlexScatterplot({
                   key={`y-tick-label-${index}`}
                   x={0}
                   y={y + FONT_SIZE / 3}
-                  text={tick.toString()}
+                  text={tick.toFixed(1)}
                   color="#000"
                   font={font}
                 />
@@ -206,7 +202,7 @@ export default function FlexScatterplot({
             const y = scaleY(point[yKey]);
             const color =
               colorMap[point[colorKey]]?.color || colorMap.default.color;
-            return renderShape(x, y, color, `${index}`);
+            return renderShape(x, y, color, `point-${index}`);
           })}
         </Canvas>
       </ScrollView>
