@@ -4,7 +4,7 @@ import { Card } from "react-native-paper";
 
 import StepsCard from "@/components/cards/StepsCard";
 import SleepCard from "@/components/cards/SleepCard";
-import { getLastNightSleepSession } from "@/db/controllers/sleep";
+import { getLastNightSleepStats } from "@/db/controllers/sleep";
 import dayjs, { Dayjs } from "dayjs";
 import { fetchEnergyAtDate } from "@/db/controllers/symptoms";
 import { getStepsForDay } from "@/db/controllers/steps";
@@ -21,11 +21,11 @@ export default function HealthInsightsScreen() {
   // Summary Statistics for Steps Data
   const [TARGET_STEPS, setTargetSteps] = useState(1);
   const [TODAY_STEPS, setTodaySteps] = useState(0);
-  
+
   const getSleepData = async () => {
     // Get last night's sleep data
-    const sleepResult = await getLastNightSleepSession(
-      todayDayJS.startOf("day").subtract(5, "hours").valueOf()
+    const sleepResult = await getLastNightSleepStats(
+      todayDayJS.format("YYYY-MM-DD")
     );
 
     if (sleepResult.length > 0) {

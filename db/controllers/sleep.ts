@@ -1,6 +1,6 @@
-import { and, gt, desc, sql } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { db } from "../client";
-import { sleep_sessions, sleep_stages } from "../schema.ts";
+import { sleep_sessions, sleep_stages } from "../schema";
 import { insertOrphanCycleDay } from "./cycle_days";
 import { Dayjs } from "dayjs";
 
@@ -62,17 +62,17 @@ export const insertSleepSessionAndStages = async (
   });
 };
 
-// Get the last sleep session that started after the specified time
-export const getLastNightSleepSession = async (startTime: number) =>
+// Get the nighttime sleep sessions for a given day, following
+// the definition of "nighttime" as defined in SleepSession.ts
+// So we just need to query by the dayId
+export const getLastNightSleepStats = async (dayId: string) =>
   await db
-    .select()
+    .select({
+      startDateTime: sql<number>`MIN(${sleep_sessions.startDateTime})`,
+      endDateTime: sql<number>`MAX(${sleep_sessions.endDateTime})`,
+      duration: sql<number>`SUM(${sleep_sessions.duration}) - SUM(${sleep_sessions.totalAwake})`,
+    })
     .from(sleep_sessions)
     .where(
-      and(
-        gt(sleep_sessions.startDateTime, startTime),
-        // Include sessions that have potential for > 2 sleep cycles
-        gt(sleep_sessions.duration, 180)
-      )
-    )
-    .orderBy(desc(sleep_sessions.startDateTime))
-    .limit(1);
+      and(eq(sleep_sessions.dayId, dayId), eq(sleep_sessions.isDaytime, false))
+    );

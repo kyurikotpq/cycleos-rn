@@ -148,7 +148,7 @@ export const formatSleepSession = (session: any) => {
   const endISO = sessionEndTimeDayJS.format("YYYY-MM-DD");
   let dayId = endISO;
 
-  // Note: For the sleep records of daylight savings end day (Nov 3, 2024), it exists in Samsung Health, but not in HealthConnect.
+  // Note: For the sleep records of daylight savings end day (e.g. Nov 3, 2024), it exists in Samsung Health, but not in HealthConnect.
   if (
     endISO == startISO &&
     !isDaytime &&
