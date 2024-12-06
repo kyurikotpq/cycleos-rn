@@ -6,8 +6,14 @@ import { Appbar, Avatar, Drawer, Card, Text, FAB } from "react-native-paper";
 import HormonoscopeCard from "@/components/HormonoscopeCard";
 import { router } from "expo-router";
 import { ScrollView } from "react-native";
+import { useMemo } from "react";
+import dayjs from "dayjs";
+import DailyCheckInCard from "@/components/cards/DailyCheckInCard";
 
 export default function AgendaScreen() {
+  const todayDayJS = useMemo(() => dayjs(), []);
+
+  
   return (
     <>
       <Appbar.Header>
@@ -20,7 +26,7 @@ export default function AgendaScreen() {
         <ThemedView style={styles.p20}>
           <ThemedText>@TODO: Date picker goes here at some point</ThemedText>
         </ThemedView>
-        <HormonoscopeCard />
+        <DailyCheckInCard todayDayJS={todayDayJS} />
 
         <ThemedText variant="title">Agenda</ThemedText>
         <ScrollView>

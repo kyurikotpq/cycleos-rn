@@ -71,6 +71,9 @@ export const symptoms = sqliteTable(
       .notNull()
       .references(() => cycle_days.id),
     symptomId: integer("symptom_id").references(() => symptoms_constructs.id),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .notNull()
+      .default(sql`(unixepoch() * 1000)`),
   },
   (table) => {
     return {

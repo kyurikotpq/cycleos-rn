@@ -29,6 +29,7 @@ export const fetchSymptomsAtDate = async (date: string) =>
       id: symptoms_constructs.id,
       type: symptoms_constructs.type,
       label: symptoms_constructs.label,
+      isNegative: symptoms_constructs.isNegative,
     })
     .from(symptoms)
     .innerJoin(

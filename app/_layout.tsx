@@ -11,15 +11,18 @@ import { expoDb } from "@/db/client";
 import OnboardingScreen from "./onboarding";
 import { initialize } from "react-native-health-connect";
 
-import { MD3LightTheme as DefaultTheme, PaperProvider } from 'react-native-paper';
+import {
+  MD3LightTheme as DefaultTheme,
+  PaperProvider,
+} from "react-native-paper";
 
 // @TODO Fake theming to get over it
 const theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    primary: 'tomato',
-    secondary: 'yellow',
+    primary: "tomato",
+    secondary: "yellow",
   },
 };
 
@@ -33,12 +36,11 @@ export default function RootLayout() {
   // Track if the user is onboarded
   const [isOnboarded, setIsOnboarded] = useState(true);
 
-  
   // Check for onboarding status in SecureStore.
   const checkForOnboarded = async () => {
     // Initialize the HealthConnect client
     const _ = await initialize();
-    
+
     const result = await SecureStore.getItemAsync("isOnboarded");
     setIsOnboarded(JSON.parse(result || "false"));
   };
@@ -67,10 +69,6 @@ export default function RootLayout() {
         <Stack.Screen name="+not-found" />
         {/* Non-Tab Screens */}
         <Stack.Screen
-          name="hormonoscope"
-          options={{ title: "Today at a Glance" }}
-        />
-        <Stack.Screen
           name="cycles/add-cycle"
           options={{ title: "Enter Period" }}
         />
@@ -89,21 +87,25 @@ export default function RootLayout() {
 
         {/* Health Insights Detail Pages */}
         <Stack.Screen
+          name="insights/health/hormonoscope"
+          options={{ title: "Today at a Glance" }}
+        />
+        <Stack.Screen
           name="insights/health/steps"
           options={{ title: "Steps" }}
-          />
+        />
         <Stack.Screen
           name="insights/health/sleep"
           options={{ title: "Sleep" }}
-          />
+        />
         <Stack.Screen
           name="insights/integrated/phase"
           options={{ title: "Phase-based Insights" }}
-          />
+        />
         <Stack.Screen
           name="insights/integrated/correlation"
           options={{ title: "Integrated Insights" }}
-          />
+        />
       </Stack>
     </PaperProvider>
   );

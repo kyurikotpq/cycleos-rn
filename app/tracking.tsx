@@ -1,9 +1,17 @@
-import { SafeAreaView, ScrollView, StyleSheet } from "react-native";
-
+import { useEffect, useRef, useState } from "react";
+import { SafeAreaView, ScrollView } from "react-native";
+import {
+  Chip,
+  Searchbar,
+  Appbar,
+  IconButton,
+  Portal,
+  Dialog,
+  Button,
+} from "react-native-paper";
+import * as SecureStore from "expo-secure-store";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { Chip, Searchbar, Appbar, Button } from "react-native-paper";
-import { useEffect, useRef, useState } from "react";
 import { router } from "expo-router";
 import {
   SYMPTOMS_CATEGORIZED,
@@ -17,6 +25,7 @@ import {
 import WeekViewDatePicker from "@/components/WeekViewDatePicker";
 import IsSavingButton from "@/components/IsSavingButton";
 import { fromDateId, toDateId } from "@marceloterreiro/flash-calendar";
+import dayjs from "dayjs";
 
 /**
  * This page shows:
@@ -26,6 +35,12 @@ import { fromDateId, toDateId } from "@marceloterreiro/flash-calendar";
 export default function SymptomTrackingScreen() {
   const today = new Date();
 
+  // Explanation Dialog State
+  const [visible, setVisible] = useState(false);
+  const showDialog = () => setVisible(true);
+  const hideDialog = () => setVisible(false);
+
+  // Filtering of symptoms by search
   const [searchQuery, setSearchQuery] = useState("");
   const [dbSymptoms, setDbSymptoms] = useState<SymptomItem[]>([]);
   const [selectedSymptoms, setSelectedSymptoms] = useState<SymptomItem[]>([]);
@@ -33,9 +48,13 @@ export default function SymptomTrackingScreen() {
     useState<SymptomCategory[]>(SYMPTOMS_CATEGORIZED);
   const [saveState, setSaveState] = useState("Save");
 
+  // Datepicker reference
   const datepickerRef = useRef<any>(null);
+
+  // Date currently picked (defaults to today)
   const [currentDate, setCurrentDate] = useState(toDateId(today));
 
+  // Helper function to compare two arrays for differences
   const compareArrays = (
     before: number[],
     after: number[]
@@ -52,6 +71,7 @@ export default function SymptomTrackingScreen() {
     };
   };
 
+  // Toggle symptom selection
   const toggleSymptom = (symptom: SymptomItem) => {
     if (isSelected(symptom.id)) {
       removeSymptom(symptom);
@@ -60,6 +80,7 @@ export default function SymptomTrackingScreen() {
     setSaveState("Save");
   };
 
+  // Remove symptom from selected list
   const removeSymptom = (item: SymptomItem) => {
     // We can do this because objects are by reference
     setSelectedSymptoms(
@@ -67,9 +88,11 @@ export default function SymptomTrackingScreen() {
     );
   };
 
+  // Check if a symptom is selected
   const isSelected = (symptomId: number) =>
     selectedSymptoms.some((s) => s.id == symptomId);
 
+  // Check if the search query is valid & the symptom matches the search query
   const isSymptom = (symptomLabel: string) => {
     return (
       searchQuery.length < 2 ||
@@ -77,6 +100,7 @@ export default function SymptomTrackingScreen() {
     );
   };
 
+  // Fetch symptoms for a specific date from DB
   const getSymptomsAtDate = async (date: string) => {
     const selectedDate = new Date(date);
     if (selectedDate > today) return;
@@ -89,6 +113,7 @@ export default function SymptomTrackingScreen() {
     setSaveState("Saved!");
   };
 
+  // Save symptoms to DB for the currently selected date
   const saveSymptoms = async () => {
     // Save cycle to DB
     setSaveState("Saving...");
@@ -108,10 +133,22 @@ export default function SymptomTrackingScreen() {
     };
 
     const transactionResult = await updateSymptomsTransaction(
-      toInsert.map((symptomId) => ({ dayId: currentDate, symptomId })),
+      toInsert.map((symptomId) => ({
+        dayId: currentDate,
+        symptomId,
+      })),
       toDelete,
       cycleDay
     );
+
+    // Update last check-in time if we're saving
+    // symptoms for today
+    if (currentDate === toDateId(today)) {
+      await SecureStore.setItemAsync(
+        "lastSymptomCheckInTime",
+        JSON.stringify(today.getTime())
+      );
+    }
 
     setSaveState("Saved!");
   };
@@ -169,13 +206,67 @@ export default function SymptomTrackingScreen() {
           currentSelectedDate={currentDate}
         />
       </ThemedView>
-      <ScrollView style={{ padding: 20, marginBottom: 40 }}>
-        <ThemedText
-          variant="title"
-          style={{ fontWeight: 700, marginBottom: 10 }}
+      <ScrollView
+        style={{
+          paddingTop: 10,
+          paddingLeft: 20,
+          paddingRight: 20,
+          marginBottom: 40,
+        }}
+      >
+        <ThemedView
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            marginBottom: 5,
+          }}
         >
-          How are you feeling today?
-        </ThemedText>
+          <ThemedText
+            variant="subtitle"
+            style={{
+              fontWeight: 700,
+              marginBottom: 2,
+            }}
+          >
+            {currentDate === toDateId(today)
+              ? "How are you feeling today?"
+              : "How did you feel on this day?"}
+          </ThemedText>
+
+          {/* Icon to trigger explanation diaglog */}
+          <IconButton icon="information" size={20} onPress={showDialog} />
+
+          {/* Dialog to explain how to log symptoms */}
+          <Portal>
+            <Dialog visible={visible} onDismiss={hideDialog}>
+              <Dialog.Title>Log all of your symptoms!</Dialog.Title>
+              <Dialog.Content>
+                <ThemedText variant="default" style={{ marginBottom: 20 }}>
+                  If you already checked some symptoms earlier today,{" "}
+                  <ThemedText variant="defaultSemiBold">
+                    don't uncheck them
+                  </ThemedText>
+                  —even if you stopped experiencing those symptoms later in the
+                  day.
+                </ThemedText>
+
+                <ThemedText variant="default">
+                  Instead,{" "}
+                  <ThemedText variant="defaultSemiBold">
+                    add any new symptoms
+                  </ThemedText>{" "}
+                  that you're experiencing now. CycleOS tracks the time you log
+                  your symptoms so you can always look back to see how they
+                  change throughout the day.
+                </ThemedText>
+              </Dialog.Content>
+              <Dialog.Actions>
+                <Button onPress={hideDialog}>OK, Got It!</Button>
+              </Dialog.Actions>
+            </Dialog>
+          </Portal>
+        </ThemedView>
         <Searchbar
           mode="view"
           placeholder="E.g. Bloating"
@@ -183,12 +274,12 @@ export default function SymptomTrackingScreen() {
           value={searchQuery}
           style={{ marginBottom: 30 }}
         />
-        {/* @TODO: Figure out custom icons */}
+        {/* @TODO: Figure out custom iconButtons */}
         {/* @TODO: Maybe make categories collapsible? */}
         {filteredSymptoms.map(
           (category) =>
             category.items.length > 0 && (
-              <ThemedView style={{ marginBottom: 30 }} key={category.label}>
+              <ThemedView style={{ marginBottom: 20 }} key={category.label}>
                 <ThemedText
                   variant="defaultSemiBold"
                   style={{ marginBottom: 10 }}
@@ -201,7 +292,7 @@ export default function SymptomTrackingScreen() {
                       isSymptom(symptom.label) && (
                         <Chip
                           showSelectedCheck={true}
-                          style={{ marginRight: 10 }}
+                          style={{ marginRight: 10, marginBottom: 10 }}
                           key={symptom.id}
                           selected={isSelected(symptom.id)}
                           onPress={() => toggleSymptom(symptom)}
