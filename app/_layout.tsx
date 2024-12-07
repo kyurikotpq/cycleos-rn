@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import * as SecureStore from "expo-secure-store";
 import "react-native-reanimated";
 
-import { useColorScheme } from "@/hooks/useColorScheme";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 import { useLoadAssets } from "@/hooks/useLoadAssets";
 import { expoDb } from "@/db/client";
@@ -12,22 +11,11 @@ import OnboardingScreen from "./onboarding";
 import { initialize } from "react-native-health-connect";
 
 import {
-  MD3LightTheme as DefaultTheme,
   PaperProvider,
 } from "react-native-paper";
-
-// @TODO Fake theming to get over it
-const theme = {
-  ...DefaultTheme,
-  colors: {
-    ...DefaultTheme.colors,
-    primary: "tomato",
-    secondary: "yellow",
-  },
-};
+import { CycleOSTheme } from "@/constants/Theme";
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   useDrizzleStudio(expoDb);
 
   // Load assets and run migrations
@@ -63,7 +51,7 @@ export default function RootLayout() {
   }
 
   return (
-    <PaperProvider theme={theme}>
+    <PaperProvider theme={CycleOSTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />

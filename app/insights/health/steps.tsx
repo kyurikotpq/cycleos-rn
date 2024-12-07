@@ -5,10 +5,14 @@ import { useEffect, useMemo, useState } from "react";
 import { StyleSheet, ScrollView, SafeAreaView, Text, View } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { readRecords, StepsRecord } from "react-native-health-connect";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 
-export default function StepsInsightsScreen() {
-  const todayDayJS = useMemo(() => dayjs(), []);
+interface StepsInsightsScreenProps {
+  todayDayJS: Dayjs;
+}
+export default function StepsInsightsScreen({
+  todayDayJS,
+}: StepsInsightsScreenProps) {
   const [TARGET_STEPS, setTargetSteps] = useState(1);
   const [TODAY_STEPS, setTodaySteps] = useState(0);
 

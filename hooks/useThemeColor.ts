@@ -5,11 +5,11 @@
 
 import { useColorScheme } from 'react-native';
 
-import { Colors } from '@/constants/Colors';
+import { CycleOSTheme } from '@/constants/Theme';
 
 export function useThemeColor(
   props: { light?: string; dark?: string },
-  colorName: keyof typeof Colors.light & keyof typeof Colors.dark
+  colorName: keyof typeof CycleOSTheme.colors
 ) {
 
   // const theme = useColorScheme() ?? 'light';
@@ -21,6 +21,6 @@ export function useThemeColor(
   if (colorFromProps) {
     return colorFromProps;
   } else {
-    return Colors[theme][colorName];
+    return CycleOSTheme.colors[colorName];
   }
 }

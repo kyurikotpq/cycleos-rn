@@ -9,9 +9,13 @@ import dayjs, { Dayjs } from "dayjs";
 import { fetchEnergyAtDate } from "@/db/controllers/symptoms";
 import { getStepsForDay } from "@/db/controllers/steps";
 
-export default function HealthInsightsScreen() {
-  const todayDayJS = useMemo(() => dayjs(), []);
+interface HealthInsightsScreenProps {
+  todayDayJS: Dayjs;
+}
 
+export default function HealthInsightsScreen({
+  todayDayJS,
+}: HealthInsightsScreenProps) {
   // Summary Statistics for Sleep Data
   const [TODAY_SLEEP_SCORE, setTodaySleepScore] = useState("");
   const [TODAY_SLEEP_DURATION, setTodaySleepDuration] = useState(0);

@@ -107,23 +107,10 @@ export default function InsightsScreen() {
           elevation={0}
           style={{ paddingBottom: 20, paddingRight: 20, paddingLeft: 20 }}
         >
-          {screen === "health" && <HealthInsightsScreen />}
+          {screen === "health" && <HealthInsightsScreen todayDayJS={todayDayJS} />}
           {screen === "trends" && <IntegratedInsightsScreen />}
         </Surface>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  headerImage: {
-    color: "#808080",
-    bottom: -90,
-    left: -35,
-    position: "absolute",
-  },
-  titleContainer: {
-    flexDirection: "row",
-    gap: 8,
-  },
-});

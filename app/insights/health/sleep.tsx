@@ -6,10 +6,13 @@ import { StyleSheet, ScrollView, SafeAreaView, Text, View } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { Card } from "react-native-paper";
 import { readRecords, SleepSessionRecord } from "react-native-health-connect";
-import dayjs from "dayjs";
+import dayjs, {Dayjs} from "dayjs";
 
-export default function SleepInsightsScreen() {
-  const todayDayJS = useMemo(() => dayjs(), []);
+interface SleepInsightsScreenProps {
+  todayDayJS: Dayjs;
+}
+
+export default function SleepInsightsScreen({ todayDayJS }: SleepInsightsScreenProps) {
 //   const [TODAY_Sleep, setTodaySleep] = useState(0);
 
   const getData = async () => {
