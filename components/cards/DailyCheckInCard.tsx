@@ -12,7 +12,7 @@ interface DailyCheckInCardProps {
 export default function DailyCheckInCard({
   todayDayJS,
 }: DailyCheckInCardProps) {
-  // @TODO: Change text to prompt daily-check in after 12pm local time
+  const LOG_NEW_SYMPTOMS_SUBTITLE = "New symptoms? Log them now.";
   const [title, setTitle] = useState("How are you feeling today?");
   const [subtitle, setSubtitle] = useState(
     "Check in now to get your insights."
@@ -43,13 +43,13 @@ export default function DailyCheckInCard({
           Math.random() * (MorningDailyQuotes.length - 1)
         );
         setTitle(MorningDailyQuotes[randomQuoteIndex]);
-        setSubtitle("");
+        setSubtitle(LOG_NEW_SYMPTOMS_SUBTITLE);
       } else {
         const randomQuoteIndex = Math.floor(
           Math.random() * (EveningDailyQuotes.length - 1)
         );
         setTitle(EveningDailyQuotes[randomQuoteIndex]);
-        setSubtitle("");
+        setSubtitle(LOG_NEW_SYMPTOMS_SUBTITLE);
       }
     }
   };
@@ -72,7 +72,10 @@ export default function DailyCheckInCard({
           titleVariant="titleMedium"
           subtitle={subtitle && <Text>{subtitle}</Text>}
           left={(props) => (
-            <Avatar.Icon {...props} icon={!subtitle ? "dumbbell" : "help"} />
+            <Avatar.Icon
+              {...props}
+              icon={subtitle == LOG_NEW_SYMPTOMS_SUBTITLE ? "dumbbell" : "help"}
+            />
           )}
         />
       </Card>

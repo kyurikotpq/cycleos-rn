@@ -6,13 +6,11 @@ import {
   Appbar,
   IconButton,
   Portal,
-  Dialog,
-  Button,
 } from "react-native-paper";
 import * as SecureStore from "expo-secure-store";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import {
   SYMPTOMS_CATEGORIZED,
   SymptomCategory,
@@ -26,6 +24,8 @@ import WeekViewDatePicker from "@/components/WeekViewDatePicker";
 import IsSavingButton from "@/components/IsSavingButton";
 import { fromDateId, toDateId } from "@marceloterreiro/flash-calendar";
 import dayjs from "dayjs";
+import LogSymptomInfoDialog from "@/components/dialogs/LogSymptomInfoDialog";
+import VisitInsightsDialog from "@/components/dialogs/VisitInsightsDialog";
 
 /**
  * This page shows:
@@ -33,12 +33,19 @@ import dayjs from "dayjs";
  * 2) a calendar picker that allows retrospective tagging of symptoms
  */
 export default function SymptomTrackingScreen() {
+  const localRouteParams = useLocalSearchParams();
   const today = new Date();
 
   // Explanation Dialog State
   const [visible, setVisible] = useState(false);
-  const showDialog = () => setVisible(true);
-  const hideDialog = () => setVisible(false);
+  const showExplanationDialog = () => setVisible(true);
+  const hideExplanationDialog = () => setVisible(false);
+
+  // Insights Dialog State
+  const [visitInsightsDialogVisible, setVisitInsightsDialogVisible] =
+    useState(false);
+  const showInsightsDialog = () => setVisitInsightsDialogVisible(true);
+  const hideInsightsDialog = () => setVisitInsightsDialogVisible(false);
 
   // Filtering of symptoms by search
   const [searchQuery, setSearchQuery] = useState("");
@@ -141,13 +148,21 @@ export default function SymptomTrackingScreen() {
       cycleDay
     );
 
-    // Update last check-in time if we're saving
-    // symptoms for today
     if (currentDate === toDateId(today)) {
+      // Update last check-in time if we're saving
+      // symptoms for today
       await SecureStore.setItemAsync(
         "lastSymptomCheckInTime",
         JSON.stringify(today.getTime())
       );
+
+      // If we came from the Agenda page, ask if the user wants to
+      // 1) go back to the Agenda page or
+      // 2) view their insights for today (hormonoscope page)
+      if (localRouteParams?.insights === "true") {
+        // Note: we can only parse string params, hence the "true" string
+        showInsightsDialog();
+      }
     }
 
     setSaveState("Saved!");
@@ -235,37 +250,11 @@ export default function SymptomTrackingScreen() {
           </ThemedText>
 
           {/* Icon to trigger explanation diaglog */}
-          <IconButton icon="information" size={20} onPress={showDialog} />
-
-          {/* Dialog to explain how to log symptoms */}
-          <Portal>
-            <Dialog visible={visible} onDismiss={hideDialog}>
-              <Dialog.Title>Log all of your symptoms!</Dialog.Title>
-              <Dialog.Content>
-                <ThemedText variant="default" style={{ marginBottom: 20 }}>
-                  If you already checked some symptoms earlier today,{" "}
-                  <ThemedText variant="defaultSemiBold">
-                    don't uncheck them
-                  </ThemedText>
-                  —even if you stopped experiencing those symptoms later in the
-                  day.
-                </ThemedText>
-
-                <ThemedText variant="default">
-                  Instead,{" "}
-                  <ThemedText variant="defaultSemiBold">
-                    add any new symptoms
-                  </ThemedText>{" "}
-                  that you're experiencing now. CycleOS tracks the time you log
-                  your symptoms so you can always look back to see how they
-                  change throughout the day.
-                </ThemedText>
-              </Dialog.Content>
-              <Dialog.Actions>
-                <Button onPress={hideDialog}>OK, Got It!</Button>
-              </Dialog.Actions>
-            </Dialog>
-          </Portal>
+          <IconButton
+            icon="information"
+            size={20}
+            onPress={showExplanationDialog}
+          />
         </ThemedView>
         <Searchbar
           mode="view"
@@ -308,6 +297,23 @@ export default function SymptomTrackingScreen() {
       </ScrollView>
 
       <IsSavingButton onPressCB={saveSymptoms} saveState={saveState} />
+      <Portal>
+        {/* Dialog to explain how to log symptoms */}
+        <LogSymptomInfoDialog
+          visible={visible}
+          onDismiss={hideExplanationDialog}
+          children={undefined}
+        />
+        {/* Dialog to route to Hormonoscope page */}
+        <VisitInsightsDialog
+          visible={visitInsightsDialogVisible}
+          onDismiss={(confirm: boolean) =>
+            !confirm
+              ? hideInsightsDialog()
+              : router.replace("/insights/health/hormonoscope")
+          }
+        />
+      </Portal>
     </SafeAreaView>
   );
 }
