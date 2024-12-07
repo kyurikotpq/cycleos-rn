@@ -26,7 +26,7 @@ export const PHASE_OPTIONS = [
   },
   {
     label: "Mid Luteal",
-    value: "mid-luteal",
+    value: "late-luteal",
   },
 ];
 
@@ -35,7 +35,7 @@ export const PHASE_BG_MAP = {
   follicular: require("@/assets/images/follicular-bg.png"),
   ovulatory: require("@/assets/images/ovulatory-bg.png"),
   "early-luteal": require("@/assets/images/early-luteal-bg.png"),
-  "mid-luteal": require("@/assets/images/mid-luteal-bg.png"),
+  "late-luteal": require("@/assets/images/late-luteal-bg.png"),
   default: "",
 };
 
@@ -44,6 +44,6 @@ export const PHASE_COLOR_MAP = {
   follicular: { color: "#F1B8D1", label: "Follicular" },
   ovulatory: { color: "#BAD6AE", label: "Ovulatory" },
   "early-luteal": { color: "#FFCA6A", label: "Early Luteal" },
-  "mid-luteal": { color: "#006E90", label: "Mid Luteal" },
+  "late-luteal": { color: "#006E90", label: "Mid Luteal" },
   default: { color: "rgba(100, 100, 100, 0.5)", label: "No Phase" },
 };
