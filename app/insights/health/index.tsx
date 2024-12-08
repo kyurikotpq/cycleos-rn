@@ -14,6 +14,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { SymptomItem } from "@/constants/Symptoms";
 import { convertMinToHrMin } from "@/util/SleepSession";
 import { router } from "expo-router";
+import CalendarService from "@/services/Calendar";
 
 interface HealthInsightsScreenProps {
   todayDayJS: Dayjs;
@@ -103,7 +104,7 @@ export default function HealthInsightsScreen({
 
           <Card.Actions>
             <Button style={{ marginRight: "auto" }}>No</Button>
-            <Button onPress={() => console.log("@TODO IMPLEMENT")}>Yes</Button>
+            <Button onPress={async () => await CalendarService.checkCalendarForFreeSpace(30)}>Yes</Button>
           </Card.Actions>
         </Card>
       )}
