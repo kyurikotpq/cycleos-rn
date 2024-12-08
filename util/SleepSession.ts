@@ -181,3 +181,6 @@ export const formatSleepSession = (session: any) => {
 
   return { session: formattedSleepSession, stages: formattedSleepStages };
 };
+
+export const convertMinToHrMin = (minutes: number) =>
+  `${Math.floor(minutes / 60)}h ${minutes % 60}m`;

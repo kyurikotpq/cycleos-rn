@@ -75,10 +75,6 @@ export default function RootLayout() {
 
         {/* Health Insights Detail Pages */}
         <Stack.Screen
-          name="insights/health/hormonoscope"
-          options={{ title: "Today at a Glance" }}
-        />
-        <Stack.Screen
           name="insights/health/steps"
           options={{ title: "Steps" }}
         />

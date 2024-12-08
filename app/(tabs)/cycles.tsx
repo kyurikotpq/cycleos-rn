@@ -50,7 +50,7 @@ export default function CyclesScreen() {
           {currentCycle && (
             <Card mode="elevated" style={{ marginBottom: 20 }}>
               <ThemedText variant="subtitle" style={{ fontWeight: 700 }}>
-                @TODO add the circle Here
+                Current Cycle
               </ThemedText>
               <ThemedText>
                 {currentCycle.startDate &&

@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import * as SecureStore from "expo-secure-store";
-import { Card } from "react-native-paper";
+import { Button, Card, Surface, Text } from "react-native-paper";
 
 import StepsCard from "@/components/cards/StepsCard";
 import SleepCard from "@/components/cards/SleepCard";
@@ -8,6 +8,12 @@ import { getLastNightSleepStats } from "@/db/controllers/sleep";
 import dayjs, { Dayjs } from "dayjs";
 import { fetchEnergyAtDate } from "@/db/controllers/symptoms";
 import { getStepsForDay } from "@/db/controllers/steps";
+import WorkoutsCard from "@/components/cards/WorkoutsCard";
+import { MorningDailyQuotes } from "@/constants/Quotes";
+import { ThemedText } from "@/components/ThemedText";
+import { SymptomItem } from "@/constants/Symptoms";
+import { convertMinToHrMin } from "@/util/SleepSession";
+import { router } from "expo-router";
 
 interface HealthInsightsScreenProps {
   todayDayJS: Dayjs;
@@ -16,6 +22,10 @@ interface HealthInsightsScreenProps {
 export default function HealthInsightsScreen({
   todayDayJS,
 }: HealthInsightsScreenProps) {
+  // One statement summary of the day
+  const [summary, setSummary] = useState("Today at a glance");
+  const [negativeEnergy, setNegativeEnergy] = useState<SymptomItem[]>([]);
+
   // Summary Statistics for Sleep Data
   const [TODAY_SLEEP_SCORE, setTodaySleepScore] = useState("");
   const [TODAY_SLEEP_DURATION, setTodaySleepDuration] = useState(0);
@@ -25,6 +35,8 @@ export default function HealthInsightsScreen({
   // Summary Statistics for Steps Data
   const [TARGET_STEPS, setTargetSteps] = useState(1);
   const [TODAY_STEPS, setTodaySteps] = useState(0);
+
+  // Track
 
   const getSleepData = async () => {
     // Get last night's sleep data
@@ -45,6 +57,9 @@ export default function HealthInsightsScreen({
     );
     if (energyResult.length > 0) {
       setTodaySleepScore(energyResult[0].label);
+      setNegativeEnergy(
+        energyResult.filter((symptom: SymptomItem) => symptom.isNegative)
+      );
     }
   };
 
@@ -64,10 +79,35 @@ export default function HealthInsightsScreen({
 
   useEffect(() => {
     getData();
-  }, []);
+  }, [todayDayJS]);
 
   return (
     <>
+      {/* Only ask this if TODAY_SLEEP_DURATION < 420 && negativeEnergy.length > 0 && user has not dismissed before */}
+      {TODAY_SLEEP_DURATION < 420 && negativeEnergy.length > 0 && (
+        <Card mode="elevated" style={{ marginBottom: 20 }}>
+          <Card.Content>
+            {/* Other variations: You slept late; you slept <7h; your sleep was fragmented */}
+            <ThemedText variant="default" style={{ marginBottom: 20 }}>
+              You mentioned feeling{" "}
+              {negativeEnergy && negativeEnergy[0].label.toLowerCase()} today
+              and you only slept {convertMinToHrMin(TODAY_SLEEP_DURATION)} hours
+              last night.
+            </ThemedText>
+            <ThemedText variant="defaultSemiBold" style={{ marginBottom: 10 }}>
+              Do you want to schedule a{" "}
+              {todayDayJS.hour() < 13 ? "nap" : "meditation session"} later
+              today?
+            </ThemedText>
+          </Card.Content>
+
+          <Card.Actions>
+            <Button style={{ marginRight: "auto" }}>No</Button>
+            <Button onPress={() => console.log("@TODO IMPLEMENT")}>Yes</Button>
+          </Card.Actions>
+        </Card>
+      )}
+
       <SleepCard
         score={TODAY_SLEEP_SCORE}
         duration={TODAY_SLEEP_DURATION}
@@ -77,9 +117,7 @@ export default function HealthInsightsScreen({
 
       <StepsCard todaySteps={TODAY_STEPS} targetSteps={TARGET_STEPS} />
 
-      <Card mode="elevated" style={{ marginBottom: 20 }}>
-        <Card.Title title="Workouts" subtitle="Workouts this week" />
-      </Card>
+      <WorkoutsCard />
     </>
   );
 }

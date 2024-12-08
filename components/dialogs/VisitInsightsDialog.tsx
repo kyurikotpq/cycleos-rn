@@ -1,4 +1,4 @@
-import { Dialog, Button, DialogProps } from "react-native-paper";
+import { Dialog, Button } from "react-native-paper";
 import { ThemedText } from "@/components/ThemedText";
 
 interface VisitInsightsDialogProps {
@@ -18,7 +18,7 @@ export default function VisitInsightsDialog({
         </ThemedText>
       </Dialog.Content>
       <Dialog.Actions>
-        <Button onPress={() => onDismiss(false)} style={{ marginRight: "auto" }}>Go back to Agenda</Button>
+        <Button onPress={() => onDismiss(false)} style={{ marginRight: "auto" }}>No</Button>
         <Button onPress={() => onDismiss(true)}>Yes</Button>
       </Dialog.Actions>
     </Dialog>

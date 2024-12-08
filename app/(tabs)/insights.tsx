@@ -22,31 +22,31 @@ import * as SecureStore from "expo-secure-store";
 import { seedSymptomsConstructs } from "@/db/seed";
 import IntegratedInsightsScreen from "../insights/integrated";
 
-export default function InsightsScreen() {
-  dayjs.extend(relativeTime);
-  const todayDayJS = useMemo(() => dayjs(), []);
+dayjs.extend(relativeTime);
 
+export default function InsightsScreen() {
   const [screen, setScreen] = useState("health");
   const [syncing, setSyncing] = useState(true);
   const [syncedText, setSyncedText] = useState("Syncing...");
+  const [todayDayJS, setTodayDayJS] = useState(dayjs());
 
   const handleSyncFinish = (lastRetrievalTime: Dayjs) => {
     setSyncing(false);
-    setSyncedText(`Last Synced: ${dayjs().to(lastRetrievalTime)}`);
+    setTodayDayJS(dayjs());
+    setSyncedText(`Last Synced: ${todayDayJS.to(lastRetrievalTime)}`);
   };
 
   const syncHCtoSQLite = async (force?: boolean) => {
-    const now = dayjs();
     const lastRetrievalTime = await HealthConnectService.checkRetrievalTime(
       "Steps",
       todayDayJS
     );
 
-    if (force || now.diff(lastRetrievalTime, "minutes") > 5) {
+    if (force || todayDayJS.diff(lastRetrievalTime, "minutes") > 5) {
       setSyncing(true);
       setSyncedText("Syncing...");
       const syncResult = await HealthConnectService.syncAll(todayDayJS);
-      handleSyncFinish(now);
+      handleSyncFinish(todayDayJS);
 
       if (Object.values(syncResult).includes(false)) {
         console.log("Error in syncing:", syncResult);

@@ -310,7 +310,7 @@ export default function SymptomTrackingScreen() {
           onDismiss={(confirm: boolean) =>
             !confirm
               ? hideInsightsDialog()
-              : router.replace("/insights/health/hormonoscope")
+              : router.replace("/insights")
           }
         />
       </Portal>

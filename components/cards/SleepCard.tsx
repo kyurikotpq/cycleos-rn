@@ -2,8 +2,9 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { router } from "expo-router";
 import { Card } from "react-native-paper";
-import dayjs, { Dayjs } from "dayjs";
+import { Dayjs } from "dayjs";
 import { Ionicons } from "@expo/vector-icons";
+import { convertMinToHrMin } from "@/util/SleepSession";
 
 interface SleepCardProps {
   score: string; // One of the energy construct values from Symptoms.ts
@@ -20,8 +21,8 @@ export default function SleepCard({
 }: SleepCardProps) {
   return (
     <Card
-      mode="elevated"
-      style={{ marginBottom: 20, overflow: "hidden" }}
+      mode="contained"
+      style={{ marginBottom: 20 }}
       onPress={() => router.push("/insights/health/sleep")}
     >
       <Card.Content
@@ -96,9 +97,7 @@ export default function SleepCard({
                 size={20}
                 color="black"
               />
-              <ThemedText>{`${Math.floor(duration / 60)}h ${
-                duration % 60
-              }m`}</ThemedText>
+              <ThemedText>{convertMinToHrMin(duration)}</ThemedText>
             </ThemedView>
           </ThemedView>
         )}

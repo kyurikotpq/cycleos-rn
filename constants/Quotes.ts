@@ -1,10 +1,10 @@
 export const MorningDailyQuotes = [
+  "Go forth and conquer!",
   "Your potential knows no bounds.",
   "You're stronger than you think.",
   "Make today a masterpiece.",
   "Confidence is your superpower.",
   "You have what it takes.",
-  "Go forth and conquer.",
   "You'll do great today.",
   "You're unstoppable. Keep the momentum!",
 ];

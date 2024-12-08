@@ -32,7 +32,7 @@ export default function DailyCheckInCard({
       lastSymptomCheckInTimeDayJS.hour() < todayDayJS.hour()
     ) {
       setTitle("How are you feeling this evening?");
-      setSubtitle("Check in now to complete your insights for today.");
+      setSubtitle("Check in now to complete your insights.");
     } else if (
       lastSymptomCheckInTimeDayJS.format("YYYY-MM-DD") ===
       todayDayJS.format("YYYY-MM-DD")
@@ -59,26 +59,26 @@ export default function DailyCheckInCard({
   }, []);
 
   return (
-    <>
-      <Card
-        mode="elevated"
-        onPress={() =>
-          router.push({ pathname: "/tracking", params: { insights: "true" } })
-        }
-      >
-        <Card.Title
-          title={title}
-          titleStyle={{ marginBottom: 0 }}
-          titleVariant="titleMedium"
-          subtitle={subtitle && <Text>{subtitle}</Text>}
-          left={(props) => (
-            <Avatar.Icon
-              {...props}
-              icon={subtitle == LOG_NEW_SYMPTOMS_SUBTITLE ? "dumbbell" : "help"}
-            />
-          )}
-        />
-      </Card>
-    </>
+    <Card
+      mode="elevated"
+      style={{ paddingTop: 10, paddingBottom: 10, marginBottom: 20 }}
+      onPress={() =>
+        router.push({ pathname: "/tracking", params: { insights: "true" } })
+      }
+    >
+      <Card.Title
+        title={title}
+        titleStyle={{ marginBottom: 0 }}
+        titleVariant="titleMedium"
+        subtitle={subtitle && <Text>{subtitle}</Text>}
+        subtitleNumberOfLines={2}
+        left={(props) => (
+          <Avatar.Icon
+            {...props}
+            icon={subtitle == LOG_NEW_SYMPTOMS_SUBTITLE ? "dumbbell" : "help"}
+          />
+        )}
+      />
+    </Card>
   );
 }

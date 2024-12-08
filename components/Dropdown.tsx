@@ -1,7 +1,7 @@
-import { useRef, useState } from "react";
-import { View, Pressable } from "react-native";
+import { useState } from "react";
+import { Pressable } from "react-native";
 import { TextInputLabelProp } from "react-native-paper/lib/typescript/components/TextInput/types";
-import { Menu, TextInput } from "react-native-paper";
+import { Menu } from "react-native-paper";
 import { ThemedText } from "./ThemedText";
 import { Ionicons } from "@expo/vector-icons";
 
