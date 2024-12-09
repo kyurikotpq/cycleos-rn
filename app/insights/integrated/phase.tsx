@@ -3,7 +3,7 @@ import { ThemedView } from "@/components/ThemedView";
 import Dropdown, { DropdownOption } from "@/components/Dropdown";
 import { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native";
-import YearHeatMap from "@/components/HeatMap/YearHeatMap";
+import YearHeatmap from "@/components/charts/YearHeatmap";
 import { Chip } from "react-native-paper";
 import { HEALTH_OPTIONS, PHASE_OPTIONS, PHASE_BG_MAP } from "@/constants/InsightsOptions";
 import { getInsightsForYear } from "@/db/controllers/insights";
@@ -78,24 +78,10 @@ export default function PhaseBasedInsightsScreen() {
             options={HEALTH_OPTIONS}
             selectedLabel={selectedHealthConstruct?.label}
             onSelect={handleHealthSelect}
-            style={{ marginBottom: 20 }}
           />
-          <ThemedView
-            style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}
-          >
-            {PHASE_OPTIONS.map((phase) => (
-              <Chip
-                key={phase.value}
-                style={{ marginRight: 5, marginBottom: 5 }}
-                onPress={() => togglePhase(phase.value)}
-                selected={isPhaseSelected(phase.value)}
-              >
-                {phase.label}
-              </Chip>
-            ))}
-          </ThemedView>
         </ThemedView>
-        <YearHeatMap
+        {/* Legend should be part of Year HeatMap. Colorbar should be part of Interactive HeatMap */}
+        <YearHeatmap
           year={selectedYear}
           data={yearData}
           colorKey={selectedHealthConstruct?.value}
