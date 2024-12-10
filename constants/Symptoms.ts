@@ -80,13 +80,13 @@ const ENERGY_ITEMS = [
 ];
 
 export const SYMPTOMS_CATEGORIZED = [
+  { label: "Energy", items: ENERGY_ITEMS },
+  { label: "Mood", items: MOOD_ITEMS },
+  { label: "Mind", items: MIND_ITEMS },
   { label: "Menstruation", items: MENSTRUATION_ITEMS },
   { label: "Pain", items: PAIN_ITEMS },
   { label: "Digestion", items: DIGESTION_ITEMS },
-  { label: "Mood", items: MOOD_ITEMS },
-  { label: "Mind", items: MIND_ITEMS },
   { label: "Skin", items: SKIN_ITEMS },
-  { label: "Energy", items: ENERGY_ITEMS },
 ];
 export const SYMPTOMS = [
   ...MENSTRUATION_ITEMS,

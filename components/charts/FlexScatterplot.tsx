@@ -4,6 +4,7 @@ import {
   Circle,
   Text,
   Line,
+  Group,
   useFont,
   matchFont,
   useFonts,
@@ -152,7 +153,7 @@ export default function FlexScatterplot({
           {getTicks(xMin, xMax, numXTicks).map((tick, index) => {
             const x = scaleX(tick);
             return (
-              <>
+              <Group key={`x-axis-tick-${index}`}>
                 <Line
                   key={`x-tick-${index}`}
                   p1={{ x, y: height - padding }}
@@ -168,7 +169,7 @@ export default function FlexScatterplot({
                   color="black"
                   font={font}
                 />
-              </>
+              </Group>
             );
           })}
 
@@ -176,7 +177,7 @@ export default function FlexScatterplot({
           {getTicks(yMin, yMax, numYTicks).map((tick, index) => {
             const y = scaleY(tick);
             return (
-              <>
+              <Group key={`y-axis-tick-${index}`}>
                 <Line
                   key={`y-tick-${index}`}
                   p1={{ x: originX - 7, y }}
@@ -192,18 +193,20 @@ export default function FlexScatterplot({
                   color="#000"
                   font={font}
                 />
-              </>
+              </Group>
             );
           })}
 
           {/* Render data points */}
-          {data.map((point, index) => {
-            const x = scaleX(point[xKey]);
-            const y = scaleY(point[yKey]);
-            const color =
-              colorMap[point[colorKey]]?.color || colorMap.default.color;
-            return renderShape(x, y, color, `point-${index}`);
-          })}
+          {xKey &&
+            yKey &&
+            data?.map((point, index) => {
+              const x = scaleX(point[xKey]);
+              const y = scaleY(point[yKey]);
+              const color =
+                colorMap[point[colorKey]]?.color || colorMap.default.color;
+              return renderShape(x, y, color, `p-${color}-${index}`);
+            })}
         </Canvas>
       </ScrollView>
     </View>

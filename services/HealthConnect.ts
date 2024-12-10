@@ -24,13 +24,13 @@ class HealthConnectService {
 
   async readHealthRecordsForType(
     type: "SleepSession" | "Steps" | "ExerciseSession",
-    startTime: Dayjs,
+    startDayJS: Dayjs,
     endDayJS: Dayjs
   ) {
     const result = await readRecords(type, {
       timeRangeFilter: {
         operator: "between",
-        startTime: startTime.toISOString(),
+        startTime: startDayJS.toISOString(),
         endTime: endDayJS.toISOString(),
       },
     });
@@ -98,7 +98,10 @@ class HealthConnectService {
 
   async updateLastRetrievalTime(type: string) {
     const key = `last${type}RetrievalTime`;
-    const _ = await SecureStore.setItemAsync(key, `${dayjs().valueOf()}`);
+    const _ = await SecureStore.setItemAsync(
+      key,
+      `${dayjs().startOf("day").valueOf()}`
+    );
     return true;
   }
 

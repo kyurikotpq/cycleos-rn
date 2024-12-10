@@ -15,6 +15,7 @@ import {
 import { FlatList, GestureHandlerRootView } from "react-native-gesture-handler";
 import dayjs from "dayjs";
 import { Surface } from "react-native-paper";
+import { CycleOSTheme } from "@/constants/Theme";
 
 interface WeekViewDatePickerProps {
   initialDate?: string;
@@ -101,7 +102,15 @@ const WeekViewDatePicker = (
             { opacity: maxDay && date.isAfter(maxDay) ? 0.2 : 1 },
           ]}
         >
-          <Text style={styles.dateText}>{date.format("DD")}</Text>
+          <Text
+            style={[
+              styles.dateText,
+              isToday && { color: CycleOSTheme.colors.primary },
+              isCurrentDate && { color: CycleOSTheme.colors.onPrimary },
+            ]}
+          >
+            {date.format("DD")}
+          </Text>
         </TouchableOpacity>
       );
     });
@@ -156,7 +165,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingLeft: 10,
     paddingRight: 10,
-    paddingTop: 5,
+    paddingTop: 10,
   },
   weekContainer: {
     width: screenWidth,
@@ -177,8 +186,9 @@ const styles = StyleSheet.create({
   },
   today: {
     borderWidth: 1,
+    borderColor: CycleOSTheme.colors.primary,
   },
   currentDate: {
-    backgroundColor: "#ffd000",
+    backgroundColor: CycleOSTheme.colors.primary,
   },
 });

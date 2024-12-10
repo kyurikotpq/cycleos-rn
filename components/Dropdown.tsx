@@ -1,9 +1,10 @@
-import { useRef, useState } from "react";
-import { View, Pressable } from "react-native";
+import { useState } from "react";
+import { Pressable } from "react-native";
 import { TextInputLabelProp } from "react-native-paper/lib/typescript/components/TextInput/types";
-import { Menu, TextInput } from "react-native-paper";
+import { Menu } from "react-native-paper";
 import { ThemedText } from "./ThemedText";
 import { Ionicons } from "@expo/vector-icons";
+import { CycleOSTheme } from "@/constants/Theme";
 
 export interface DropdownOption {
   label: string;
@@ -42,11 +43,12 @@ export default function DropdownInput({
     <Pressable
       style={{
         ...style,
-        paddingTop: 10,
+        paddingTop: 20,
         paddingRight: 44,
-        paddingBottom: 10,
+        paddingBottom: 20,
         paddingLeft: 16,
-        backgroundColor: "#e0e0e0",
+        backgroundColor: CycleOSTheme.colors.secondaryContainer,
+        color: CycleOSTheme.colors.onSecondaryContainer,
         borderBottomWidth: 1,
       }}
       onLayout={(event) => {
@@ -66,7 +68,7 @@ export default function DropdownInput({
         name="caret-down"
         size={20}
         color="black"
-        style={{ position: "absolute", right: 10, top: "48%" }}
+        style={{ position: "absolute", right: 15, top: 23 }}
       />
       <Menu
         visible={showMenu}

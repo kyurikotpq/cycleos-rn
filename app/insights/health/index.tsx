@@ -1,6 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
 import * as SecureStore from "expo-secure-store";
-import { Card } from "react-native-paper";
 
 import StepsCard from "@/components/cards/StepsCard";
 import SleepCard from "@/components/cards/SleepCard";
@@ -8,9 +7,25 @@ import { getLastNightSleepStats } from "@/db/controllers/sleep";
 import dayjs, { Dayjs } from "dayjs";
 import { fetchEnergyAtDate } from "@/db/controllers/symptoms";
 import { getStepsForDay } from "@/db/controllers/steps";
+import WorkoutsCard from "@/components/cards/WorkoutsCard";
+import { MorningDailyQuotes } from "@/constants/Quotes";
+import { ThemedText } from "@/components/ThemedText";
+import { SymptomItem } from "@/constants/Symptoms";
+import { convertMinToHrMin } from "@/util/SleepSession";
+import { router } from "expo-router";
+import CalendarService from "@/services/Calendar";
+import NapOrMeditateCard from "@/components/cards/NapOrMeditateCard";
 
-export default function HealthInsightsScreen() {
-  const todayDayJS = useMemo(() => dayjs(), []);
+interface HealthInsightsScreenProps {
+  todayDayJS: Dayjs;
+}
+
+export default function HealthInsightsScreen({
+  todayDayJS,
+}: HealthInsightsScreenProps) {
+  // One statement summary of the day
+  const [summary, setSummary] = useState("Today at a glance");
+  const [negativeEnergy, setNegativeEnergy] = useState<SymptomItem[]>([]);
 
   // Summary Statistics for Sleep Data
   const [TODAY_SLEEP_SCORE, setTodaySleepScore] = useState("");
@@ -21,6 +36,8 @@ export default function HealthInsightsScreen() {
   // Summary Statistics for Steps Data
   const [TARGET_STEPS, setTargetSteps] = useState(1);
   const [TODAY_STEPS, setTodaySteps] = useState(0);
+
+  // Track
 
   const getSleepData = async () => {
     // Get last night's sleep data
@@ -41,6 +58,9 @@ export default function HealthInsightsScreen() {
     );
     if (energyResult.length > 0) {
       setTodaySleepScore(energyResult[0].label);
+      setNegativeEnergy(
+        energyResult.filter((symptom: SymptomItem) => symptom.isNegative)
+      );
     }
   };
 
@@ -60,10 +80,17 @@ export default function HealthInsightsScreen() {
 
   useEffect(() => {
     getData();
-  }, []);
+  }, [todayDayJS]);
 
   return (
     <>
+      <NapOrMeditateCard
+        negativeEnergy={negativeEnergy[0]}
+        sleepDuration={TODAY_SLEEP_DURATION}
+        sleepTime={TODAY_SLEEP_TIME}
+        todayDayJS={todayDayJS}
+      />
+
       <SleepCard
         score={TODAY_SLEEP_SCORE}
         duration={TODAY_SLEEP_DURATION}
@@ -73,9 +100,7 @@ export default function HealthInsightsScreen() {
 
       <StepsCard todaySteps={TODAY_STEPS} targetSteps={TARGET_STEPS} />
 
-      <Card mode="elevated" style={{ marginBottom: 20 }}>
-        <Card.Title title="Workouts" subtitle="Workouts this week" />
-      </Card>
+      <WorkoutsCard />
     </>
   );
 }

@@ -6,6 +6,7 @@ import * as SecureStore from "expo-secure-store";
 import { router } from "expo-router";
 import { Card } from "react-native-paper";
 import { Dayjs } from "dayjs";
+import { CycleOSTheme } from "@/constants/Theme";
 
 interface StepsCardProps {
   todaySteps: number;
@@ -13,9 +14,11 @@ interface StepsCardProps {
 }
 
 export default function StepsCard({ todaySteps, targetSteps }: StepsCardProps) {
+  const COMPLETION_RATE = (todaySteps / targetSteps) * 100;
+
   return (
     <Card
-      mode="elevated"
+      mode="contained"
       style={{ marginBottom: 20, overflow: "hidden" }}
       onPress={() => router.push("/insights/health/steps")}
     >
@@ -29,18 +32,37 @@ export default function StepsCard({ todaySteps, targetSteps }: StepsCardProps) {
         <View
           style={{
             position: "absolute",
-            backgroundColor: "#ffd000",
+            backgroundColor: CycleOSTheme.colors.primary,
             top: 0,
             bottom: 0,
             left: 0,
-            width: `${(todaySteps / targetSteps) * 100}%`,
+            minWidth: "2%",
+            width: `${COMPLETION_RATE}%`,
           }}
         />
         <ThemedView style={{ flexDirection: "column" }}>
-          <ThemedText variant="title" style={{ marginBottom: 0 }}>
+          <ThemedText
+            variant="title"
+            style={{
+              marginBottom: 0,
+              color:
+                COMPLETION_RATE < 30
+                  ? CycleOSTheme.colors.onSurface
+                  : CycleOSTheme.colors.onPrimary,
+            }}
+          >
             {todaySteps}
           </ThemedText>
-          <ThemedText>/ {targetSteps} steps</ThemedText>
+          <ThemedText
+            style={{
+              color:
+                COMPLETION_RATE < 30
+                  ? CycleOSTheme.colors.onSurface
+                  : CycleOSTheme.colors.onPrimary,
+            }}
+          >
+            / {targetSteps} steps
+          </ThemedText>
         </ThemedView>
         {todaySteps > targetSteps && (
           <ThemedText variant="title" style={{ marginBottom: 0 }}>

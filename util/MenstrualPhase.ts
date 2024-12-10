@@ -21,8 +21,8 @@ const calculateCyclePhases = (
   const LUTEAL_PHASE_DURATION = 13;
   for (let i = 0; i < LUTEAL_PHASE_DURATION; i++) {
     const date = endDayjs.subtract(i, "day").format("YYYY-MM-DD");
-    // Differentiate between mid-luteal (last 6 days) and early-luteal (the first 7 days)
-    phases[date] = i < 6 ? "mid-luteal" : "early-luteal";
+    // Differentiate between late-luteal (last 6 days) and early-luteal (the first 7 days)
+    phases[date] = i < 6 ? "late-luteal" : "early-luteal";
   }
 
   // Ovulatory phase (5 days in the middle of the cycle)
@@ -36,7 +36,7 @@ const calculateCyclePhases = (
 
   // Follicular phase (from the end of menstruation to the start of ovulation)
   const follicular_end_day = cycleLength - LUTEAL_PHASE_DURATION - OVULATORY_PHASE_DURATION; // - luteal phase - ovulation phase
-  for (let i = periodLength; i <= follicular_end_day; i++) {
+  for (let i = periodLength; i < follicular_end_day; i++) {
     const date = startDayjs.add(i, "day").format("YYYY-MM-DD");
     phases[date] = "follicular";
   }

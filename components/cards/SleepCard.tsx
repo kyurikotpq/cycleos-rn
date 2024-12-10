@@ -2,8 +2,10 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { router } from "expo-router";
 import { Card } from "react-native-paper";
-import dayjs, { Dayjs } from "dayjs";
+import { Dayjs } from "dayjs";
 import { Ionicons } from "@expo/vector-icons";
+import { convertMinToHrMin } from "@/util/SleepSession";
+import { Pressable } from "react-native";
 
 interface SleepCardProps {
   score: string; // One of the energy construct values from Symptoms.ts
@@ -20,25 +22,44 @@ export default function SleepCard({
 }: SleepCardProps) {
   return (
     <Card
-      mode="elevated"
-      style={{ marginBottom: 20, overflow: "hidden" }}
+      mode="contained"
+      style={{ marginBottom: 20 }}
       onPress={() => router.push("/insights/health/sleep")}
     >
       <Card.Content
         style={{
           flexDirection: "row",
           justifyContent: "space-between",
-          alignItems: "center",
+          alignItems: "stretch",
         }}
       >
-        <ThemedView style={{ flexDirection: "column" }}>
+        <ThemedView>
           {duration > 0 ? (
-            <>
-              <ThemedText>I'm feeling</ThemedText>
-              <ThemedText variant="title" style={{ marginBottom: 0 }}>
-                {score != "" ? score : "..."}
-              </ThemedText>
-            </>
+            score != "" ? (
+              <ThemedView style={{ justifyContent: "center", flex: 1 }}>
+                <ThemedText>I'm feeling</ThemedText>
+                <ThemedText variant="title" style={{ marginBottom: 0 }}>
+                  {score}
+                </ThemedText>
+              </ThemedView>
+            ) : (
+              <Pressable
+                style={{ justifyContent: "center", flex: 1 }}
+                onPress={() =>
+                  router.push({
+                    pathname: "/tracking",
+                    params: { insights: "true" },
+                  })
+                }
+              >
+                <ThemedText variant="defaultSemiBold">
+                  How are you feeling today?
+                </ThemedText>
+                <ThemedText variant="link" style={{ marginBottom: 0 }}>
+                  Tap here to record your energy.
+                </ThemedText>
+              </Pressable>
+            )
           ) : (
             <>
               <ThemedText variant="defaultSemiBold">
@@ -96,9 +117,7 @@ export default function SleepCard({
                 size={20}
                 color="black"
               />
-              <ThemedText>{`${Math.floor(duration / 60)}h ${
-                duration % 60
-              }m`}</ThemedText>
+              <ThemedText>{convertMinToHrMin(duration)}</ThemedText>
             </ThemedView>
           </ThemedView>
         )}

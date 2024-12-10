@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import InteractiveHeatmap from "./InteractiveHeatmap";
 import { useEffect, useState } from "react";
-import { Text } from "react-native";
+import ThemedLegend from "./ThemedLegend";
 
 type HeatmapCell = {
   id: string;
@@ -30,11 +30,11 @@ interface YearHeatMapProps {
   data: HeatmapData;
   year: string;
   colorKey?: string;
-  cellBGImgMapping?: { [key: string]: string }; // Mapping of cell values to background image paths
+  cellBGImgMapping?: { [key: string]: { img: any; label: string } }; // Mapping of cell values to background image paths
   cellBGImgKey?: string; // The key in `data` to use for cell background images. Must exist in `cellBGImgMapping`
 }
 
-export default function YearHeatMap({
+export default function YearHeatmap({
   data,
   year,
   colorKey,
@@ -92,20 +92,24 @@ export default function YearHeatMap({
   }, [year]);
 
   return (
-    <InteractiveHeatmap
-      matrix={days}
-      data={data}
-      dataMatrixKey="date"
-      colorKey={colorKey ?? ""}
-      numColumns={7}
-      xLabels={dayLabels}
-      yLabels={monthLabels}
-      offsetX={offsetX}
-      cellBGImgMapping={cellBGImgMapping}
-      cellBGImgKey={cellBGImgKey ?? ""}
-      onPress={(cell) => {
-        console.log(cell);
-      }}
-    />
+    <>
+      <InteractiveHeatmap
+        style={{ marginBottom: 20, flex: 1 }}
+        matrix={days}
+        data={data}
+        dataMatrixKey="date"
+        colorKey={colorKey ?? ""}
+        numColumns={7}
+        xLabels={dayLabels}
+        yLabels={monthLabels}
+        offsetX={offsetX}
+        cellBGImgMapping={cellBGImgMapping}
+        cellBGImgKey={cellBGImgKey ?? ""}
+        onPress={(cell) => {
+          console.log(cell);
+        }}
+      />
+      <ThemedLegend bgImgMap={cellBGImgMapping} />
+    </>
   );
 }

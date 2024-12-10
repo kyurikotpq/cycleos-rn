@@ -6,8 +6,10 @@ import {
   ScrollView,
   ImageBackground,
 } from "react-native";
+import HeatmapColorBar from "./HeatmapColorBar";
 
 export interface HeatMapProps {
+  style?: any; // CSS styles
   matrix: any[]; // 1D array of cells
   data: any;
   dataMatrixKey: string; // The key in matrix that links to `data`
@@ -72,11 +74,12 @@ export default function InteractiveHeatmap({
   cellBGImgMapping,
   cellBGImgKey,
   color = defaultColorMap,
-
+  style,
   onPress,
 }: HeatMapProps) {
   const [finalNumColumns, setFinalNumColumns] = useState(numColumns ?? 0);
-
+  const [finalColorMin, setFinalColorMin] = useState(0);
+  const [finalColorMax, setFinalColorMax] = useState(0);
   const CELL_SPACING = 4;
 
   useEffect(() => {
@@ -98,8 +101,12 @@ export default function InteractiveHeatmap({
     const values = !data
       ? Array.from({ length: matrix?.length || 0 }, (_, i) => 0.01)
       : Object.values(data).map((item: any) => item[colorKey]);
+
     const colorMin = Math.min(...values);
+    setFinalColorMin(colorMin);
+
     const colorMax = Math.max(...values);
+    setFinalColorMax(colorMax);
 
     matrix.forEach((item, index) => {
       // Render the row labels (along the y-axis)
@@ -173,7 +180,7 @@ export default function InteractiveHeatmap({
         data[item[dataMatrixKey]][cellBGImgKey]
           ? cellBGImgMapping[
               data[item[dataMatrixKey]][cellBGImgKey] ?? "default"
-            ]
+            ].img
           : "";
 
       cells.push(
@@ -249,38 +256,39 @@ export default function InteractiveHeatmap({
   }, [data, colorKey]);
 
   return (
-    <>
+    <View style={style}>
+      {/* Render the column labels (xLabels in the topmost "row") */}
       <View
         style={{
           width:
             (finalNumColumns + 1) * cellSize +
             (finalNumColumns + 2) * CELL_SPACING,
-          // backgroundColor: "red",
           flexDirection: "row",
           flexWrap: "wrap",
+          marginBottom: 5,
         }}
       >
-        {/* Render xLabels (in the topmost "row") */}
+        {/* Render the padding cell */}
         {xLabels && (
           <View
             style={[
               {
                 width: cellSize,
-                height: cellSize,
+                height: cellSize / 2,
                 marginRight: CELL_SPACING,
                 backgroundColor: "transparent",
               },
             ]}
           />
         )}
-        {/* Render the column labels */}
+        {/* The actual labels */}
         {xLabels &&
           xLabels.map((label, index) => (
             <View
               key={`heatmap-main-label-${index}`}
               style={{
                 width: cellSize,
-                height: cellSize,
+                height: cellSize / 2,
                 marginRight: CELL_SPACING,
                 backgroundColor: "transparent",
                 display: "flex",
@@ -319,6 +327,12 @@ export default function InteractiveHeatmap({
           {renderCells}
         </View>
       </ScrollView>
-    </>
+      <HeatmapColorBar
+        style={{ position: "absolute", margin: CELL_SPACING, right: 0 }}
+        min={finalColorMin}
+        max={finalColorMax}
+        color={"rgba(0, 110, 144"}
+      />
+    </View>
   );
 }
