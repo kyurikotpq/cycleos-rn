@@ -308,9 +308,7 @@ export default function SymptomTrackingScreen() {
         <VisitInsightsDialog
           visible={visitInsightsDialogVisible}
           onDismiss={(confirm: boolean) =>
-            !confirm
-              ? hideInsightsDialog()
-              : router.replace("/insights")
+            !confirm ? hideInsightsDialog() : router.replace("/insights")
           }
         />
       </Portal>

@@ -5,6 +5,7 @@ import { Card } from "react-native-paper";
 import { Dayjs } from "dayjs";
 import { Ionicons } from "@expo/vector-icons";
 import { convertMinToHrMin } from "@/util/SleepSession";
+import { Pressable } from "react-native";
 
 interface SleepCardProps {
   score: string; // One of the energy construct values from Symptoms.ts
@@ -29,17 +30,36 @@ export default function SleepCard({
         style={{
           flexDirection: "row",
           justifyContent: "space-between",
-          alignItems: "center",
+          alignItems: "stretch",
         }}
       >
-        <ThemedView style={{ flexDirection: "column" }}>
+        <ThemedView>
           {duration > 0 ? (
-            <>
-              <ThemedText>I'm feeling</ThemedText>
-              <ThemedText variant="title" style={{ marginBottom: 0 }}>
-                {score != "" ? score : "..."}
-              </ThemedText>
-            </>
+            score != "" ? (
+              <ThemedView style={{ justifyContent: "center", flex: 1 }}>
+                <ThemedText>I'm feeling</ThemedText>
+                <ThemedText variant="title" style={{ marginBottom: 0 }}>
+                  {score}
+                </ThemedText>
+              </ThemedView>
+            ) : (
+              <Pressable
+                style={{ justifyContent: "center", flex: 1 }}
+                onPress={() =>
+                  router.push({
+                    pathname: "/tracking",
+                    params: { insights: "true" },
+                  })
+                }
+              >
+                <ThemedText variant="defaultSemiBold">
+                  How are you feeling today?
+                </ThemedText>
+                <ThemedText variant="link" style={{ marginBottom: 0 }}>
+                  Tap here to record your energy.
+                </ThemedText>
+              </Pressable>
+            )
           ) : (
             <>
               <ThemedText variant="defaultSemiBold">

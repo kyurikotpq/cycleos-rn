@@ -1,5 +1,3 @@
-import { useEffect } from "react";
-import { StyleSheet, View, Text, Button, Platform } from "react-native";
 import * as Calendar from "expo-calendar";
 
 class CalendarService {
@@ -25,14 +23,29 @@ class CalendarService {
     return granted;
   }
 
+  async createEventInCalendarAsync(eventData: any) {
+    // @TODO: Add better permission checks
+    const granted = await this.checkPermissions();
+    if (!granted) {
+      return false;
+    }
+
+    // @TODO: How would this look like in Samsung?
+    // On a Pixel 8a it opens Google Calendar
+    return Calendar.createEventInCalendarAsync(eventData);
+  }
+
   async checkCalendarForFreeSpace(minDuration: number) {
+    // @TODO: Not implemented yet
     const granted = await this.checkPermissions();
     console.log(granted);
     if (!granted) {
       return false;
     }
 
-    const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
+    const calendars = await Calendar.getCalendarsAsync(
+      Calendar.EntityTypes.EVENT
+    );
     const defaultCalendar = calendars.find((calendar) => calendar.isPrimary);
 
     console.log(calendars, defaultCalendar);

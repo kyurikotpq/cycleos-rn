@@ -1,6 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
 import * as SecureStore from "expo-secure-store";
-import { Button, Card, Surface, Text } from "react-native-paper";
 
 import StepsCard from "@/components/cards/StepsCard";
 import SleepCard from "@/components/cards/SleepCard";
@@ -15,6 +14,7 @@ import { SymptomItem } from "@/constants/Symptoms";
 import { convertMinToHrMin } from "@/util/SleepSession";
 import { router } from "expo-router";
 import CalendarService from "@/services/Calendar";
+import NapOrMeditateCard from "@/components/cards/NapOrMeditateCard";
 
 interface HealthInsightsScreenProps {
   todayDayJS: Dayjs;
@@ -84,30 +84,12 @@ export default function HealthInsightsScreen({
 
   return (
     <>
-      {/* Only ask this if TODAY_SLEEP_DURATION < 420 && negativeEnergy.length > 0 && user has not dismissed before */}
-      {TODAY_SLEEP_DURATION < 420 && negativeEnergy.length > 0 && (
-        <Card mode="elevated" style={{ marginBottom: 20 }}>
-          <Card.Content>
-            {/* Other variations: You slept late; you slept <7h; your sleep was fragmented */}
-            <ThemedText variant="default" style={{ marginBottom: 20 }}>
-              You mentioned feeling{" "}
-              {negativeEnergy && negativeEnergy[0].label.toLowerCase()} today
-              and you only slept {convertMinToHrMin(TODAY_SLEEP_DURATION)} hours
-              last night.
-            </ThemedText>
-            <ThemedText variant="defaultSemiBold" style={{ marginBottom: 10 }}>
-              Do you want to schedule a{" "}
-              {todayDayJS.hour() < 13 ? "nap" : "meditation session"} later
-              today?
-            </ThemedText>
-          </Card.Content>
-
-          <Card.Actions>
-            <Button style={{ marginRight: "auto" }}>No</Button>
-            <Button onPress={async () => await CalendarService.checkCalendarForFreeSpace(30)}>Yes</Button>
-          </Card.Actions>
-        </Card>
-      )}
+      <NapOrMeditateCard
+        negativeEnergy={negativeEnergy[0]}
+        sleepDuration={TODAY_SLEEP_DURATION}
+        sleepTime={TODAY_SLEEP_TIME}
+        todayDayJS={todayDayJS}
+      />
 
       <SleepCard
         score={TODAY_SLEEP_SCORE}
