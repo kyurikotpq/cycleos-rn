@@ -4,8 +4,9 @@ import {
   openHealthConnectSettings,
 } from "react-native-health-connect";
 import { Appbar, List } from "react-native-paper";
+import {router} from "expo-router";
 
-export default function TabTwoScreen() {
+export default function AccountScreen() {
   return (
     <SafeAreaView>
       <Appbar.Header>
@@ -28,8 +29,8 @@ export default function TabTwoScreen() {
           )}
         />
         <List.Item
-          title="Google Calendar"
-          onPress={() => console.log("NOT IMPLEMENTED")}
+          title="Synced Calendars"
+          onPress={() => router.push("/account/calendars")}
           right={() => (
             <Ionicons
               name="chevron-forward"
@@ -44,15 +45,3 @@ export default function TabTwoScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  headerImage: {
-    color: "#808080",
-    bottom: -90,
-    left: -35,
-    position: "absolute",
-  },
-  titleContainer: {
-    flexDirection: "row",
-    gap: 8,
-  },
-});

@@ -6,7 +6,7 @@ import { ThemedText } from "../ThemedText";
 import { convertMinToHrMin } from "@/util/SleepSession";
 import { SymptomItem } from "@/constants/Symptoms";
 import { Availability } from "expo-calendar";
-import Calendar from "@/services/Calendar";
+import CalendarService from "@/services/CalendarService";
 
 interface NapOrMeditateCardProps {
   negativeEnergy: SymptomItem;
@@ -58,7 +58,7 @@ export default function NapOrMeditateCard({
     // User can choose not to schedule the session
     // Regardless of whether the session was scheduled or not,
     // we've done our part. Dismiss the card to avoid annoying the user.
-    await Calendar.createEventInCalendarAsync(eventData);
+    await CalendarService.createEventInCalendarAsync(eventData);
     await dismissCard();
   };
 

@@ -90,6 +90,12 @@ export default function RootLayout() {
           name="insights/integrated/correlation"
           options={{ title: "Integrated Insights" }}
         />
+
+        {/* Account Pages */}
+        <Stack.Screen
+          name="account/calendars"
+          options={{ title: "Synced Calendars" }}
+        />
       </Stack>
     </PaperProvider>
   );

@@ -1,19 +1,14 @@
 import { useEffect, useState, useMemo } from "react";
 import * as SecureStore from "expo-secure-store";
 
-import StepsCard from "@/components/cards/StepsCard";
-import SleepCard from "@/components/cards/SleepCard";
 import { getLastNightSleepStats } from "@/db/controllers/sleep";
-import dayjs, { Dayjs } from "dayjs";
 import { fetchEnergyAtDate } from "@/db/controllers/symptoms";
 import { getStepsForDay } from "@/db/controllers/steps";
-import WorkoutsCard from "@/components/cards/WorkoutsCard";
-import { MorningDailyQuotes } from "@/constants/Quotes";
-import { ThemedText } from "@/components/ThemedText";
+import StepsCard from "@/components/cards/StepsCard";
+import SleepCard from "@/components/cards/SleepCard";
+import dayjs, { Dayjs } from "dayjs";
 import { SymptomItem } from "@/constants/Symptoms";
-import { convertMinToHrMin } from "@/util/SleepSession";
-import { router } from "expo-router";
-import CalendarService from "@/services/Calendar";
+import WorkoutsCard from "@/components/cards/WorkoutsCard";
 import NapOrMeditateCard from "@/components/cards/NapOrMeditateCard";
 
 interface HealthInsightsScreenProps {

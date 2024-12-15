@@ -17,13 +17,24 @@ class CalendarService {
 
     if (!granted) {
       const { status } = await Calendar.requestCalendarPermissionsAsync();
-      console.log(status);
       return status === "granted";
     }
     return granted;
   }
 
+  async getCalendarsAsync() {
+    // Get all calendars on the user's device
+    const granted = await this.checkPermissions();
+    if (!granted) {
+      return false;
+    }
+
+    return Calendar.getCalendarsAsync();
+    
+  }
+
   async createEventInCalendarAsync(eventData: any) {
+    // Open the System UI to create a new event
     // @TODO: Add better permission checks
     const granted = await this.checkPermissions();
     if (!granted) {
