@@ -1,31 +1,53 @@
 import { SafeAreaView, ScrollView, StyleSheet } from "react-native";
-
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { Appbar, Card, Surface } from "react-native-paper";
 import { useState, useCallback } from "react";
+import { Appbar, Portal, Surface } from "react-native-paper";
 import { useFocusEffect } from "@react-navigation/native";
-import { CycleCircle } from "@/components/charts/CycleCircle";
-import { fetchCycles } from "@/db/controllers/cycles";
 import { router } from "expo-router";
+import { Cycle } from "@/db/schema";
+import { deleteCycle, fetchCycles } from "@/db/controllers/cycles";
+import { ThemedText } from "@/components/ThemedText";
+import CycleCard from "@/components/cards/CycleCard";
+import ConfirmCycleDeleteDialog from "@/components/dialogs/ConfirmCycleDeleteDialog";
 
 export default function CyclesScreen() {
-  const [cycles, setCycles] = useState([]);
-  const [currentCycle, setCurrentCycle] = useState([]);
+  const [prevCycles, setPrevCycles] = useState<Cycle[]>([]);
+  const [currentCycle, setCurrentCycle] = useState<Cycle | null>(null);
+  const [cycleToDelete, setCycleToDelete] = useState<Cycle | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  const handleEditOrDelete = (action: string, cycle: Cycle) => {
+    if (action === "edit") {
+      router.navigate("/cycles/edit-cycle", { cycle });
+    } else if (action === "delete") {
+      setCycleToDelete(cycle);
+      setShowDeleteDialog(true);
+    }
+  };
+
+  const handleDeleteDialogDismiss = async (confirm: boolean) => {
+    console.log(confirm);
+    if (confirm && cycleToDelete) {
+      // Delete cycle from DB
+      await deleteCycle(cycleToDelete.id);
+      await fetchData();
+    }
+    setShowDeleteDialog(false);
+  };
 
   const fetchData = async () => {
     // Fetch cycles from DB
     const result = await fetchCycles();
-
     const activeCycle = result.shift();
-    if (result) {
-      setCycles(result);
-      setCurrentCycle(activeCycle);
-    }
+
+    setCurrentCycle(activeCycle ?? null);
+    setPrevCycles([]); // Tell React Native that there's a change
+    setPrevCycles(result);
   };
+
   useFocusEffect(
     useCallback(() => {
       // Fetch data when coming back to this screen
+      // (required after adding or editing a cycle)
       fetchData();
     }, [])
   );
@@ -45,22 +67,17 @@ export default function CyclesScreen() {
         />
       </Appbar.Header>
       <ScrollView style={{ flex: 1 }}>
-        {/* <Surface> is needed to establish elevation context */}
+        {/* 
+        - <Surface> is needed to establish elevation context.
+        - Padding needs to be applied to Surface, not ScrollView,
+          so that the shadows are correct. */}
         <Surface elevation={0} style={{ padding: 20 }}>
           {currentCycle && (
-            <Card mode="elevated" style={{ marginBottom: 20 }}>
-              <ThemedText variant="subtitle" style={{ fontWeight: 700 }}>
-                Current Cycle
-              </ThemedText>
-              <ThemedText>
-                {currentCycle.startDate &&
-                  new Date(currentCycle.startDate).toDateString().slice(4)}{" "}
-                -{" "}
-                {currentCycle.endDate
-                  ? new Date(currentCycle.endDate).toDateString().slice(4)
-                  : "??"}
-              </ThemedText>
-            </Card>
+            <CycleCard
+              cycle={currentCycle}
+              isCurrentCycle={true}
+              onEditOrDelete={handleEditOrDelete}
+            />
           )}
 
           <ThemedText
@@ -69,36 +86,30 @@ export default function CyclesScreen() {
           >
             Previous Cycles
           </ThemedText>
-          {cycles.length > 0 ? (
-            cycles.map((cycle) => (
-              <Card
-                key={cycle.id}
-                mode="elevated"
-                style={{ padding: 20, marginBottom: 10 }}
-              >
-                <ThemedText
-                  variant="defaultSemiBold"
-                  style={{ marginBottom: 10 }}
-                >
-                  {cycle.cycleLength
-                    ? `${cycle.cycleLength} days`
-                    : "Unspecified number of days"}{" "}
-                </ThemedText>
-                <ThemedText>
-                  {cycle.startDate &&
-                    new Date(cycle.startDate).toDateString().slice(4)}{" "}
-                  -{" "}
-                  {cycle.endDate
-                    ? new Date(cycle.endDate).toDateString().slice(4)
-                    : "??"}
-                </ThemedText>
-              </Card>
-            ))
-          ) : (
+          {prevCycles.length === 0 ? (
             <ThemedText>No previous cycles yet.</ThemedText>
+          ) : (
+            prevCycles.map((c: Cycle) => (
+              <CycleCard
+                key={c.id}
+                cycle={c}
+                isCurrentCycle={false}
+                onEditOrDelete={handleEditOrDelete}
+              />
+            ))
           )}
         </Surface>
       </ScrollView>
+      <Portal>
+        {/* Render dialogs */}
+        {cycleToDelete && (
+          <ConfirmCycleDeleteDialog
+            cycle={cycleToDelete}
+            visible={showDeleteDialog}
+            onDismiss={handleDeleteDialogDismiss}
+          />
+        )}
+      </Portal>
     </SafeAreaView>
   );
 }

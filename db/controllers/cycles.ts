@@ -1,7 +1,10 @@
 import { eq, gt, lt, desc } from "drizzle-orm";
-import { CalendarActiveDateRange, fromDateId } from "@marceloterreiro/flash-calendar";
+import {
+  CalendarActiveDateRange,
+  fromDateId,
+} from "@marceloterreiro/flash-calendar";
 import { db } from "../client";
-import { upsertCycleDays } from "./cycle_days";
+import { upsertCycleDays, updateCycleDaysByCycleId } from "./cycle_days";
 import { Cycle, cycle } from "../schema";
 import dayjs from "dayjs";
 import { getCycleDaysFromDates } from "@/util/MenstrualPhase";
@@ -80,8 +83,8 @@ export const createCycle = async (
       startZoneOffset: zoneOffset,
       endZoneOffset: zoneOffset,
       periodLength,
-      cycleLength: 0,
-      endDate: 0, // Initialize endDate
+      cycleLength,
+      endDate: startDayjs.add(cycleLength, "day").valueOf(), // Initialize endDate
     };
 
     // Check if the next cycle exists
@@ -94,9 +97,6 @@ export const createCycle = async (
       );
       cycleDetails.cycleLength = thisCycleLength;
       cycleDetails.endDate = nextCycle[0].startDate - NUM_MS_PER_DAY;
-    } else {
-      cycleDetails.endDate = startDayjs.add(cycleLength, "day").valueOf();
-      cycleDetails.cycleLength = cycleLength;
     }
 
     // Update previous cycle's end dates where relevant
@@ -143,3 +143,12 @@ export const createCycle = async (
 
 export const updateCycle = async (cycleId: number, cycleDetails: any) =>
   await db.update(cycle).set(cycleDetails).where(eq(cycle.id, cycleId));
+
+export const deleteCycle = async (cycleId: number) =>
+  await db.transaction(async (tx) => {
+    // Set the cycleId and phase to null for all cycle days
+    await updateCycleDaysByCycleId(cycleId, { cycleId: null, phase: null });
+
+    // Delete the cycle
+    await db.delete(cycle).where(eq(cycle.id, cycleId));
+  });

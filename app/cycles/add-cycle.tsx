@@ -53,8 +53,3 @@ export default function AddCycleScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  p20: {
-    padding: 20,
-  },
-});

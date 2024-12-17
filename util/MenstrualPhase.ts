@@ -35,10 +35,12 @@ const calculateCyclePhases = (
   }
 
   // Follicular phase (from the end of menstruation to the start of ovulation)
-  const follicular_end_day = cycleLength - LUTEAL_PHASE_DURATION - OVULATORY_PHASE_DURATION; // - luteal phase - ovulation phase
-  for (let i = periodLength; i < follicular_end_day; i++) {
+  const follicular_end_day =
+    cycleLength - LUTEAL_PHASE_DURATION - OVULATORY_PHASE_DURATION; // - luteal phase - ovulation phase
+  for (let i = periodLength; i <= follicular_end_day; i++) {
     const date = startDayjs.add(i, "day").format("YYYY-MM-DD");
-    phases[date] = "follicular";
+    
+    if (phases[date] === undefined) phases[date] = "follicular";
   }
 
   return phases;

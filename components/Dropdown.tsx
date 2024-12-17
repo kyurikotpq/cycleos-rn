@@ -9,6 +9,8 @@ import { CycleOSTheme } from "@/constants/Theme";
 export interface DropdownOption {
   label: string;
   value: string;
+  icon?: string;
+  color?: string;
 }
 interface DropdownInputProps {
   placeholder?: string;
