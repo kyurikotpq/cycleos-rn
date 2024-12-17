@@ -6,18 +6,23 @@ import CalendarService from "@/services/CalendarService";
 import { Calendar } from "expo-calendar";
 
 export default function CalendarSyncSettingsScreen() {
-  const [groupedCalendars, setGroupedCalendars] = useState<
+  const [calGroupedByEmail, setCalGroupedByEmail] = useState<{
+    [key: string]: Calendar[];
+  }>({});
+  const [groupedCalendarsArr, setGroupedCalendarsArr] = useState<
     { account: string; calendars: Calendar[] }[]
   >([]);
 
   const toggleSync = (calendarId: string) => async () => {
     console.log("Toggling sync for calendar", calendarId);
   };
+  const toggleSyncAll = (accountId: string) => async () => {
+    console.log("Toggling sync for account", accountId);
+  };
 
   useEffect(() => {
     (async () => {
       const calendars = await CalendarService.getCalendarsAsync();
-
       const groupedByEmail: { [key: string]: Calendar[] } = {};
 
       if (calendars) {
@@ -34,8 +39,8 @@ export default function CalendarSyncSettingsScreen() {
       for (let account in groupedByEmail) {
         grouped.push({ account, calendars: groupedByEmail[account] });
       }
-      console.log(groupedByEmail, grouped);
-      setGroupedCalendars(grouped);
+      setCalGroupedByEmail(groupedByEmail);
+      setGroupedCalendarsArr(grouped);
     })();
   }, []);
 
@@ -46,12 +51,19 @@ export default function CalendarSyncSettingsScreen() {
           Select the calendars you'd like CycleOS to use to check for
           conflicting events.
         </ThemedText>
-        {groupedCalendars &&
-          groupedCalendars.map((c) => (
-            <List.Section key={c.account}>
-              <List.Subheader style={{ fontWeight: "bold" }}>
-                {c.account}
-              </List.Subheader>
+        {groupedCalendarsArr &&
+          groupedCalendarsArr.map((c) => (
+            <List.Section style={{ marginBottom: 20 }} key={c.account}>
+              <List.Item
+                title={c.account}
+                titleStyle={{ fontWeight: "bold" }}
+                right={() => (
+                  <Switch
+                    value={false}
+                    onValueChange={toggleSyncAll(c.account)}
+                  />
+                )}
+              />
               {c.calendars.map((calendar) => (
                 <List.Item
                   key={calendar.id}

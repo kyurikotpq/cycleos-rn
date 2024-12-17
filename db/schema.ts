@@ -194,3 +194,45 @@ export const sleep_stages = sqliteTable(
 
 export type SleepStage = typeof sleep_stages.$inferSelect;
 export type InsertSleepStage = typeof sleep_stages.$inferInsert;
+
+/* Calendars */
+// export const calendars = sqliteTable(
+//   "calendars",
+//   {
+//     id: integer("id").primaryKey().notNull(),
+//     sleepSessionId: integer("sleep_session_id")
+//       .notNull()
+//       .references(() => sleep_sessions.id, {
+//         onDelete: "cascade",
+//       }),
+//     "accessLevel": "owner",
+//     "allowedAttendeeTypes": ["none", "required", "optional"],
+//     "allowedAvailabilities": ["busy", "free"],
+//     "allowedReminders": ["default", "alert", "email"],
+//     "allowsModifications": true,
+//     "color": "#C2C2C2",
+//     "id": "20",
+//     "isPrimary": false,
+//     "isSynced": true,
+//     "isVisible": true,
+//     "ownerAccount": "tea@uni.minerva.edu",
+//     "source": {
+//       "isLocalAccount": false,
+//       "accountName": "tea@uni.minerva.edu",
+//       "type": "com.google"
+//     },
+//     "timeZone": "America/Los_Angeles",
+//     "title": "[Minerva] Pei Qi Tea"
+//   },
+//   // Prevent duplicate imports
+//   (table) => ({
+//     sleepStageUniqueIndex: uniqueIndex("sleepStageUniqueIndex").on(
+//       table.startDateTime,
+//       table.sleepType
+//     ),
+//   })
+// );
+
+// export type Calendar = typeof calendars.$inferSelect;
+// export type InsertCalendar = typeof calendars.$inferInsert;
+
