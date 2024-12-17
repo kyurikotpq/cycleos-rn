@@ -51,7 +51,7 @@ export const PHASE_BG_MAP = {
     img: require("@/assets/images/late-luteal-bg.png"),
     label: "Late Luteal",
   },
-  default: { img: "", label: "No Phase" },
+  default: { img: "", label: "No Phase/Data" },
 };
 
 export const PHASE_COLOR_MAP = {
