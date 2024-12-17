@@ -27,7 +27,8 @@ export default function TabTwoScreen() {
             />
           )}
         />
-        <List.Item
+        
+        {/* <List.Item
           title="Google Calendar"
           onPress={() => console.log("NOT IMPLEMENTED")}
           right={() => (
@@ -38,7 +39,7 @@ export default function TabTwoScreen() {
               style={{ marginRight: 10 }}
             />
           )}
-        />
+        /> */}
       </List.Section>
     </SafeAreaView>
   );

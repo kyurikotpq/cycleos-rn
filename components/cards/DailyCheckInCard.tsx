@@ -61,7 +61,7 @@ export default function DailyCheckInCard({
   return (
     <Card
       mode="elevated"
-      style={{ paddingTop: 10, paddingBottom: 10, marginBottom: 20 }}
+      style={{ paddingTop: 10, paddingBottom: 10, marginBottom: 40 }}
       onPress={() =>
         router.push({ pathname: "/tracking", params: { insights: "true" } })
       }

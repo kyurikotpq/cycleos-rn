@@ -12,15 +12,17 @@ import {
   Appbar,
   SegmentedButtons,
   Surface,
+  FAB,
 } from "react-native-paper";
 import HealthInsightsScreen from "../insights/health";
 import { ThemedText } from "@/components/ThemedText";
 import dayjs, { Dayjs } from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import HealthConnectService from "@/services/HealthConnect";
-import * as SecureStore from "expo-secure-store";
+import { router } from "expo-router";
 import { seedSymptomsConstructs } from "@/db/seed";
 import IntegratedInsightsScreen from "../insights/integrated";
+import DailyCheckInCard from "@/components/cards/DailyCheckInCard";
 
 dayjs.extend(relativeTime);
 
@@ -74,26 +76,6 @@ export default function InsightsScreen() {
           <ActivityIndicator animating={syncing} style={{ marginRight: 20 }} />
         )}
       </Appbar.Header>
-      <SegmentedButtons
-        value={screen}
-        onValueChange={setScreen}
-        style={{
-          marginTop: 20,
-          marginRight: 20,
-          marginBottom: 30,
-          marginLeft: 20,
-        }}
-        buttons={[
-          {
-            value: "health",
-            label: "Health",
-          },
-          {
-            value: "trends",
-            label: "Integrated Trends",
-          },
-        ]}
-      />
       <ScrollView
         style={{ flex: 1 }}
         refreshControl={
@@ -103,14 +85,45 @@ export default function InsightsScreen() {
           />
         }
       >
-        <Surface
-          elevation={0}
-          style={{ paddingBottom: 20, paddingRight: 20, paddingLeft: 20 }}
-        >
-          {screen === "health" && <HealthInsightsScreen todayDayJS={todayDayJS} />}
+        <Surface elevation={0} style={{ padding: 20 }}>
+          <DailyCheckInCard todayDayJS={todayDayJS} />
+          <SegmentedButtons
+            value={screen}
+            onValueChange={setScreen}
+            style={{
+              marginBottom: 20,
+            }}
+            buttons={[
+              {
+                value: "health",
+                label: "Health",
+              },
+              {
+                value: "trends",
+                label: "Integrated Trends",
+              },
+            ]}
+          />
+          {screen === "health" && (
+            <HealthInsightsScreen todayDayJS={todayDayJS} />
+          )}
           {screen === "trends" && <IntegratedInsightsScreen />}
         </Surface>
       </ScrollView>
+      <FAB
+        icon="emoticon-outline"
+        style={styles.fab}
+        onPress={() => router.push("/tracking")}
+      />
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  fab: {
+    position: "absolute",
+    margin: 25,
+    right: 0,
+    bottom: 0,
+  },
+});

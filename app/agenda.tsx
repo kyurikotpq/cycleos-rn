@@ -3,7 +3,6 @@ import { Image, StyleSheet, Platform, View } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Appbar, Avatar, Drawer, Card, Text, FAB } from "react-native-paper";
-import HormonoscopeCard from "@/components/HormonoscopeCard";
 import { router } from "expo-router";
 import { ScrollView } from "react-native";
 import { useMemo } from "react";
