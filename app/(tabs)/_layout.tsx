@@ -5,7 +5,6 @@ import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { CycleOSTheme } from "@/constants/Theme";
 
 export default function TabLayout() {
-
   return (
     <Tabs
       screenOptions={{

@@ -34,13 +34,16 @@ export default function CycleCard({
   };
 
   useEffect(() => {
-    if (!isCurrentCycle) {
-      const finalCardTitle = cycle.cycleLength
-        ? `${cycle.cycleLength} days`
-        : "Unspecified number of days";
+    const finalCardTitle =
+      cycle.startDate && cycle.endDate
+        ? new Date(cycle.startDate).toDateString().slice(4) +
+          " - " +
+          `${new Date(cycle.endDate).toDateString().slice(4)} ${
+            isCurrentCycle ? "(predicted)" : ""
+          }`
+        : "Invalid date range";
 
-      setCardTitle(finalCardTitle);
-    }
+    setCardTitle(finalCardTitle);
   }, []);
 
   return (
@@ -50,8 +53,8 @@ export default function CycleCard({
     >
       <Card.Title
         title={cardTitle}
-        titleStyle={{ fontWeight: "bold" }}
-        right={(props) => (
+        titleStyle={{ fontWeight: "bold", marginBottom: 0 }}
+        right={() => (
           <MoreOptionsMenu
             options={EDIT_OR_DELETE_OPTIONS}
             onSelect={handleEditOrDelete}
@@ -60,13 +63,14 @@ export default function CycleCard({
       />
       <Card.Content>
         <ThemedText>
-          {cycle.startDate && new Date(cycle.startDate).toDateString().slice(4)}{" "}
-          -{" "}
-          {cycle.endDate
-            ? `${new Date(cycle.endDate).toDateString().slice(4)} ${
-                isCurrentCycle ? "(predicted)" : ""
-              }`
-            : "??"}
+          Period: {cycle.periodLength
+            ? `${cycle.periodLength} days`
+            : "Unspecified number of days"}
+        </ThemedText>
+        <ThemedText>
+          Cycle Length: {cycle.cycleLength
+            ? `${cycle.cycleLength} days ${isCurrentCycle ? "(predicted)" : ""}`
+            : "Unspecified number of days"}
         </ThemedText>
       </Card.Content>
     </Card>

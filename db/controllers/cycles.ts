@@ -1,4 +1,4 @@
-import { eq, gt, lt, desc } from "drizzle-orm";
+import { avg, eq, or, and, gte, gt, lte, lt, desc, sql } from "drizzle-orm";
 import {
   CalendarActiveDateRange,
   fromDateId,
@@ -39,17 +39,67 @@ export const insertCycle = async ({
     })
     .returning({ insertedId: cycle.id });
 
+// Get all cycles in descending order of startDate
 export const fetchCycles = async () =>
   await db.select().from(cycle).orderBy(desc(cycle.startDate));
 
-export const getMostRecentCycle = async () =>
+// Get the average period and cycle length of the past 3 periods
+export const getAverageCycleAndPeriodLength = async () =>
   await db
-    .select({ id: cycle.id })
+    .select({
+      avgPeriodLength: avg(cycle.periodLength),
+      avgCycleLength: avg(cycle.cycleLength),
+    })
     .from(cycle)
     .orderBy(desc(cycle.startDate))
-    .limit(1);
+    .limit(3);
+
+// Get the date ranges of all periods
+// (To mark the calendar in AddCycleScreen)
+// @TODO restrict to the past 12 months?
+export const getAllPeriodsDateRanges = async () =>
+  await db
+    .select({
+      id: cycle.id,
+      startDate: cycle.startDate,
+      periodLength: cycle.periodLength,
+    })
+    .from(cycle);
 
 // Controller Actions
+const checkForOverlappingCycles = async (
+  newStartDate: number,
+  newPeriodLength: number
+) => {
+  const newEndDate = newStartDate + (newPeriodLength - 1) * NUM_MS_PER_DAY;
+
+  // Get existing cycles whose period overlaps or comes
+  // consecutively before/after the specified period
+  return await db
+    .select({
+      id: cycle.id,
+    })
+    .from(cycle)
+    .where(
+      or(
+        // Overlap condition
+        and(
+          lte(cycle.startDate, newEndDate),
+          gte(
+            sql`${cycle.startDate} + (${cycle.periodLength} - 1) * ${NUM_MS_PER_DAY}`,
+            newStartDate
+          )
+        ),
+        // Consecutive conditions
+        eq(cycle.startDate, newEndDate),
+        eq(
+          sql`${cycle.startDate} + (${cycle.periodLength} - 1) * ${NUM_MS_PER_DAY}`,
+          newStartDate
+        )
+      )
+    );
+};
+
 const getNextCycle = async (currStartDate: number): Promise<Cycle[]> =>
   await db
     .select()
@@ -77,6 +127,12 @@ export const createCycle = async (
     const startDayjsUnix = startDayjs.valueOf();
     const endDayjs = dayjs(dateRange.endId); // for MENSTRUATION
     const periodLength = endDayjs.diff(startDayjs, "day") + 1;
+
+    // Delete existing cycles to prevent duplication
+    const existingCycle = await checkForOverlappingCycles(startDayjsUnix, periodLength);
+    if (existingCycle.length > 0) {
+      await Promise.all(existingCycle.map((c) => deleteCycle(c.id)));
+    }
 
     const cycleDetails = {
       startDate: startDayjsUnix,
@@ -144,10 +200,12 @@ export const createCycle = async (
 export const updateCycle = async (cycleId: number, cycleDetails: any) =>
   await db.update(cycle).set(cycleDetails).where(eq(cycle.id, cycleId));
 
-export const deleteCycle = async (cycleId: number) =>
+export const deleteCycle = async (cycleId: number, setNullPhase?: boolean) =>
   await db.transaction(async (tx) => {
-    // Set the cycleId and phase to null for all cycle days
-    await updateCycleDaysByCycleId(cycleId, { cycleId: null, phase: null });
+    if (setNullPhase) {
+      // Set the cycleId and phase to null for all cycle days
+      await updateCycleDaysByCycleId(cycleId, { cycleId: null, phase: null });
+    }
 
     // Delete the cycle
     await db.delete(cycle).where(eq(cycle.id, cycleId));

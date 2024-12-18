@@ -10,14 +10,17 @@ import CycleCard from "@/components/cards/CycleCard";
 import ConfirmCycleDeleteDialog from "@/components/dialogs/ConfirmCycleDeleteDialog";
 
 export default function CyclesScreen() {
-  const [prevCycles, setPrevCycles] = useState<Cycle[]>([]);
-  const [currentCycle, setCurrentCycle] = useState<Cycle | null>(null);
+  const [cycles, setCycles] = useState<Cycle[]>([]);
   const [cycleToDelete, setCycleToDelete] = useState<Cycle | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const handleEditOrDelete = (action: string, cycle: Cycle) => {
-    if (action === "edit") {
-      router.navigate("/cycles/edit-cycle", { cycle });
+    if (action === "edit" && cycle.startDate && cycle.periodLength) {
+      // @TODO: Disallow editing cycles older than 12 months
+      const params = {
+        scrollTo: cycle.id != cycles[0].id ? cycle.startDate : "-1",
+      };
+      router.navigate({ pathname: "/cycles/add-cycle", params });
     } else if (action === "delete") {
       setCycleToDelete(cycle);
       setShowDeleteDialog(true);
@@ -25,23 +28,22 @@ export default function CyclesScreen() {
   };
 
   const handleDeleteDialogDismiss = async (confirm: boolean) => {
-    console.log(confirm);
     if (confirm && cycleToDelete) {
       // Delete cycle from DB
       await deleteCycle(cycleToDelete.id);
       await fetchData();
+      setCycleToDelete(null);
     }
     setShowDeleteDialog(false);
   };
 
   const fetchData = async () => {
+    // Tell React Native that there's a change
+    setCycles([]);
+
     // Fetch cycles from DB
     const result = await fetchCycles();
-    const activeCycle = result.shift();
-
-    setCurrentCycle(activeCycle ?? null);
-    setPrevCycles([]); // Tell React Native that there's a change
-    setPrevCycles(result);
+    setCycles(result);
   };
 
   useFocusEffect(
@@ -72,9 +74,9 @@ export default function CyclesScreen() {
         - Padding needs to be applied to Surface, not ScrollView,
           so that the shadows are correct. */}
         <Surface elevation={0} style={{ padding: 20 }}>
-          {currentCycle && (
+          {cycles[0] && (
             <CycleCard
-              cycle={currentCycle}
+              cycle={cycles[0]}
               isCurrentCycle={true}
               onEditOrDelete={handleEditOrDelete}
             />
@@ -86,17 +88,19 @@ export default function CyclesScreen() {
           >
             Previous Cycles
           </ThemedText>
-          {prevCycles.length === 0 ? (
+          {cycles.length === 0 ? (
             <ThemedText>No previous cycles yet.</ThemedText>
           ) : (
-            prevCycles.map((c: Cycle) => (
-              <CycleCard
-                key={c.id}
-                cycle={c}
-                isCurrentCycle={false}
-                onEditOrDelete={handleEditOrDelete}
-              />
-            ))
+            cycles
+              .slice(1)
+              .map((c: Cycle) => (
+                <CycleCard
+                  key={c.id}
+                  cycle={c}
+                  isCurrentCycle={false}
+                  onEditOrDelete={handleEditOrDelete}
+                />
+              ))
           )}
         </Surface>
       </ScrollView>

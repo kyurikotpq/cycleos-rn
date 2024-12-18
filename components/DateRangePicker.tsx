@@ -2,6 +2,7 @@
 
 import {
   Calendar,
+  CalendarListRef,
   CalendarActiveDateRange,
   CalendarOnDayPress,
   CalendarTheme,
@@ -65,13 +66,16 @@ const linearTheme: CalendarTheme = {
 };
 
 interface DateRangePickerProps {
+  calendarInstanceId?: string;
   onCalendarDayPress: CalendarOnDayPress;
   calendarActiveDateRanges: CalendarActiveDateRange[];
+  innerRef?: React.RefObject<CalendarListRef>;
 }
 
 export default function DateRangePicker({
   onCalendarDayPress,
   calendarActiveDateRanges,
+  innerRef,
   ...props
 }: DateRangePickerProps & Record<string, any>) {
   return (
@@ -84,6 +88,7 @@ export default function DateRangePicker({
       calendarActiveDateRanges={calendarActiveDateRanges}
       onCalendarDayPress={onCalendarDayPress}
       theme={linearTheme}
+      ref={innerRef}
       {...props}
     />
   );

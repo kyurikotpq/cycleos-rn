@@ -60,10 +60,6 @@ export default function RootLayout() {
           name="cycles/add-cycle"
           options={{ title: "Enter Period" }}
         />
-        {/* <Stack.Screen
-          name="cycles/edit-cycle"
-          options={{ title: "Edit Period" }}
-          /> */}
         <Stack.Screen
           name="tracking"
           options={{

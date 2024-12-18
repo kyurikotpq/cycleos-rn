@@ -23,7 +23,6 @@ import {
 import WeekViewDatePicker from "@/components/WeekViewDatePicker";
 import IsSavingButton from "@/components/IsSavingButton";
 import { fromDateId, toDateId } from "@marceloterreiro/flash-calendar";
-import dayjs from "dayjs";
 import LogSymptomInfoDialog from "@/components/dialogs/LogSymptomInfoDialog";
 import VisitInsightsDialog from "@/components/dialogs/VisitInsightsDialog";
 
@@ -226,7 +225,7 @@ export default function SymptomTrackingScreen() {
           paddingTop: 10,
           paddingLeft: 20,
           paddingRight: 20,
-          marginBottom: 40,
+          marginBottom: 20,
         }}
       >
         <ThemedView
@@ -304,11 +303,11 @@ export default function SymptomTrackingScreen() {
           onDismiss={hideExplanationDialog}
           children={undefined}
         />
-        {/* Dialog to route to Hormonoscope page */}
+        {/* Dialog to route to Insights page */}
         <VisitInsightsDialog
           visible={visitInsightsDialogVisible}
           onDismiss={(confirm: boolean) =>
-            !confirm ? hideInsightsDialog() : router.replace("/insights")
+            !confirm ? hideInsightsDialog() : router.back()
           }
         />
       </Portal>
